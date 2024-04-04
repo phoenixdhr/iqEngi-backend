@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { ProgresoCursosService } from '../services/progreso-cursos.service';
 import { ProgresoCurso } from '../entities/progreso-curso.entity';
@@ -17,6 +18,7 @@ import {
   UpdateProgresoCursoDto,
 } from '../dtos/progresoCurso.dto';
 
+@ApiTags('progreso-cursos')
 @Controller('progreso-cursos')
 export class ProgresoCursosController {
   constructor(private readonly progresoCursosService: ProgresoCursosService) {}

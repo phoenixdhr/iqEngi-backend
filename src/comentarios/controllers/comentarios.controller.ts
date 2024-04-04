@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { ComentariosService } from '../services/comentarios.service';
 import { Comentario } from '../entities/comentario.entity';
@@ -17,6 +18,7 @@ import {
   UpdateComentariosDto,
 } from '../dtos/comentario.dto';
 
+@ApiTags('comentarios')
 @Controller('comentarios')
 export class ComentariosController {
   constructor(private readonly comentariosService: ComentariosService) {}

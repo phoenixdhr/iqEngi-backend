@@ -3,7 +3,7 @@ export type Aprenderas = string[];
 export type Objetivos = string[];
 export type CompromisosEducativos = string[];
 
-import type { Id } from '../../common/dtos/id';
+import type { Id } from '../../_common/dtos/id';
 import { Categoria } from '../../categorias/entities/categoria.entity';
 import { Cuestionario } from '../../cuestionario/entities/cuestionario.entity';
 import { Instructor } from '../../instructores/entities/instructores.entity';

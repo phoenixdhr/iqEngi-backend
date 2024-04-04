@@ -6,7 +6,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { Curso } from 'src/cursos/entities/curso.entity';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import { CuestionarioRespuestaUsuario } from 'src/cuestionario-respuesta-usuario/entities/cuestionario-respuesta-usuario.entity';

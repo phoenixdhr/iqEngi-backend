@@ -1,5 +1,5 @@
 import { IsString, IsOptional } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 
 export class CreateCategoriaDto {
   @IsString({ message: 'El nombre debe ser una cadena de texto.' })

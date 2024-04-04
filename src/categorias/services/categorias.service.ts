@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Categoria } from '../entities/categoria.entity';
+import { CursosService } from 'src/cursos/services/cursos.service';
 
 @Injectable()
 export class CategoriasService {
+  constructor(private readonly cursosService: CursosService) {}
+
   private counter = 3;
   private categorias: Categoria[] = [
     {
@@ -81,5 +84,18 @@ export class CategoriasService {
       (categoria) => categoria._id !== id,
     );
     return categoria;
+  }
+
+  findCursosByCategoriaId(id: string) {
+    const cursos = this.cursosService.findAll().map((curso) => {
+      if (curso.categoriaIds.includes(id)) return curso;
+    });
+
+    if (!cursos) {
+      throw new NotFoundException(
+        `No hay ningun curso registrado con la categoria ID ${id} no encontrados`,
+      );
+    }
+    return cursos;
   }
 }

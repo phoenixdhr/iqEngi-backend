@@ -8,7 +8,7 @@ import {
   IsDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { Opciones, TipoPregunta } from '../entities/cuestionario.entity';
 import { Curso } from 'src/cursos/entities/curso.entity';
 

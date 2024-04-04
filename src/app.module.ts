@@ -10,9 +10,22 @@ import { ComentariosModule } from './comentarios/comentarios.module';
 import { ProgresoCursosModule } from './progreso-cursos/progreso-cursos.module';
 import { CuestionarioModule } from './cuestionario/cuestionario.module';
 import { CuestionarioRespuestaUsuarioModule } from './cuestionario-respuesta-usuario/cuestionario-respuesta-usuario.module';
+import { DatabaseModule } from './_database/database.module';
+import { ConfigModule } from '@nestjs/config';
+import { environment } from './_common/enviroments';
+import configEnv from './_common/config';
+import { configValidationSchema } from './_common/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: process.env.NODE_ENV
+        ? environment[process.env.NODE_ENV]
+        : '.env',
+      isGlobal: true,
+      load: [configEnv],
+      validationSchema: configValidationSchema,
+    }),
     CursosModule,
     CategoriasModule,
     UsuariosModule,
@@ -22,6 +35,8 @@ import { CuestionarioRespuestaUsuarioModule } from './cuestionario-respuesta-usu
     ProgresoCursosModule,
     CuestionarioModule,
     CuestionarioRespuestaUsuarioModule,
+    DatabaseModule,
+    DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

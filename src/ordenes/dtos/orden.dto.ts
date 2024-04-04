@@ -6,7 +6,7 @@ import {
   IsString,
   ArrayNotEmpty,
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 // import type { Id } from '../../common/dtos/id';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
 import { Curso } from 'src/cursos/entities/curso.entity';

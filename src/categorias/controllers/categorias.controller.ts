@@ -9,11 +9,15 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+
 import { CategoriasService } from '../services/categorias.service';
 import { Categoria } from '../entities/categoria.entity';
 // Asegúrate de importar o definir los DTOs para crear y actualizar categorías
 import { CreateCategoriaDto, UpdateCategoriaDto } from '../dtos/categorias.dto';
+import { Curso } from 'eliminame';
 
+@ApiTags('categorias')
 @Controller('categorias')
 export class CategoriasController {
   constructor(private readonly categoriasService: CategoriasService) {}
@@ -49,5 +53,11 @@ export class CategoriasController {
   @HttpCode(HttpStatus.DELETE)
   delete(@Param('id') id: string): void {
     this.categoriasService.delete(id);
+  }
+
+  @Get(':id/cursos')
+  @HttpCode(HttpStatus.OK)
+  getCursos(@Param('id') id: string): Curso[] {
+    return this.categoriasService.findCursosByCategoriaId(id);
   }
 }

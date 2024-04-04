@@ -13,9 +13,9 @@ import {
   // ArrayNotEmpty, // Importación añadida
   IsDateString, // Importación añadida
 } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import type { Id } from '../../common/dtos/id'; // Asegurando el uso de Id
+import type { Id } from '../../_common/dtos/id'; // Asegurando el uso de Id
 import { Cuestionario } from 'src/cuestionario/entities/cuestionario.entity';
 import { Categoria } from 'src/categorias/entities/categoria.entity';
 

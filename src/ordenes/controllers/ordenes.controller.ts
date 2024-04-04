@@ -9,11 +9,13 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { OrdenesService } from '../services/ordenes.service';
 import { Orden } from '../entities/orden.entity'; // Asegúrate de ajustar la ruta de importación
 import { CreateOrdenDto, UpdateOrdenDto } from '../dtos/orden.dto'; // Asume que tienes DTOs definidos para crear y actualizar
 
+@ApiTags('ordenes')
 @Controller('ordenes')
 export class OrdenesController {
   constructor(private readonly ordenesService: OrdenesService) {}

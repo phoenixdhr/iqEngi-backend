@@ -15,8 +15,8 @@ import {
   Opciones,
   Pregunta,
 } from 'src/cuestionario/entities/cuestionario.entity';
-import { PartialType } from '@nestjs/mapped-types';
-import type { Id } from '../../common/dtos/id';
+import { PartialType } from '@nestjs/swagger';
+import type { Id } from '../../_common/dtos/id';
 import { Usuario } from 'src/usuarios/entities/usuario.entity';
 
 export class RespuestaUsuarioDTO {
@@ -41,6 +41,10 @@ export class CreateCuestionarioRespuestaUsuarioDto {
   @IsString()
   @IsNotEmpty()
   usuarioId: Usuario['_id'];
+
+  @IsString()
+  @IsNotEmpty()
+  cursoId: Usuario['_id'];
 
   @IsNumber()
   @IsNotEmpty()

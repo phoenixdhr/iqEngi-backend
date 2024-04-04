@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { CuestionarioRespuestaUsuarioService } from '../services/cuestionario-respuesta-usuario.service';
 import { CuestionarioRespuestaUsuario } from '../entities/cuestionario-respuesta-usuario.entity';
@@ -17,6 +18,7 @@ import {
   UpdateCuestionarioRespuestaUsuarioDto,
 } from '../dtos/cuestionario-respuesta-usuario.dto';
 
+@ApiTags('cuestionario-respuesta-usuario')
 @Controller('cuestionario-respuesta-usuario')
 export class CuestionarioRespuestaUsuarioController {
   constructor(

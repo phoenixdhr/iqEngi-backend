@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { CuestionarioService } from '../services/cuestionario.service';
 import { Cuestionario } from '../entities/cuestionario.entity';
@@ -17,6 +18,7 @@ import {
   UpdateCuestionarioDto,
 } from '../dtos/cuestionario.dto';
 
+@ApiTags('cuestionarios')
 @Controller('cuestionarios') // Asegúrate de que el nombre del controlador refleje la ruta que quieres usar
 export class CuestionarioController {
   constructor(private readonly cuestionarioService: CuestionarioService) {}

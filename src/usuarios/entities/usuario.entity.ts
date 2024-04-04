@@ -1,4 +1,4 @@
-import type { Id } from '../../common/dtos/id';
+import type { Id } from '../../_common/dtos/id';
 import { Curso } from '../../cursos/entities/curso.entity';
 import { ProgresoCurso } from '../../progreso-cursos/entities/progreso-curso.entity';
 // type id = string; // Cambiado a string para reflejar el uso de MongoDB ObjectId.
@@ -36,13 +36,13 @@ interface Perfil {
   intereses?: string[]; // Opcional
 }
 
-interface CursoComprado {
+export interface CursoComprado {
   cursoId: Curso['_id'];
   fechaCompra: Date;
   estadoAcceso: EstadoAccesoCurso;
 }
 
-interface ProgresoId {
+export interface ProgresoId {
   progresoCursoId: ProgresoCurso['_id'];
   cursoId: Curso['_id'];
 }

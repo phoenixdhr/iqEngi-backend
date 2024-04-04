@@ -10,12 +10,14 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { CursosService } from '../services/cursos.service';
 import { Curso } from '../entities/curso.entity';
-import { StringNumberStringPipe } from '../../common/string-number-string/string-number-string.pipe';
+import { StringNumberStringPipe } from '../../_common/string-number-string/string-number-string.pipe';
 import { CreateCursoDto, UpdateCursoDto } from '../dtos/cursos.dto';
 
+@ApiTags('cursos')
 @Controller('cursos')
 export class CursosController {
   constructor(private readonly cursoService: CursosService) {}
@@ -57,5 +59,23 @@ export class CursosController {
   @HttpCode(HttpStatus.DELETE)
   delete(@Param('id', StringNumberStringPipe) id: string): Curso {
     return this.cursoService.delete(id);
+  }
+
+  @Get(':id/ordenes')
+  @HttpCode(HttpStatus.OK)
+  findOrdenes(@Param('id') id: string) {
+    return this.cursoService.findOrdenes(id);
+  }
+
+  @Get(':id/comentarios')
+  @HttpCode(HttpStatus.OK)
+  findComentarios(@Param('id') id: string) {
+    return this.cursoService.findComentarios(id);
+  }
+
+  @Get(':id/cuestionarios')
+  @HttpCode(HttpStatus.OK)
+  findCuestionarios(@Param('id') id: string) {
+    return this.cursoService.findCuestionarios(id);
   }
 }

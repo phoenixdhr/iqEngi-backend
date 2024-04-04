@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { InstructoresService } from '../services/instructores.service';
 import {
@@ -16,6 +17,7 @@ import {
   UpdateInstructorDto,
 } from '../dtos/instructores.dto';
 
+@ApiTags('instructores')
 @Controller('instructores')
 export class InstructoresController {
   constructor(private readonly instructoresService: InstructoresService) {}

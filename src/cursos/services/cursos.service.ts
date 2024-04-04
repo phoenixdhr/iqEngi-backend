@@ -1,8 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Curso, nivel } from '../entities/curso.entity';
+import { OrdenesService } from 'src/ordenes/services/ordenes.service';
+import { ComentariosService } from 'src/comentarios/services/comentarios.service';
+import { CuestionarioService } from 'src/cuestionario/services/cuestionario.service';
 
 @Injectable()
 export class CursosService {
+  constructor(
+    private readonly ordenesService: OrdenesService,
+    private readonly comentariosService: ComentariosService,
+    private readonly cuestionarioService: CuestionarioService,
+  ) {}
   private counter = 103;
 
   private cursos: Curso[] = [
@@ -316,5 +324,45 @@ export class CursosService {
     const cursoEliminado = this.cursos[index];
     this.cursos = this.cursos.filter((curso) => curso._id !== id);
     return cursoEliminado;
+  }
+
+  findOrdenes(cursoId: string) {
+    // Utiliza el servicio de órdenes para buscar órdenes relacionadas con el cursoId
+    // Este método asume que cada orden contiene un array de cursoId(s) asociados
+    const ordenes = this.ordenesService
+      .findAll()
+      .filter((orden) => orden.cursos.includes(cursoId));
+    if (!ordenes) {
+      throw new NotFoundException(
+        `Ordenes para el curso con ID ${cursoId} no encontradas`,
+      );
+    }
+    return ordenes;
+  }
+
+  findComentarios(cursoId: string) {
+    // Utiliza el servicio de comentarios para buscar comentarios relacionados con el cursoId
+    const comentarios = this.comentariosService
+      .findAll()
+      .filter((comentario) => comentario.cursoId === cursoId);
+    if (!comentarios) {
+      throw new NotFoundException(
+        `Comentarios para el curso con ID ${cursoId} no encontrados`,
+      );
+    }
+    return comentarios;
+  }
+
+  findCuestionarios(cursoId: string) {
+    // Utiliza el servicio de cuestionarios para buscar cuestionarios relacionados con el cursoId
+    const cuestionarios = this.cuestionarioService
+      .findAll()
+      .filter((cuestionario) => cuestionario.cursoId === cursoId);
+    if (!cuestionarios) {
+      throw new NotFoundException(
+        `Cuestionarios para el curso con ID ${cursoId} no encontrados`,
+      );
+    }
+    return cuestionarios;
   }
 }

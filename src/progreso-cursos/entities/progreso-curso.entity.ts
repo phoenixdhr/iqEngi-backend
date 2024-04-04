@@ -1,5 +1,5 @@
 import { Curso } from '../../cursos/entities/curso.entity';
-import { Id } from '../../common/dtos/id';
+import { Id } from '../../_common/dtos/id';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
 import { CuestionarioRespuestaUsuario } from '../../cuestionario-respuesta-usuario/entities/cuestionario-respuesta-usuario.entity';
 

@@ -1,4 +1,4 @@
-import type { Id } from '../../common/dtos/id';
+import type { Id } from '../../_common/dtos/id';
 
 //ENTIDAD
 export class Categoria {

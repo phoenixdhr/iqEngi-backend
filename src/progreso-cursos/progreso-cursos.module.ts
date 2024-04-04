@@ -5,5 +5,6 @@ import { ProgresoCursosService } from './services/progreso-cursos.service';
 @Module({
   controllers: [ProgresoCursosController],
   providers: [ProgresoCursosService],
+  exports: [ProgresoCursosService],
 })
 export class ProgresoCursosModule {}

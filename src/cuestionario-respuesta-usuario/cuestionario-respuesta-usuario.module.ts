@@ -5,5 +5,6 @@ import { CuestionarioRespuestaUsuarioController } from './controllers/cuestionar
 @Module({
   providers: [CuestionarioRespuestaUsuarioService],
   controllers: [CuestionarioRespuestaUsuarioController],
+  exports: [CuestionarioRespuestaUsuarioService],
 })
 export class CuestionarioRespuestaUsuarioModule {}

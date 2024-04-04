@@ -10,6 +10,7 @@ export class CuestionarioRespuestaUsuarioService {
     {
       _id: 'cr001',
       usuarioId: 'u001',
+      cursoId: '101',
       modulo: 1,
       unidad: 2,
       cuestionarioId: 'cq001',
@@ -32,6 +33,7 @@ export class CuestionarioRespuestaUsuarioService {
     {
       _id: 'cr002',
       usuarioId: 'u002',
+      cursoId: '102',
       modulo: 2,
       unidad: 1,
       cuestionarioId: 'cq002',
@@ -48,6 +50,7 @@ export class CuestionarioRespuestaUsuarioService {
     {
       _id: 'cr003',
       usuarioId: 'u003',
+      cursoId: '103',
       modulo: 3,
       unidad: 1,
       cuestionarioId: 'cq003',

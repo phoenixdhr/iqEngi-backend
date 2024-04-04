@@ -1,6 +1,6 @@
 import { IsDate, IsNumber, IsString, IsOptional } from 'class-validator';
-import type { Id } from '../../common/dtos/id';
-import { PartialType } from '@nestjs/mapped-types';
+import type { Id } from '../../_common/dtos/id';
+import { PartialType } from '@nestjs/swagger';
 
 export class CreateComentariosDto {
   @IsString()

@@ -5,13 +5,14 @@ import {
   ValidateNested,
   IsEnum,
   // IsOptional,
-  IsDate,
+  // IsDate,
   IsOptional,
   IsUrl,
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import type { Id } from '../../common/dtos/id';
-import { PartialType } from '@nestjs/mapped-types';
+import type { Id } from '../../_common/dtos/id';
+import { PartialType, ApiProperty } from '@nestjs/swagger';
 import { Curso, ProgresoCurso } from 'eliminame';
 
 enum RolUsuario {
@@ -27,6 +28,7 @@ enum EstadoAccesoCurso {
 }
 
 class PerfilDto {
+  @ApiProperty({ description: 'datos del usuario' })
   @IsString()
   @IsOptional()
   readonly bio?: string;
@@ -97,7 +99,7 @@ class CursoCompradoDto {
   @IsString()
   readonly cursoId: Id;
 
-  @IsDate()
+  @IsDateString()
   readonly fechaCompra: Date;
 
   @IsEnum(EstadoAccesoCurso)

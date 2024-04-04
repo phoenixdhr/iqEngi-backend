@@ -1,4 +1,5 @@
-import type { Id } from '../../common/dtos/id';
+import { Curso } from 'src/cursos/entities/curso.entity';
+import type { Id } from '../../_common/dtos/id';
 import { Cuestionario } from '../../cuestionario/entities/cuestionario.entity';
 import { Pregunta } from '../../cuestionario/entities/cuestionario.entity';
 import { Opciones } from '../../cuestionario/entities/cuestionario.entity';
@@ -8,6 +9,7 @@ import { Usuario } from '../../usuarios/entities/usuario.entity';
 export class CuestionarioRespuestaUsuario {
   _id: Id; // Identificador único para las respuestas de un usuario a un cuestionario.
   usuarioId: Usuario['_id']; // Identificador del usuario que respondió al cuestionario.
+  cursoId: Curso['_id']; // Identificador del curso al que pertenece el cuestionario.
   modulo: number;
   unidad: number;
   cuestionarioId: Cuestionario['_id']; // Identificador del cuestionario que fue respondido.

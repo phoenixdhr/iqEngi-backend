@@ -5,5 +5,6 @@ import { OrdenesService } from './services/ordenes.service';
 @Module({
   controllers: [OrdenesController],
   providers: [OrdenesService],
+  exports: [OrdenesService],
 })
 export class OrdenesModule {}

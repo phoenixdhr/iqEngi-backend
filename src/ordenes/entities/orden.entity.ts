@@ -1,4 +1,4 @@
-import type { Id } from '../../common/dtos/id';
+import type { Id } from '../../_common/dtos/id';
 import { Curso } from '../../cursos/entities/curso.entity';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
 
