@@ -4,7 +4,7 @@ import * as Joi from 'joi';
 export default registerAs('configEnv', () => ({
   database: {
     name: process.env.DATABASE_NAME,
-    port: process.env.DATABASE_PORT,
+    port: process.env.PORT,
   },
   apiKey: process.env.API_KEY,
 }));
@@ -15,4 +15,4 @@ export const configValidationSchema = Joi.object({
   DATABASE_PORT: Joi.number().required(),
 });
 
-export const port = process.env.DATABASE_PORT || 3000;
+export const port = process.env.PORT || 3000;
