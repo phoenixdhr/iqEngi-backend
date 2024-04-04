@@ -47,7 +47,7 @@ export class CursosController {
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.UPDATE)
+  @HttpCode(HttpStatus.OK)
   update(
     @Param('id', StringNumberStringPipe) id: string,
     @Body() payload: UpdateCursoDto,
@@ -56,7 +56,7 @@ export class CursosController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.DELETE)
+  @HttpCode(HttpStatus.NO_CONTENT)
   delete(@Param('id', StringNumberStringPipe) id: string): Curso {
     return this.cursoService.delete(id);
   }

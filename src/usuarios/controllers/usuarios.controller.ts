@@ -41,7 +41,7 @@ export class UsuariosController {
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.UPDATE) // Corrige el status a OK ya que UPDATE no es un código de estado HTTP válido
+  @HttpCode(HttpStatus.OK) // Corrige el status a OK ya que UPDATE no es un código de estado HTTP válido
   update(
     @Param('id') id: string,
     @Body() updateUsuarioDto: UpdateUsuarioDto,
@@ -50,7 +50,7 @@ export class UsuariosController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.DELETE) // Utiliza NO_CONTENT para las operaciones de eliminación que no retornan contenido
+  @HttpCode(HttpStatus.NO_CONTENT) // Utiliza NO_CONTENT para las operaciones de eliminación que no retornan contenido
   delete(@Param('id') id: string): void {
     this.usuariosService.delete(id);
   }

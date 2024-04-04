@@ -14,3 +14,5 @@ export const configValidationSchema = Joi.object({
   DATABASE_NAME: Joi.string().required(),
   DATABASE_PORT: Joi.number().required(),
 });
+
+export const port = process.env.DATABASE_PORT || 3000;

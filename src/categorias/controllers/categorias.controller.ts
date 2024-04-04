@@ -15,7 +15,7 @@ import { CategoriasService } from '../services/categorias.service';
 import { Categoria } from '../entities/categoria.entity';
 // Asegúrate de importar o definir los DTOs para crear y actualizar categorías
 import { CreateCategoriaDto, UpdateCategoriaDto } from '../dtos/categorias.dto';
-import { Curso } from 'eliminame';
+import { Curso } from '../../cursos/entities/curso.entity';
 
 @ApiTags('categorias')
 @Controller('categorias')
@@ -41,7 +41,7 @@ export class CategoriasController {
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.UPDATE)
+  @HttpCode(HttpStatus.OK)
   update(
     @Param('id') id: string,
     @Body() updateCategoriaDto: UpdateCategoriaDto,
@@ -50,7 +50,7 @@ export class CategoriasController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.DELETE)
+  @HttpCode(HttpStatus.NO_CONTENT)
   delete(@Param('id') id: string): void {
     this.categoriasService.delete(id);
   }

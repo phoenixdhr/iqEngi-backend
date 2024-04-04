@@ -42,7 +42,7 @@ export class ComentariosController {
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.UPDATE) // Cambiado a HttpStatus.OK ya que HttpStatus.UPDATE no existe
+  @HttpCode(HttpStatus.OK) // Cambiado a HttpStatus.OK ya que HttpStatus.UPDATE no existe
   update(
     @Param('id') id: string,
     @Body() payload: UpdateComentariosDto,

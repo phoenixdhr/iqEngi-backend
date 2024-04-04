@@ -42,7 +42,7 @@ export class CuestionarioController {
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.UPDATE) // Cambiado de HttpStatus.UPDATE porque UPDATE no es un estado HTTP válido
+  @HttpCode(HttpStatus.OK) // Cambiado de HttpStatus.UPDATE porque UPDATE no es un estado HTTP válido
   update(
     @Param('id') id: string,
     @Body() payload: UpdateCuestionarioDto,

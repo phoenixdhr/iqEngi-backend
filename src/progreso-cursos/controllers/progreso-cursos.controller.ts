@@ -42,7 +42,7 @@ export class ProgresoCursosController {
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.UPDATE) // Corrección: HttpStatus.UPDATE no existe, debe ser HttpStatus.OK para una operación PUT
+  @HttpCode(HttpStatus.OK) // Corrección: HttpStatus.UPDATE no existe, debe ser HttpStatus.OK para una operación PUT
   update(
     @Param('id') id: string,
     @Body() payload: UpdateProgresoCursoDto,
@@ -51,7 +51,7 @@ export class ProgresoCursosController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.DELETE) // Corrección: usar HttpStatus.OK es más adecuado para DELETE, HttpStatus.DELETE no existe
+  @HttpCode(HttpStatus.NO_CONTENT) // Corrección: usar HttpStatus.OK es más adecuado para DELETE, HttpStatus.DELETE no existe
   delete(@Param('id') id: string): ProgresoCurso {
     return this.progresoCursosService.delete(id);
   }

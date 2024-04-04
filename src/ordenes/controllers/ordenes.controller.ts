@@ -39,7 +39,7 @@ export class OrdenesController {
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.UPDATE) // HttpStatus.UPDATE no es un estado HTTP válido. Debes usar HttpStatus.OK para operaciones de actualización exitosas.
+  @HttpCode(HttpStatus.OK) // HttpStatus.UPDATE no es un estado HTTP válido. Debes usar HttpStatus.OK para operaciones de actualización exitosas.
   update(@Param('id') id: string, @Body() payload: UpdateOrdenDto): Orden {
     return this.ordenesService.update(id, payload);
   }

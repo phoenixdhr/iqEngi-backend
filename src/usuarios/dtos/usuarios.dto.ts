@@ -13,7 +13,8 @@ import {
 import { Type } from 'class-transformer';
 import type { Id } from '../../_common/dtos/id';
 import { PartialType, ApiProperty } from '@nestjs/swagger';
-import { Curso, ProgresoCurso } from 'eliminame';
+import { Curso } from '../../cursos/entities/curso.entity';
+import { ProgresoCurso } from 'src/progreso-cursos/entities/progreso-curso.entity';
 
 enum RolUsuario {
   Estudiante = 'estudiante',

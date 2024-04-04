@@ -47,7 +47,7 @@ export class InstructoresController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.DELETE) // Nota: Usualmente se usa HttpStatus.NO_CONTENT para DELETE si no se retorna contenido, pero HttpStatus.OK también es válido si se retorna el recurso eliminado.
+  @HttpCode(HttpStatus.NO_CONTENT) // Nota: Usualmente se usa HttpStatus.NO_CONTENT para DELETE si no se retorna contenido, pero HttpStatus.OK también es válido si se retorna el recurso eliminado.
   delete(@Param('id') id: string) {
     return this.instructoresService.delete(id);
   }
