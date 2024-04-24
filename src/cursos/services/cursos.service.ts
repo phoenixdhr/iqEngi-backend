@@ -1,4 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+// import { Model } from 'mongoose';
+// import { InjectModel } from '@nestjs/mongoose';
+
 import { Curso, nivel } from '../entities/curso.entity';
 import { OrdenesService } from 'src/ordenes/services/ordenes.service';
 import { ComentariosService } from 'src/comentarios/services/comentarios.service';

@@ -1,18 +1,39 @@
 import { Global, Module } from '@nestjs/common';
-
-const apiKey = '1234567890';
+// import { MongoClient } from 'mongodb';
+import configEnv from '../_common/configEnv';
+import { ConfigType } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Global()
 @Module({
-  providers: [
-    {
-      provide: 'API_CONFIG',
-      useValue: {
-        baseUrl: 'https://api.externa.com',
-        apiKey: process.env.NODE_API_KEY ? process.env.NODE_API_KEY : apiKey,
+  imports: [
+    MongooseModule.forRootAsync({
+      useFactory: async (configEnvService: ConfigType<typeof configEnv>) => {
+        return {
+          uri: configEnvService.mongo.uri,
+          // user: configEnvService.mongo.user,
+          // pass: configEnvService.mongo.password,
+          // dbName: configEnvService.mongo.dbName,
+        };
       },
-    },
+      inject: [configEnv.KEY],
+    }),
   ],
-  exports: ['API_CONFIG'],
+  // providers: [
+  //   {
+  //     provide: 'MONGO',
+  //     useFactory: async (configEnvService: ConfigType<typeof configEnv>) => {
+  //       const uri = configEnvService.mongo.uri;
+  //       const dbName = configEnvService.mongo.dbName;
+
+  //       const client = new MongoClient(uri);
+  //       await client.connect();
+  //       const database = client.db(dbName);
+  //       return database;
+  //     },
+  //     inject: [configEnv.KEY],
+  //   },
+  // ],
+  // exports: ['MONGO'],
 })
 export class DatabaseModule {}

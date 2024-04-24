@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CursosModule } from './cursos/cursos.module';
@@ -10,11 +12,11 @@ import { ComentariosModule } from './comentarios/comentarios.module';
 import { ProgresoCursosModule } from './progreso-cursos/progreso-cursos.module';
 import { CuestionarioModule } from './cuestionario/cuestionario.module';
 import { CuestionarioRespuestaUsuarioModule } from './cuestionario-respuesta-usuario/cuestionario-respuesta-usuario.module';
+
 import { DatabaseModule } from './_database/database.module';
-import { ConfigModule } from '@nestjs/config';
 import { environment } from './_common/enviroments';
-import configEnv from './_common/config';
-import { configValidationSchema } from './_common/config';
+import configEnv from './_common/configEnv';
+import { configValidationSchema } from './_common/configValidationSchema';
 
 @Module({
   imports: [
@@ -35,7 +37,6 @@ import { configValidationSchema } from './_common/config';
     ProgresoCursosModule,
     CuestionarioModule,
     CuestionarioRespuestaUsuarioModule,
-    DatabaseModule,
     DatabaseModule,
   ],
   controllers: [AppController],
