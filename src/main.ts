@@ -13,6 +13,9 @@ async function bootstrap() {
       transform: true, // Transforma el payload de entrada a su tipo de clase DTO correspondiente.
       disableErrorMessages: false, // Para producción podría considerarse cambiar a true.
       validationError: { target: false }, // Opcional: Evita devolver el objeto que falló en la validación en la respuesta de error.
+      transformOptions: {
+        enableImplicitConversion: true, // Convierte los tipos de los campos automáticamente.
+      },
     }),
   );
 

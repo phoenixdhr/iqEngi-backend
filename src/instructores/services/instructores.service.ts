@@ -1,43 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Instructor } from '../entities/instructores.entity';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Instructores } from '../entities/instructores.entity';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import {
+  CreateInstructorDto,
+  FilterInstructorDto,
+  UpdateInstructorDto,
+} from '../dtos/instructores.dto';
 
 @Injectable()
 export class InstructoresService {
-  private counter = 3; // Asumimos que ya tienes 3 instructores
-  private instructores: Instructor[] = [
-    {
-      _id: '1',
-      nombre: 'Roberto',
-      apellidos: 'González',
-      profesion: 'Ingeniero Mecánico',
-      especializacion: ['Diseño de tanques de almacenamiento', 'Normas API'],
-      calificacionPromedio: undefined, // Opcional, inicialmente puede no estar presente
-      pais: undefined, // Opcional, inicialmente puede no estar presente
-    },
-    {
-      _id: '2',
-      nombre: 'Mariana',
-      apellidos: 'López',
-      profesion: 'Ingeniera Industrial',
-      especializacion: ['Recipientes a presión', 'Normativa ASME'],
-      // No es necesario incluir campos opcionales si no se provee un valor
-    },
-    {
-      _id: '3',
-      nombre: 'José',
-      apellidos: 'Ramírez',
-      profesion: 'Ingeniero Mecánico',
-      especializacion: ['Inspección de tuberías', 'Normas API'],
-      // Los campos opcionales no incluidos son considerados undefined automáticamente
-    },
-  ];
+  constructor(
+    @InjectModel(Instructores.name)
+    private instructorModel: Model<Instructores>,
+  ) {}
 
-  findAll() {
-    return this.instructores;
+  async findAll(params?: FilterInstructorDto) {
+    if (params) {
+      const { limit, offset } = params;
+      return await this.instructorModel.find().skip(offset).limit(limit).exec();
+    }
+    return await this.instructorModel.find().exec();
   }
 
-  findOne(id: string) {
-    const instructor = this.instructores.find((inst) => inst._id === id);
+  async findOne(id: string) {
+    const instructor = await this.instructorModel.findById(id).exec();
+
     if (!instructor) {
       throw new NotFoundException(
         `No se encontró ningún instructor con el ID ${id}`,
@@ -46,45 +38,44 @@ export class InstructoresService {
     return instructor;
   }
 
-  create(createInstructorDto: any) {
-    this.counter++;
-    const newInstructor = {
-      _id: this.counter.toString(),
-      ...createInstructorDto,
-    };
-
-    this.instructores.push(newInstructor);
-    return newInstructor;
+  async create(data: CreateInstructorDto) {
+    try {
+      const newInstructor = await this.instructorModel.create(data);
+      return newInstructor;
+    } catch (error) {
+      // Aquí podrías manejar errores específicos o lanzar una excepción personalizada
+      // throw new Error('Error al crear el instructor: ' + error.message);
+      throw new InternalServerErrorException(
+        'Error al crear el instructor: ' + error.message,
+      );
+    }
   }
 
-  update(id: string, updateInstructorDto: any) {
-    const index = this.instructores.findIndex((inst) => inst._id === id);
+  async update(id: string, changes: UpdateInstructorDto) {
+    const instructor = await this.instructorModel
+      .findByIdAndUpdate(id, { $set: changes }, { new: true })
+      .exec();
 
-    if (index === -1) {
+    if (!instructor) {
       throw new NotFoundException(
         `No se encontró ningún instructor con el ID ${id} para actualizar`,
       );
     }
 
-    this.instructores[index] = {
-      ...this.instructores[index],
-      ...updateInstructorDto,
-    };
-
-    return this.instructores[index];
+    return instructor;
   }
 
-  delete(id: string) {
-    const index = this.instructores.findIndex((inst) => inst._id === id);
+  async delete(id: string) {
+    const instructorEliminado = await this.instructorModel
+      .findByIdAndDelete(id)
+      .exec();
 
-    if (index === -1) {
+    if (!instructorEliminado) {
       throw new NotFoundException(
         `No se encontró ningún instructor con el ID ${id} para eliminar`,
       );
     }
 
-    const instructor = this.instructores[index];
-    this.instructores = this.instructores.filter((inst) => inst._id !== id);
-    return instructor;
+    return instructorEliminado; // Retorna el documento eliminado
   }
 }

@@ -14,9 +14,4 @@ export class AppController {
   getHome(): string {
     return `hola estas! en home`;
   }
-
-  // @Get('cursopuc')
-  // getCurso() {
-  //   return this.appService.getCurso();
-  // }
 }

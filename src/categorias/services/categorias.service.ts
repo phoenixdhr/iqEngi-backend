@@ -1,42 +1,27 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+
 import { Categoria } from '../entities/categoria.entity';
 import { CursosService } from 'src/cursos/services/cursos.service';
+import { CreateCategoriaDto, UpdateCategoriaDto } from '../dtos/categorias.dto';
 
 @Injectable()
 export class CategoriasService {
-  constructor(private readonly cursosService: CursosService) {}
-
-  private counter = 3;
-  private categorias: Categoria[] = [
-    {
-      _id: '1',
-      nombre: 'Ingeniería Mecánica',
-      descripcion:
-        'Cursos relacionados con la ingeniería mecánica y diseño industrial.',
-    },
-    {
-      _id: '2',
-      nombre: 'Ingeniería Industrial',
-      descripcion:
-        'Cursos centrados en la optimización de procesos industriales y sistemas de producción.',
-    },
-    {
-      _id: '3',
-      nombre: 'Normas y Certificaciones',
-      descripcion:
-        'Cursos enfocados en normativas específicas y certificaciones industriales como API y ASME.',
-    },
-    // Puedes agregar más categorías según sea necesario
-  ];
+  constructor(
+    private readonly cursosService: CursosService,
+    @InjectModel(Categoria.name)
+    private readonly categoriaModel: Model<Categoria>,
+  ) {}
 
   // Encuentra todas las categorías
   findAll() {
-    return this.categorias;
+    return this.categoriaModel.find().exec();
   }
 
   // Encuentra una categoría por su ID
-  findOne(id: string): Categoria {
-    const categoria = this.categorias.find((categoria) => categoria._id === id);
+  async findOne(id: string) {
+    const categoria = await this.categoriaModel.findById(id).exec();
     if (!categoria) {
       throw new NotFoundException(`Categoria con ID ${id} no encontrada`);
     }
@@ -44,58 +29,50 @@ export class CategoriasService {
   }
 
   // Crea una nueva categoría
-  create(payload: any): Categoria {
-    this.counter++;
-    const newCategoria: Categoria = {
-      _id: this.counter.toString(),
-      ...payload,
-    };
-    this.categorias.push(newCategoria);
+  async create(data: CreateCategoriaDto) {
+    const newCategoria = await this.categoriaModel.create(data);
     return newCategoria;
   }
 
   // Actualiza una categoría existente por su ID
-  update(id: string, payload: any): Categoria {
-    const index = this.categorias.findIndex(
-      (categoria) => categoria._id === id,
-    );
-    if (index === -1) {
+  async update(id: string, changes: UpdateCategoriaDto) {
+    const categoria = await this.categoriaModel
+      .findByIdAndUpdate(id, { $set: changes }, { new: true })
+      .exec();
+
+    if (!categoria) {
       throw new NotFoundException(
-        `Categoria con ID ${id} no encontrada para actualizar`,
+        `No se encontró ninguna categoria con el ID ${id} para actualizar`,
       );
     }
-    // Actualiza la categoría. Considera validaciones adicionales para producción.
-    this.categorias[index] = { ...this.categorias[index], ...payload };
-    return this.categorias[index];
+
+    return categoria;
   }
 
   // Elimina una categoría por su ID
-  delete(id: string): Categoria {
-    const index = this.categorias.findIndex(
-      (categoria) => categoria._id === id,
-    );
-    if (index === -1) {
+  async delete(id: string) {
+    const categoriaEliminada = await this.categoriaModel
+      .findByIdAndDelete(id)
+      .exec();
+
+    if (!categoriaEliminada) {
       throw new NotFoundException(
         `Categoria con ID ${id} no encontrada para eliminar`,
       );
     }
-    const categoria = this.categorias[index];
-    this.categorias = this.categorias.filter(
-      (categoria) => categoria._id !== id,
-    );
-    return categoria;
+    return categoriaEliminada;
   }
 
-  findCursosByCategoriaId(id: string) {
-    const cursos = this.cursosService.findAll().map((curso) => {
-      if (curso.categoriaIds.includes(id)) return curso;
-    });
+  // async findCursosByCategoriaId(id: string) {
+  //   const cursos = this.cursosService.findAll().map((curso) => {
+  //     if (curso.categoriaIds.includes(id)) return curso;
+  //   });
 
-    if (!cursos) {
-      throw new NotFoundException(
-        `No hay ningun curso registrado con la categoria ID ${id} no encontrados`,
-      );
-    }
-    return cursos;
-  }
+  //   if (!cursos) {
+  //     throw new NotFoundException(
+  //       `No hay ningun curso registrado con la categoria ID ${id} no encontrados`,
+  //     );
+  //   }
+  //   return cursos;
+  // }
 }

@@ -6,7 +6,7 @@ export type CompromisosEducativos = string[];
 import type { Id } from '../../_common/dtos/id';
 import { Categoria } from '../../categorias/entities/categoria.entity';
 import { Cuestionario } from '../../cuestionario/entities/cuestionario.entity';
-import { Instructor } from '../../instructores/entities/instructores.entity';
+import { Instructores } from '../../instructores/entities/instructores.entity';
 
 export enum nivel {
   Principiante = 'Principiante',
@@ -35,7 +35,7 @@ export class Curso {
 }
 
 interface InstructorCurso {
-  instructorId: Instructor['_id'];
+  instructorId: Instructores['_id'];
   nombre: string;
   apellidos: string;
   profesion?: string; // Opcional, podría no ser relevante para todos los casos

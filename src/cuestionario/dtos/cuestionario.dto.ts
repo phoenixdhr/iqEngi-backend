@@ -4,17 +4,21 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
-  ValidateNested,
+  // ValidateNested,
   IsDate,
+  IsMongoId,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+// import { Type } from 'class-transformer';
 import { PartialType } from '@nestjs/swagger';
-import { Opciones, TipoPregunta } from '../entities/cuestionario.entity';
-import { Curso } from 'src/cursos/entities/curso.entity';
+import { TipoPregunta } from '../entities/cuestionario.entity';
+// import { Opciones } from '../entities/cuestionario.entity';
+// import { Curso } from 'src/cursos/entities/curso.entity';
+// import { ObjectId } from 'mongodb';
+import { Types } from 'mongoose';
 
 export class CreateCuestionarioDto {
   @IsString()
-  readonly cursoId: Curso['_id'];
+  readonly cursoId: Types.ObjectId;
 
   @IsOptional()
   @IsString()
@@ -25,30 +29,42 @@ export class CreateCuestionarioDto {
   readonly descripcion?: string;
 
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => PreguntaDto)
-  readonly preguntas: PreguntaDto[];
+  @IsMongoId({ each: true })
+  readonly preguntas: Types.ObjectId[] | PreguntaDto[]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
+
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // @Type(() => PreguntaDto)
+  // readonly preguntas: PreguntaDto[];
 
   @IsDate()
   @IsOptional()
-  readonly fecha: Date;
+  readonly fecha?: Date;
 }
 
 export class PreguntaDto {
   @IsString()
-  readonly texto: string;
+  readonly enunciado: string;
 
   @IsEnum(TipoPregunta)
   readonly tipo: TipoPregunta;
 
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OpcionDto)
-  readonly opciones: OpcionDto[];
+  @IsMongoId({ each: true })
+  readonly opciones: Types.ObjectId[] | OpcionDto[]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
 
-  @IsOptional()
-  @IsArray()
-  readonly respuestaCorrecta?: Opciones['_id'] | Opciones['_id'][]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // @Type(() => OpcionDto)
+  // readonly opciones: OpcionDto[];
+
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // readonly opciones: OpcionDto[];
+
+  // @IsOptional()
+  // @IsArray()
+  // readonly respuestaCorrecta?: Opciones['_id'] | Opciones['_id'][]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
 }
 
 export class OpcionDto {
@@ -57,7 +73,7 @@ export class OpcionDto {
 
   @IsOptional()
   @IsBoolean()
-  readonly esCorrecta?: boolean;
+  readonly esCorrecta?: boolean | number;
 }
 
 export class UpdateCuestionarioDto extends PartialType(CreateCuestionarioDto) {}

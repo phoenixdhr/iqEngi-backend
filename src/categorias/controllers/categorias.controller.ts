@@ -12,10 +12,11 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 
 import { CategoriasService } from '../services/categorias.service';
+import { MongoIdPipe } from '../../_common/pipes/mongo-id/mongo-id.pipe';
 import { Categoria } from '../entities/categoria.entity';
 // Asegúrate de importar o definir los DTOs para crear y actualizar categorías
 import { CreateCategoriaDto, UpdateCategoriaDto } from '../dtos/categorias.dto';
-import { Curso } from '../../cursos/entities/curso.entity';
+// import { Curso } from '../../cursos/entities/curso.entity';
 
 @ApiTags('categorias')
 @Controller('categorias')
@@ -24,40 +25,42 @@ export class CategoriasController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  getAll(): Categoria[] {
+  async getAll(): Promise<Categoria[]> {
     return this.categoriasService.findAll();
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getOne(@Param('id') id: string): Categoria {
+  async getOne(@Param('id', MongoIdPipe) id: string): Promise<Categoria> {
     return this.categoriasService.findOne(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createCategoriaDto: CreateCategoriaDto): Categoria {
+  async create(
+    @Body() createCategoriaDto: CreateCategoriaDto,
+  ): Promise<Categoria> {
     return this.categoriasService.create(createCategoriaDto);
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
-  update(
-    @Param('id') id: string,
+  async update(
+    @Param('id', MongoIdPipe) id: string,
     @Body() updateCategoriaDto: UpdateCategoriaDto,
-  ): Categoria {
+  ): Promise<Categoria> {
     return this.categoriasService.update(id, updateCategoriaDto);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  delete(@Param('id') id: string): void {
-    this.categoriasService.delete(id);
+  @HttpCode(HttpStatus.OK)
+  async delete(@Param('id', MongoIdPipe) id: string): Promise<Categoria> {
+    return this.categoriasService.delete(id);
   }
 
-  @Get(':id/cursos')
-  @HttpCode(HttpStatus.OK)
-  getCursos(@Param('id') id: string): Curso[] {
-    return this.categoriasService.findCursosByCategoriaId(id);
-  }
+  // @Get(':id/cursos')
+  // @HttpCode(HttpStatus.OK)
+  // getCursos(@Param('id', MongoIdPipe) id: string): Curso[] {
+  //   return this.categoriasService.findCursosByCategoriaId(id);
+  // }
 }

@@ -14,7 +14,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { CursosService } from '../services/cursos.service';
 import { Curso } from '../entities/curso.entity';
-import { StringNumberStringPipe } from '../../_common/string-number-string/string-number-string.pipe';
+import { StringNumberStringPipe } from '../../_common/pipes/string-number-string/string-number-string.pipe';
 import { CreateCursoDto, UpdateCursoDto } from '../dtos/cursos.dto';
 
 @ApiTags('cursos')
