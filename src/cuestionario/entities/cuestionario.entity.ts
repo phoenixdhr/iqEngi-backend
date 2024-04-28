@@ -69,7 +69,7 @@ export class Pregunta extends Document {
   tipo: TipoPregunta;
 
   @Prop({ type: [Types.ObjectId], ref: Opciones.name })
-  opciones: Types.ObjectId[] | Opciones[];
+  opciones: Types.ObjectId[] | Types.Array<Opciones>;
 }
 
 export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);
@@ -87,7 +87,7 @@ export class Cuestionario extends Document {
   descripcion?: string;
 
   @Prop({ type: [Types.ObjectId], ref: Pregunta.name })
-  preguntas: Types.ObjectId[] | Pregunta[];
+  preguntas: Types.ObjectId[] | Types.Array<Pregunta>;
 
   @Prop()
   fecha?: Date;

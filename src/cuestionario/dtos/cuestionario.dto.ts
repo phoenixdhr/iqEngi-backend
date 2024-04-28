@@ -7,13 +7,12 @@ import {
   // ValidateNested,
   IsDate,
   IsMongoId,
+  Allow,
+  IsNumber,
 } from 'class-validator';
 // import { Type } from 'class-transformer';
-import { PartialType } from '@nestjs/swagger';
+import { PartialType, OmitType } from '@nestjs/swagger';
 import { TipoPregunta } from '../entities/cuestionario.entity';
-// import { Opciones } from '../entities/cuestionario.entity';
-// import { Curso } from 'src/cursos/entities/curso.entity';
-// import { ObjectId } from 'mongodb';
 import { Types } from 'mongoose';
 
 export class CreateCuestionarioDto {
@@ -30,12 +29,14 @@ export class CreateCuestionarioDto {
 
   @IsArray()
   @IsMongoId({ each: true })
-  readonly preguntas: Types.ObjectId[] | PreguntaDto[]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
+  readonly preguntas: Types.ObjectId[]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
 
   // @IsArray()
+  // @Allow() // Permite la validación de tipos mixtos
   // @ValidateNested({ each: true })
   // @Type(() => PreguntaDto)
-  // readonly preguntas: PreguntaDto[];
+  // @IsMongoId({ each: true, always: false })
+  // readonly preguntas: Types.ObjectId[] | PreguntaDto[]; // Aceptar tanto IDs como objetos completos
 
   @IsDate()
   @IsOptional()
@@ -49,31 +50,33 @@ export class PreguntaDto {
   @IsEnum(TipoPregunta)
   readonly tipo: TipoPregunta;
 
-  @IsArray()
-  @IsMongoId({ each: true })
-  readonly opciones: Types.ObjectId[] | OpcionDto[]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
-
   // @IsArray()
+  // @Allow() // Permite la validación de tipos mixtos
   // @ValidateNested({ each: true })
   // @Type(() => OpcionDto)
-  // readonly opciones: OpcionDto[];
+  // @IsMongoId({ each: true, always: false })
+  // readonly opciones: Types.ObjectId[] | OpcionDto[]; // Aceptar tanto IDs como objetos completos
 
-  // @IsArray()
-  // @ValidateNested({ each: true })
-  // readonly opciones: OpcionDto[];
-
-  // @IsOptional()
-  // @IsArray()
-  // readonly respuestaCorrecta?: Opciones['_id'] | Opciones['_id'][]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
+  @IsArray()
+  @IsMongoId({ each: true })
+  readonly opciones: Types.ObjectId[]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
 }
 
 export class OpcionDto {
   @IsString()
   readonly texto: string;
 
-  @IsOptional()
-  @IsBoolean()
-  readonly esCorrecta?: boolean | number;
+  // PARA REVISAR SI ES PSOBILE VALIDAR BOOLEANOS Y NUMÉRICOS
+  @Allow() // Permite cualquier valor validado por más de una regla
+  @IsBoolean({ always: false })
+  @IsNumber({}, { always: false })
+  readonly esCorrecta: boolean | number; // Aceptar valores booleanos o numéricos
+
+  // @IsOptional()
+  // @IsBoolean()
+  // readonly esCorrecta?: boolean | number;
 }
 
-export class UpdateCuestionarioDto extends PartialType(CreateCuestionarioDto) {}
+export class UpdateCuestionarioDto extends PartialType(
+  OmitType(CreateCuestionarioDto, ['cursoId', 'preguntas']),
+) {}

@@ -1,20 +1,9 @@
-import type { Id } from '../../_common/dtos/id';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+
 import { Curso } from '../../cursos/entities/curso.entity';
 import { ProgresoCurso } from '../../progreso-cursos/entities/progreso-curso.entity';
 // type id = string; // Cambiado a string para reflejar el uso de MongoDB ObjectId.
-
-//ENTIDAD
-export class Usuario {
-  _id: Id;
-  nombre: string;
-  apellidos: string;
-  email: string;
-  hashContraseña: string;
-  rol: RolUsuario[];
-  perfil?: Perfil; // Opcional, puede completarse después del registro inicial
-  cursos_comprados_historial?: CursoComprado[]; // Opcional, inicialmente vacío hasta que compren cursos
-  curso_progreso?: ProgresoId[]; // Opcional, inicialmente vacío hasta que comiencen un curso
-}
 
 export enum RolUsuario {
   Estudiante = 'estudiante',
@@ -28,21 +17,62 @@ export enum EstadoAccesoCurso {
   Inactivo = 'inactivo',
 }
 
-interface Perfil {
-  bio?: string; // Opcional
-  ubicacion?: string; // Opcional
-  imagenURL?: string; // Opcional
-  contacto?: string; // Opcional
-  intereses?: string[]; // Opcional
-}
+@Schema()
+export class Perfil extends Document {
+  @Prop()
+  bio?: string;
 
-export interface CursoComprado {
-  cursoId: Curso['_id'];
+  @Prop()
+  ubicacion?: string;
+
+  @Prop()
+  imagenURL?: string;
+
+  @Prop()
+  contacto?: string;
+
+  @Prop()
+  intereses?: string[];
+}
+export const PerfilSchema = SchemaFactory.createForClass(Perfil);
+
+@Schema()
+export class CursoComprado extends Document {
+  @Prop({ type: Types.ObjectId, ref: Curso.name })
+  cursoId: Types.ObjectId;
+
+  @Prop()
   fechaCompra: Date;
+
+  @Prop({ enum: EstadoAccesoCurso })
   estadoAcceso: EstadoAccesoCurso;
 }
+export const CursoCompradoSchema = SchemaFactory.createForClass(CursoComprado);
 
-export interface ProgresoId {
-  progresoCursoId: ProgresoCurso['_id'];
-  cursoId: Curso['_id'];
+//ENTIDAD
+@Schema()
+export class Usuario extends Document {
+  @Prop({ required: true })
+  nombre: string;
+
+  @Prop({ required: true })
+  apellidos: string;
+
+  @Prop({ required: true, unique: true })
+  email: string;
+
+  @Prop({ required: true })
+  hashContraseña: string;
+
+  @Prop({ enum: RolUsuario, required: true })
+  rol: RolUsuario[];
+
+  @Prop({ type: PerfilSchema, default: null })
+  perfil?: Perfil;
+
+  @Prop({ type: [CursoCompradoSchema], default: [] })
+  cursos_comprados_historial?: CursoComprado[];
+
+  @Prop({ type: [Types.ObjectId], ref: ProgresoCurso.name, default: [] })
+  curso_progreso?: Types.Array<Types.ObjectId>; // Opcional, inicialmente vacío hasta que comiencen un curso
 }

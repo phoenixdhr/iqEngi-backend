@@ -1,12 +1,15 @@
-// Definiciones de tipos básicos permanecen sin cambios.
-export type Aprenderas = string[];
-export type Objetivos = string[];
-export type CompromisosEducativos = string[];
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 
 import type { Id } from '../../_common/dtos/id';
 import { Categoria } from '../../categorias/entities/categoria.entity';
 import { Cuestionario } from '../../cuestionario/entities/cuestionario.entity';
 import { Instructores } from '../../instructores/entities/instructores.entity';
+
+// Definiciones de tipos básicos permanecen sin cambios.
+export type Aprenderas = string[];
+export type Objetivos = string[];
+export type CompromisosEducativos = string[];
 
 export enum nivel {
   Principiante = 'Principiante',

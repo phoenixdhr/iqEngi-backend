@@ -9,12 +9,11 @@ import {
   IsOptional,
   IsUrl,
   IsDateString,
+  IsMongoId,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import type { Id } from '../../_common/dtos/id';
 import { PartialType, ApiProperty } from '@nestjs/swagger';
-import { Curso } from '../../cursos/entities/curso.entity';
-import { ProgresoCurso } from 'src/progreso-cursos/entities/progreso-curso.entity';
+import { Types } from 'mongoose';
 
 enum RolUsuario {
   Estudiante = 'estudiante',
@@ -52,10 +51,18 @@ class PerfilDto {
   readonly intereses?: string[];
 }
 
-export class CreateUsuarioDto {
-  @IsString()
-  readonly _id: Id;
+class CursoCompradoDto {
+  @IsMongoId()
+  readonly cursoId: Types.ObjectId;
 
+  @IsDateString()
+  readonly fechaCompra: Date;
+
+  @IsEnum(EstadoAccesoCurso)
+  readonly estadoAcceso: EstadoAccesoCurso;
+}
+
+export class CreateUsuarioDto {
   @IsString()
   readonly nombre: string;
 
@@ -83,28 +90,10 @@ export class CreateUsuarioDto {
   readonly cursos_comprados_historial?: CursoCompradoDto[];
 
   @IsArray()
-  @IsString({ each: true })
+  @ValidateNested({ each: true })
   @IsOptional()
-  readonly curso_progreso?: ProgresoId[]; // Utilizamos string[] para simplificar, suponiendo que ProgresoId sea una referencia a un ID de tipo string
-}
-
-class ProgresoId {
-  @IsString()
-  progresoCursoId: ProgresoCurso['_id'];
-
-  @IsString()
-  cursoId: Curso['_id'];
-}
-
-class CursoCompradoDto {
-  @IsString()
-  readonly cursoId: Id;
-
-  @IsDateString()
-  readonly fechaCompra: Date;
-
-  @IsEnum(EstadoAccesoCurso)
-  readonly estadoAcceso: EstadoAccesoCurso;
+  @Type(() => Types.ObjectId)
+  readonly curso_progreso?: Types.ObjectId[]; // Utilizamos string[] para simplificar, suponiendo que ProgresoId sea una referencia a un ID de tipo string
 }
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}
