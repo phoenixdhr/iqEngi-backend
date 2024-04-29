@@ -76,3 +76,5 @@ export class Usuario extends Document {
   @Prop({ type: [Types.ObjectId], ref: ProgresoCurso.name, default: [] })
   curso_progreso?: Types.Array<Types.ObjectId>; // Opcional, inicialmente vacío hasta que comiencen un curso
 }
+
+export const UsuarioSchema = SchemaFactory.createForClass(Usuario);

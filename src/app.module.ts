@@ -17,6 +17,7 @@ import { DatabaseModule } from './_database/database.module';
 import { environment } from './_common/enviroments';
 import configEnv from './_common/configEnv';
 import { configValidationSchema } from './_common/configValidationSchema';
+import { EstructuraProgramariaModule } from './estructura-programaria/estructura-programaria.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { configValidationSchema } from './_common/configValidationSchema';
     CuestionarioModule,
     CuestionarioRespuestaUsuarioModule,
     DatabaseModule,
+    EstructuraProgramariaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
