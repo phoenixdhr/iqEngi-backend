@@ -7,7 +7,11 @@ import { CuestionarioRespuestaUsuarioService } from 'src/cuestionario-respuesta-
 import { ProgresoCursosService } from 'src/progreso-cursos/services/progreso-cursos.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateUsuarioDto, UpdateUsuarioDto } from '../dtos/usuarios.dto';
+import {
+  CreateCursoCompradoDto,
+  CreateUsuarioDto,
+  UpdateUsuarioDto,
+} from '../dtos/usuarios.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -19,6 +23,7 @@ export class UsuariosService {
     @InjectModel(Usuario.name) private readonly usuariosModel: Model<Usuario>,
   ) {}
 
+  // #region CRUD service
   findAll() {
     return this.usuariosModel.find().exec();
   }
@@ -67,6 +72,61 @@ export class UsuariosService {
     return usuarioEliminado;
   }
 
+  // #region add
+  async addCursoComprado(
+    usuarioId: string,
+    cursoCompradoDoc: CreateCursoCompradoDto[],
+  ) {
+    const usuario = await this.findOne(usuarioId);
+
+    usuario.cursos_comprados_historial.push(...cursoCompradoDoc);
+    await usuario.save();
+    return usuario;
+  }
+
+  async addProgresoCurso(usuarioId: string, progresoCursoId: string[]) {
+    const usuario = await this.findOne(usuarioId);
+
+    usuario.curso_progreso.push(...progresoCursoId);
+    await usuario.save();
+    return usuario;
+  }
+
+  async addInteres(usuarioId: string, interes: string[]) {
+    const usuario = await this.findOne(usuarioId);
+
+    usuario.perfil.intereses.push(...interes);
+    await usuario.save();
+    return usuario;
+  }
+
+  // #region remove
+
+  async removeCursoComprado(usuarioId: string, cursoCompradoId: string) {
+    const usuario = await this.findOne(usuarioId);
+
+    usuario.cursos_comprados_historial.pull(cursoCompradoId);
+    await usuario.save();
+    return usuario;
+  }
+
+  async removeProgresoCurso(usuarioId: string, progresoCursoId: string) {
+    const usuario = await this.findOne(usuarioId);
+
+    usuario.curso_progreso.pull(progresoCursoId);
+    await usuario.save();
+    return usuario;
+  }
+
+  async removeInteres(usuarioId: string, interes: string) {
+    const usuario = await this.findOne(usuarioId);
+
+    usuario.perfil.intereses.pull(interes);
+    await usuario.save();
+    return usuario;
+  }
+
+  // #region Find
   async findCursosComprados(usuarioId: string) {
     const usuario = await this.findOne(usuarioId);
     const cursosComprados = usuario.cursos_comprados_historial || [];

@@ -41,6 +41,7 @@ export class CreateInstructorDto {
 
 export class UpdateInstructorDto extends PartialType(CreateInstructorDto) {}
 
+// #region Filter Paginacion
 export class FilterInstructorDto {
   @IsOptional()
   @IsPositive() // Solo números positivos desde el 1

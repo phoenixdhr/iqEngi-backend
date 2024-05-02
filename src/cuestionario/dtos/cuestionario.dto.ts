@@ -18,7 +18,8 @@ import {
 } from '../entities/cuestionario.entity';
 import { Type } from 'class-transformer';
 
-export class OpcionDto {
+// #region OpcionDTO
+export class CreateOpcionDto {
   @IsString()
   readonly texto: string;
 
@@ -27,7 +28,10 @@ export class OpcionDto {
   readonly esCorrecta: number;
 }
 
-export class PreguntaDto {
+export class UpdateOpcionDto extends PartialType(CreateOpcionDto) {}
+
+// #region PreguntaDTO
+export class CreatePreguntaDto {
   @IsString()
   readonly enunciado: string;
 
@@ -36,11 +40,14 @@ export class PreguntaDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => OpcionDto)
+  @Type(() => CreateOpcionDto)
   @IsOptional()
   readonly opciones?: Opcion[]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
 }
 
+export class UpdatePreguntaDto extends PartialType(CreatePreguntaDto) {}
+
+// #region CuestionarioDto
 export class CreateCuestionarioDto {
   @IsMongoId()
   @IsString()
@@ -54,7 +61,7 @@ export class CreateCuestionarioDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => PreguntaDto)
+  @Type(() => CreatePreguntaDto)
   @IsOptional()
   readonly preguntas?: Pregunta[]; // Ajusta según la necesidad de aceptar múltiples IDs o un solo ID
 

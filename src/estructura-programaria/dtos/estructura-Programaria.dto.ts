@@ -9,7 +9,8 @@ import {
 import { PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-class UnidadEducativaDto {
+// #region UnidadEducativaDto
+export class CreateUnidadEducativaDto {
   @IsNumber()
   readonly unidad: number;
 
@@ -29,6 +30,11 @@ class UnidadEducativaDto {
   readonly idEstructuraProgramaria: string;
 }
 
+export class UpdateUnidadEducativaDto extends PartialType(
+  CreateUnidadEducativaDto,
+) {}
+
+// #region EstructuraProgramariaDto
 export class CreateEstructuraProgramariaDto {
   @IsNumber()
   readonly modulo: number;
@@ -38,9 +44,9 @@ export class CreateEstructuraProgramariaDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => UnidadEducativaDto)
+  @Type(() => CreateUnidadEducativaDto)
   @IsOptional() // Ahora es opcional para reflejar la posibilidad de que no estén definidas al principio.
-  readonly unidades?: UnidadEducativaDto[];
+  readonly unidades?: CreateUnidadEducativaDto[];
 }
 
 export class UpdateEstructuraProgramariaDto extends PartialType(

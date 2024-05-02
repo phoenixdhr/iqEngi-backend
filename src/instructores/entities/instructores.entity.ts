@@ -11,16 +11,17 @@ export class Instructores extends Document {
   apellidos: string;
 
   @Prop()
-  profesion?: string; // Opcional
+  profesion?: string;
 
   @Prop({ default: [] })
-  especializacion: Types.Array<string>; // Opcional
+  especializacion: Types.Array<string>;
+
+  // #region definir
+  @Prop()
+  calificacionPromedio?: number; // Opcional, se pide encuesta al terminar el curso
 
   @Prop()
-  calificacionPromedio?: number; // Opcional, puede que inicialmente no tengan calificaciones
-
-  @Prop()
-  pais?: string; // Opcional
+  pais?: string;
 }
 
 export const InstructorSchema = SchemaFactory.createForClass(Instructores);

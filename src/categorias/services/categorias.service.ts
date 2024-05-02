@@ -14,6 +14,8 @@ export class CategoriasService {
     private readonly categoriaModel: Model<Categoria>,
   ) {}
 
+  //#region CRUD service
+
   // Encuentra todas las categorías
   findAll() {
     return this.categoriaModel.find().exec();
@@ -65,6 +67,7 @@ export class CategoriasService {
     return categoriaEliminada;
   }
 
+  //#region Find
   async findCursosByCategoriaId(categoryId: string) {
     const cursosFilterByCategory =
       await this.cursosService.filterByCategoryId(categoryId);

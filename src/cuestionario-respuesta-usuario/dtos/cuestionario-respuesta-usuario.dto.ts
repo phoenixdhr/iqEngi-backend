@@ -14,7 +14,8 @@ import { PartialType } from '@nestjs/swagger';
 import { EstadoCuestionario } from '../entities/cuestionario-respuesta-usuario.entity';
 import { Type } from 'class-transformer';
 
-export class RespuestaUsuarioDTO {
+// #region RespuestaUsuarioDTO
+export class CreateRespuestaUsuarioDTO {
   @IsMongoId()
   preguntaId: string;
 
@@ -24,6 +25,11 @@ export class RespuestaUsuarioDTO {
   respuesta: string[];
 }
 
+export class UpdateRespuestaUsuarioDTO extends PartialType(
+  CreateRespuestaUsuarioDTO,
+) {}
+
+// #region CuestionarioRespuestaDto
 export class CreateCuestionarioRespuestaUsuarioDto {
   @IsMongoId()
   usuarioId: string;
@@ -41,9 +47,9 @@ export class CreateCuestionarioRespuestaUsuarioDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => RespuestaUsuarioDTO)
+  @Type(() => CreateRespuestaUsuarioDTO)
   @IsOptional()
-  respuestas?: RespuestaUsuarioDTO[];
+  respuestas?: CreateRespuestaUsuarioDTO[];
 
   @IsDate()
   @IsOptional()

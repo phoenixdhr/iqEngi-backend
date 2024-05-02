@@ -19,6 +19,7 @@ export class InstructoresService {
     private instructorModel: Model<Instructores>,
   ) {}
 
+  // #region CRUD service
   async findAll(params?: FilterInstructorDto) {
     if (params) {
       const { limit, offset } = params;

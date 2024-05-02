@@ -73,12 +73,11 @@ export class Usuario extends Document {
   hashContraseña: string;
 
   @Prop({
-    type: [String],
     enum: RolUsuario,
     required: true,
-    default: [RolUsuario.Estudiante],
+    default: RolUsuario.Estudiante,
   })
-  rol: Types.Array<RolUsuario>;
+  rol: RolUsuario;
 
   @Prop({ type: PerfilSchema, default: {} })
   perfil: Perfil;

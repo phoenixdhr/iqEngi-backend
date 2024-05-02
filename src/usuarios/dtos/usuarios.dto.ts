@@ -17,7 +17,8 @@ import { PartialType, ApiProperty } from '@nestjs/swagger';
 import { RolUsuario } from '../entities/usuario.entity';
 import { EstadoAccesoCurso } from '../entities/usuario.entity';
 
-class PerfilDto {
+// #region PerfilDto
+export class CreatePerfilDto {
   @ApiProperty({ description: 'datos del usuario' })
   @IsString()
   @IsOptional()
@@ -51,7 +52,10 @@ class PerfilDto {
   readonly intereses?: string[];
 }
 
-class CursoCompradoDto {
+export class UpdatePerfilDto extends PartialType(CreatePerfilDto) {}
+
+// #region CursoCompradoDto
+export class CreateCursoCompradoDto {
   @IsMongoId()
   readonly cursoId: string;
 
@@ -65,6 +69,11 @@ class CursoCompradoDto {
   readonly estadoAcceso: EstadoAccesoCurso;
 }
 
+export class UpdateCursoCompradoDto extends PartialType(
+  CreateCursoCompradoDto,
+) {}
+
+// #region UsuarioDto
 export class CreateUsuarioDto {
   @IsString()
   readonly nombre: string;
@@ -78,21 +87,20 @@ export class CreateUsuarioDto {
   @IsString()
   readonly hashContraseña: string;
 
-  @IsArray()
-  @IsEnum(RolUsuario, { each: true })
+  @IsEnum(RolUsuario)
   @IsOptional()
-  readonly rol?: RolUsuario[];
+  readonly rol?: RolUsuario;
 
   @ValidateNested()
-  @Type(() => PerfilDto)
+  @Type(() => CreatePerfilDto)
   @IsOptional()
-  readonly perfil?: PerfilDto;
+  readonly perfil?: CreatePerfilDto;
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CursoCompradoDto)
+  @Type(() => CreateCursoCompradoDto)
   @IsOptional()
-  readonly cursos_comprados_historial?: CursoCompradoDto[];
+  readonly cursos_comprados_historial?: CreateCursoCompradoDto[];
 
   @IsArray()
   @IsMongoId({ each: true })
