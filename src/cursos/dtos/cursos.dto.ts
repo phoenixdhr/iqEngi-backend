@@ -1,155 +1,5 @@
-// import {
-//   IsArray,
-//   // IsDate,
-//   IsEnum,
-//   IsNotEmpty,
-//   IsNumber,
-//   IsOptional,
-//   IsString,
-//   IsUrl,
-//   Max,
-//   Min,
-//   ValidateNested,
-//   // ArrayNotEmpty, // Importación añadida
-//   IsDateString, // Importación añadida
-// } from 'class-validator';
-// import { PartialType } from '@nestjs/swagger';
-// import { Type } from 'class-transformer';
-// import type { Id } from '../../_common/dtos/id'; // Asegurando el uso de Id
-// import { Cuestionario } from 'src/cuestionario/entities/cuestionario.entity';
-// import { Categoria } from 'src/categorias/entities/categoria.entity';
-
-// enum Nivel {
-//   Principiante = 'Principiante',
-//   Intermedio = 'Intermedio',
-//   Avanzado = 'Avanzado',
-// }
-
-// class InstructorCursoDto {
-//   @IsString()
-//   readonly instructorId: Id;
-
-//   @IsString()
-//   readonly nombre: string;
-
-//   @IsString()
-//   readonly apellidos: string;
-
-//   @IsString()
-//   @IsOptional()
-//   readonly profesion?: string;
-
-//   @IsArray()
-//   @IsOptional()
-//   readonly especializacion?: string[];
-// }
-
-// class EstructuraProgramariaDto {
-//   @IsNumber()
-//   readonly modulo: number;
-
-//   @IsString()
-//   readonly titleModulo: string;
-
-//   @ValidateNested({ each: true })
-//   @Type(() => UnidadEducativaDto)
-//   @IsArray()
-//   @IsOptional() // Ahora es opcional para reflejar la posibilidad de que no estén definidas al principio.
-//   readonly unidades?: UnidadEducativaDto[];
-// }
-
-// class UnidadEducativaDto {
-//   @IsNumber()
-//   readonly unidad: number;
-
-//   @IsString()
-//   readonly title: string;
-
-//   @IsArray()
-//   @IsOptional() // Temas puede ser opcional.
-//   readonly temas?: string[];
-
-//   @IsArray()
-//   @IsOptional() // idCuestionario puede ser opcional.
-//   readonly idCuestionario?: Cuestionario['_id'];
-// }
-
-// export class CreateCursoDto {
-//   @IsString()
-//   @IsNotEmpty()
-//   readonly title: string;
-
-//   @IsString()
-//   readonly descripcionCorta: string;
-
-//   @IsEnum(Nivel)
-//   readonly nivel: Nivel;
-
-//   @ValidateNested()
-//   @Type(() => InstructorCursoDto)
-//   @IsOptional()
-//   readonly instructor?: InstructorCursoDto;
-
-//   @IsNumber()
-//   @Min(0)
-//   readonly duracionHoras: number;
-
-//   @IsString()
-//   @IsUrl()
-//   @IsOptional()
-//   readonly imagenURL?: string;
-
-//   @IsNumber()
-//   @Min(0)
-//   @IsOptional()
-//   readonly precio?: number;
-
-//   @IsNumber()
-//   @Min(0)
-//   @Max(100)
-//   @IsOptional()
-//   readonly descuentos?: number;
-
-//   @IsNumber()
-//   @Min(0)
-//   @Max(5)
-//   @IsOptional()
-//   readonly calificacion?: number;
-
-//   @IsArray()
-//   @IsOptional()
-//   readonly aprenderas?: string[];
-
-//   @IsArray()
-//   @IsOptional()
-//   readonly objetivos?: string[];
-
-//   @IsArray()
-//   @IsOptional()
-//   readonly dirigidoA?: string[];
-
-//   @ValidateNested({ each: true })
-//   @Type(() => EstructuraProgramariaDto)
-//   @IsArray()
-//   @IsOptional()
-//   readonly contenido?: EstructuraProgramariaDto[];
-
-//   @IsDateString()
-//   @IsOptional()
-//   readonly fechaLanzamiento?: Date;
-
-//   @IsArray()
-//   @IsOptional() // Permite cursos sin categorías asignadas.
-//   readonly categoriaIds?: Categoria['_id'][]; // Conservando el uso de Id
-// }
-
-// // Las mismas mejoras y principios de opcionalidad y validación específica se aplican a UpdateCursoDto, manteniendo la consistencia y claridad en el código.
-
-// export class UpdateCursoDto extends PartialType(CreateCursoDto) {}
-
 import {
   IsArray,
-  // IsDate,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -158,10 +8,8 @@ import {
   IsUrl,
   Max,
   Min,
-  // ValidateNested,
-  // ArrayNotEmpty, // Importación añadida
-  IsDateString,
-  IsMongoId, // Importación añadida
+  IsMongoId,
+  IsDate,
 } from 'class-validator';
 import { PartialType } from '@nestjs/swagger';
 import { Nivel } from '../entities/curso.entity';
@@ -172,10 +20,12 @@ export class CreateCursoDto {
   readonly title: string;
 
   @IsString()
+  @IsNotEmpty()
   readonly descripcionCorta: string;
 
   @IsEnum(Nivel)
-  readonly nivel: Nivel;
+  @IsOptional()
+  readonly nivel?: Nivel;
 
   @IsMongoId()
   @IsOptional()
@@ -183,7 +33,8 @@ export class CreateCursoDto {
 
   @IsNumber()
   @Min(0)
-  readonly duracionHoras: number;
+  @IsOptional()
+  readonly duracionHoras?: number;
 
   @IsUrl()
   @IsOptional()
@@ -207,14 +58,17 @@ export class CreateCursoDto {
   readonly calificacion?: number;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   readonly aprenderas?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   readonly objetivos?: string[];
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   readonly dirigidoA?: string[];
 
@@ -223,14 +77,15 @@ export class CreateCursoDto {
   @IsOptional()
   readonly estructuraProgramaria?: string[];
 
-  @IsDateString()
+  // @IsDateString()
+  @IsDate()
   @IsOptional()
   readonly fechaLanzamiento?: Date;
 
   @IsArray()
   @IsMongoId({ each: true })
-  @IsOptional() // Permite cursos sin categorías asignadas.
-  readonly categorias?: string[]; // Conservando el uso de Id
+  @IsOptional()
+  readonly categorias: string[];
 }
 
 // Las mismas mejoras y principios de opcionalidad y validación específica se aplican a UpdateCursoDto, manteniendo la consistencia y claridad en el código.

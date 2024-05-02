@@ -1,10 +1,9 @@
 import {
-  // IsDate,
   IsNumber,
   IsString,
   IsOptional,
   IsMongoId,
-  IsDateString,
+  IsDate,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 
@@ -26,9 +25,10 @@ export class CreateComentariosDto {
   @ApiPropertyOptional({ description: 'Calificación numérica del comentario' })
   readonly calificacion?: number;
 
-  @IsDateString()
+  @IsDate()
+  @IsOptional()
   @ApiProperty({ description: 'Fecha cuando se realiza el comentario' })
-  readonly fecha: string; // Usamos string para la fecha para facilitar la validación
+  readonly fecha?: Date;
 }
 
 export class UpdateComentariosDto extends PartialType(CreateComentariosDto) {}

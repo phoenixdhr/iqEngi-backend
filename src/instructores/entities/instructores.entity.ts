@@ -1,7 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-
-// import type { Id } from '../../_common/dtos/id';
+import { Document, Types } from 'mongoose';
 
 //ENTIDAD
 @Schema({ collection: 'Instructores' })
@@ -15,8 +13,8 @@ export class Instructores extends Document {
   @Prop()
   profesion?: string; // Opcional
 
-  @Prop()
-  especializacion?: string[]; // Opcional
+  @Prop({ default: [] })
+  especializacion: Types.Array<string>; // Opcional
 
   @Prop()
   calificacionPromedio?: number; // Opcional, puede que inicialmente no tengan calificaciones

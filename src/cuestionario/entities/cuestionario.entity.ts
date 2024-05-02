@@ -1,41 +1,7 @@
-// import type { Id } from '../../_common/dtos/id';
-// import { Curso } from '../../cursos/entities/curso.entity';
-
-// // Define los posibles tipos de preguntas que pueden existir en el sistema.
-// export enum TipoPregunta {
-//   Abierta = 'abierta',
-//   Alternativa = 'alternativa',
-//   Opcion_multiple = 'opcion_multiple',
-//   Verdadero_falso = 'verdadero_falso',
-//   Ordenamiento = 'ordenamiento',
-// }
-
-// export interface Opciones {
-//   _id: Id;
-//   texto: string;
-//   esCorrecta?: boolean | number;
-// }
-
-// export interface Pregunta {
-//   _id: Id;
-//   enunciado: string;
-//   tipo: TipoPregunta;
-//   opciones: Opciones[];
-// }
-
-// //ENTIDAD
-// export class Cuestionario {
-//   _id: Id;
-//   cursoId: Curso['_id'];
-//   titulo?: string;
-//   descripcion?: string;
-//   preguntas: Pregunta[];
-//   fecha?: Date;
-// }
-
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Curso } from 'src/cursos/entities/curso.entity';
+
+import { Entidades } from '../../_common/nameEntidaes';
 
 // Tipo Enumerado para TipoPregunta
 export enum TipoPregunta {
@@ -48,15 +14,15 @@ export enum TipoPregunta {
 
 // Esquema y clase para Opciones
 @Schema()
-export class Opciones extends Document {
+export class Opcion extends Document {
   @Prop({ required: true })
   texto: string;
 
-  @Prop()
-  esCorrecta?: boolean | number;
+  @Prop({ required: true })
+  esCorrecta: number; // 0: Incorrecta, 1: Correcta, si hay numeros mayores a 1, se considera una pregunta con ordenamiento
 }
 
-export const OpcionesSchema = SchemaFactory.createForClass(Opciones);
+export const OpcionSchema = SchemaFactory.createForClass(Opcion);
 
 // // Esquema embebido referenciadp
 // Esquema y clase para Pregunta
@@ -68,8 +34,8 @@ export class Pregunta extends Document {
   @Prop({ required: true, enum: TipoPregunta })
   tipo: TipoPregunta;
 
-  @Prop({ type: [Types.ObjectId], ref: Opciones.name })
-  opciones: Types.ObjectId[] | Types.Array<Opciones>;
+  @Prop({ type: [OpcionSchema], default: [] })
+  opciones: Types.Array<Opcion>;
 }
 
 export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);
@@ -77,20 +43,28 @@ export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);
 // Esquema y clase para Cuestionario
 @Schema()
 export class Cuestionario extends Document {
-  @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
+  @Prop({ type: Types.ObjectId, ref: Entidades.Curso, required: true })
   cursoId: Types.ObjectId;
 
   @Prop()
-  titulo?: string;
+  titulo: string;
 
   @Prop()
-  descripcion?: string;
+  descripcion: string;
 
-  @Prop({ type: [Types.ObjectId], ref: Pregunta.name })
-  preguntas: Types.ObjectId[] | Types.Array<Pregunta>;
+  @Prop({ type: [PreguntaSchema], default: [] })
+  preguntas: Types.Array<Pregunta>;
 
-  @Prop()
-  fecha?: Date;
+  @Prop({ default: new Date() })
+  fecha: Date;
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: Entidades.UnidadEducativa,
+    required: true,
+    index: true,
+  })
+  unidadEducativaId: Types.ObjectId; // Referencia única a la Unidad Educativa asociada
 }
 
 export const CuestionarioSchema = SchemaFactory.createForClass(Cuestionario);

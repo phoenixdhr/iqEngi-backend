@@ -12,11 +12,11 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 
 import { ComentariosService } from '../services/comentarios.service';
-import { Comentario } from '../entities/comentario.entity';
 import {
   CreateComentariosDto,
   UpdateComentariosDto,
 } from '../dtos/comentario.dto';
+import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 
 @ApiTags('comentarios')
 @Controller('comentarios')
@@ -25,34 +25,34 @@ export class ComentariosController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  getAll(): Comentario[] {
+  getAll() {
     return this.comentariosService.findAll();
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getOne(@Param('id') id: string): Comentario {
+  getOne(@Param('id', MongoIdPipe) id: string) {
     return this.comentariosService.findOne(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() payload: CreateComentariosDto): Comentario {
+  create(@Body() payload: CreateComentariosDto) {
     return this.comentariosService.create(payload);
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK) // Cambiado a HttpStatus.OK ya que HttpStatus.UPDATE no existe
   update(
-    @Param('id') id: string,
+    @Param('id', MongoIdPipe) id: string,
     @Body() payload: UpdateComentariosDto,
-  ): Comentario {
+  ) {
     return this.comentariosService.update(id, payload);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK) // Cambiado a HttpStatus.OK para la acción de DELETE, más comúnmente usado
-  delete(@Param('id') id: string): Comentario {
+  delete(@Param('id', MongoIdPipe) id: string) {
     return this.comentariosService.delete(id);
   }
 }

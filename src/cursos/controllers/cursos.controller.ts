@@ -13,9 +13,8 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 
 import { CursosService } from '../services/cursos.service';
-import { Curso } from '../entities/curso.entity';
-import { StringNumberStringPipe } from '../../_common/pipes/string-number-string/string-number-string.pipe';
 import { CreateCursoDto, UpdateCursoDto } from '../dtos/cursos.dto';
+import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 
 @ApiTags('cursos')
 @Controller('cursos')
@@ -24,7 +23,7 @@ export class CursosController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  getAll(): Curso[] {
+  getAll() {
     return this.cursoService.findAll();
   }
 
@@ -36,46 +35,46 @@ export class CursosController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getOne(@Param('id', StringNumberStringPipe) id: string): Curso {
+  getOne(@Param('id', MongoIdPipe) id: string) {
     return this.cursoService.findOne(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() payload: CreateCursoDto): Curso {
+  create(@Body() payload: CreateCursoDto) {
     return this.cursoService.create(payload);
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   update(
-    @Param('id', StringNumberStringPipe) id: string,
+    @Param('id', MongoIdPipe) id: string,
     @Body() payload: UpdateCursoDto,
-  ): Curso {
+  ) {
     return this.cursoService.update(id, payload);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  delete(@Param('id', StringNumberStringPipe) id: string): Curso {
+  delete(@Param('id', MongoIdPipe) id: string) {
     return this.cursoService.delete(id);
   }
 
   @Get(':id/ordenes')
   @HttpCode(HttpStatus.OK)
-  findOrdenes(@Param('id') id: string) {
-    return this.cursoService.findOrdenes(id);
+  findOrdenes(@Param('id', MongoIdPipe) id: string) {
+    return this.cursoService.findOrdenesByCursoId(id);
   }
 
   @Get(':id/comentarios')
   @HttpCode(HttpStatus.OK)
-  findComentarios(@Param('id') id: string) {
-    return this.cursoService.findComentarios(id);
+  findComentarios(@Param('id', MongoIdPipe) id: string) {
+    return this.cursoService.findComentariosByCursoId(id);
   }
 
   @Get(':id/cuestionarios')
   @HttpCode(HttpStatus.OK)
-  findCuestionarios(@Param('id') id: string) {
-    return this.cursoService.findCuestionarios(id);
+  findCuestionarios(@Param('id', MongoIdPipe) id: string) {
+    return this.cursoService.findCuestionariosByCursoId(id);
   }
 }

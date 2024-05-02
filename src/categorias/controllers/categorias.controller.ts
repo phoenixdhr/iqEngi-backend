@@ -25,21 +25,19 @@ export class CategoriasController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getAll(): Promise<Categoria[]> {
+  async getAll() {
     return this.categoriasService.findAll();
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getOne(@Param('id', MongoIdPipe) id: string): Promise<Categoria> {
+  async getOne(@Param('id', MongoIdPipe) id: string) {
     return this.categoriasService.findOne(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(
-    @Body() createCategoriaDto: CreateCategoriaDto,
-  ): Promise<Categoria> {
+  async create(@Body() createCategoriaDto: CreateCategoriaDto) {
     return this.categoriasService.create(createCategoriaDto);
   }
 
@@ -48,19 +46,19 @@ export class CategoriasController {
   async update(
     @Param('id', MongoIdPipe) id: string,
     @Body() updateCategoriaDto: UpdateCategoriaDto,
-  ): Promise<Categoria> {
+  ) {
     return this.categoriasService.update(id, updateCategoriaDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async delete(@Param('id', MongoIdPipe) id: string): Promise<Categoria> {
+  async delete(@Param('id', MongoIdPipe) id: string) {
     return this.categoriasService.delete(id);
   }
 
-  // @Get(':id/cursos')
-  // @HttpCode(HttpStatus.OK)
-  // getCursos(@Param('id', MongoIdPipe) id: string): Curso[] {
-  //   return this.categoriasService.findCursosByCategoriaId(id);
-  // }
+  @Get(':id/cursos')
+  @HttpCode(HttpStatus.OK)
+  getCursos(@Param('id', MongoIdPipe) id: string) {
+    return this.categoriasService.findCursosByCategoriaId(id);
+  }
 }

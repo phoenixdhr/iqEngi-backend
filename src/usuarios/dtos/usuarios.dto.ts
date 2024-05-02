@@ -4,28 +4,18 @@ import {
   IsArray,
   ValidateNested,
   IsEnum,
-  // IsOptional,
-  // IsDate,
   IsOptional,
   IsUrl,
   IsDateString,
   IsMongoId,
+  // IsNumberString,
+  // IsPhoneNumber,
+  IsMobilePhone,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartialType, ApiProperty } from '@nestjs/swagger';
-import { Types } from 'mongoose';
-
-enum RolUsuario {
-  Estudiante = 'estudiante',
-  Instructor = 'instructor',
-  Editor = 'editor',
-  Administrador = 'administrador',
-}
-
-enum EstadoAccesoCurso {
-  Activo = 'activo',
-  Inactivo = 'inactivo',
-}
+import { RolUsuario } from '../entities/usuario.entity';
+import { EstadoAccesoCurso } from '../entities/usuario.entity';
 
 class PerfilDto {
   @ApiProperty({ description: 'datos del usuario' })
@@ -36,6 +26,16 @@ class PerfilDto {
   @IsString()
   @IsOptional()
   readonly ubicacion?: string;
+
+  // @IsNumberString()
+  // @IsPhoneNumber()
+  @IsMobilePhone()
+  @IsOptional()
+  readonly celular?: string;
+
+  @IsDateString()
+  @IsOptional()
+  readonly fechaNacimiento?: Date;
 
   @IsUrl()
   @IsOptional()
@@ -53,10 +53,13 @@ class PerfilDto {
 
 class CursoCompradoDto {
   @IsMongoId()
-  readonly cursoId: Types.ObjectId;
+  readonly cursoId: string;
 
   @IsDateString()
   readonly fechaCompra: Date;
+
+  @IsDateString()
+  readonly fechaExpiracion: Date;
 
   @IsEnum(EstadoAccesoCurso)
   readonly estadoAcceso: EstadoAccesoCurso;
@@ -75,8 +78,10 @@ export class CreateUsuarioDto {
   @IsString()
   readonly hashContraseña: string;
 
+  @IsArray()
   @IsEnum(RolUsuario, { each: true })
-  readonly rol: RolUsuario[];
+  @IsOptional()
+  readonly rol?: RolUsuario[];
 
   @ValidateNested()
   @Type(() => PerfilDto)
@@ -90,10 +95,9 @@ export class CreateUsuarioDto {
   readonly cursos_comprados_historial?: CursoCompradoDto[];
 
   @IsArray()
-  @ValidateNested({ each: true })
+  @IsMongoId({ each: true })
   @IsOptional()
-  @Type(() => Types.ObjectId)
-  readonly curso_progreso?: Types.ObjectId[]; // Utilizamos string[] para simplificar, suponiendo que ProgresoId sea una referencia a un ID de tipo string
+  readonly curso_progreso?: string[]; // Utilizamos string[] para simplificar, suponiendo que ProgresoId sea una referencia a un ID de tipo string
 }
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}

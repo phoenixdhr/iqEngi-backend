@@ -12,11 +12,11 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 
 import { ProgresoCursosService } from '../services/progreso-cursos.service';
-import { ProgresoCurso } from '../entities/progreso-curso.entity';
 import {
   CreateProgresoCursoDto,
   UpdateProgresoCursoDto,
 } from '../dtos/progresoCurso.dto';
+import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 
 @ApiTags('progreso-cursos')
 @Controller('progreso-cursos')
@@ -25,34 +25,34 @@ export class ProgresoCursosController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  getAll(): ProgresoCurso[] {
+  getAll() {
     return this.progresoCursosService.findAll();
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getOne(@Param('id') id: string): ProgresoCurso {
+  getOne(@Param('id', MongoIdPipe) id: string) {
     return this.progresoCursosService.findOne(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() payload: CreateProgresoCursoDto): ProgresoCurso {
+  create(@Body() payload: CreateProgresoCursoDto) {
     return this.progresoCursosService.create(payload);
   }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK) // Corrección: HttpStatus.UPDATE no existe, debe ser HttpStatus.OK para una operación PUT
   update(
-    @Param('id') id: string,
+    @Param('id', MongoIdPipe) id: string,
     @Body() payload: UpdateProgresoCursoDto,
-  ): ProgresoCurso {
+  ) {
     return this.progresoCursosService.update(id, payload);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT) // Corrección: usar HttpStatus.OK es más adecuado para DELETE, HttpStatus.DELETE no existe
-  delete(@Param('id') id: string): ProgresoCurso {
+  delete(@Param('id', MongoIdPipe) id: string) {
     return this.progresoCursosService.delete(id);
   }
 }

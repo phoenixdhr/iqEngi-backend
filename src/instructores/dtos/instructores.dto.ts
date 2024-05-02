@@ -23,6 +23,7 @@ export class CreateInstructorDto {
   readonly profesion?: string;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional()
   @ApiProperty()
   readonly especializacion?: string[];

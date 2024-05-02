@@ -2,40 +2,44 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 import { Cuestionario } from '../../cuestionario/entities/cuestionario.entity';
-
-export enum Nivel {
-  Principiante = 'Principiante',
-  Intermedio = 'Intermedio',
-  Avanzado = 'Avanzado',
-}
+import { Entidades } from '../../_common/nameEntidaes';
 
 @Schema()
-class UnidadEducativa {
-  @Prop()
+export class UnidadEducativa extends Document {
+  @Prop({ unique: true, required: true })
   unidad: number;
 
-  @Prop()
+  @Prop({ required: true })
   title: string;
 
-  @Prop()
-  temas?: string[];
+  @Prop({ default: [] })
+  temas: Types.Array<string>;
 
   @Prop({ type: Types.ObjectId, ref: Cuestionario.name })
   idCuestionario?: Types.ObjectId | Cuestionario; // Opcional, puede que algunas unidades no tengan cuestionarios asociados
+
+  @Prop({
+    type: Types.ObjectId,
+    ref: Entidades.EstructuraProgramaria,
+    required: true,
+    index: true,
+  })
+  idEstructuraProgramaria: Types.ObjectId;
 }
+
 export const UnidadEducativaSchema =
   SchemaFactory.createForClass(UnidadEducativa);
 
 @Schema()
 export class EstructuraProgramaria extends Document {
-  @Prop()
+  @Prop({ unique: true, required: true })
   modulo: number;
 
-  @Prop()
+  @Prop({ required: true })
   titleModulo: string;
 
   @Prop({ type: [UnidadEducativaSchema], default: [] })
-  unidades?: Types.Array<UnidadEducativa>;
+  unidades: Types.Array<UnidadEducativa>;
 }
 
 export const EstructuraProgramariaSchema = SchemaFactory.createForClass(

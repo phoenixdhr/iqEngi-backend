@@ -1,19 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  Usuario,
-  RolUsuario,
-  EstadoAccesoCurso,
-  CursoComprado,
-  ProgresoId,
-} from '../entities/usuario.entity';
+import { Usuario } from '../entities/usuario.entity';
 
 import { OrdenesService } from '../../ordenes/services/ordenes.service';
-import { Orden } from 'src/ordenes/entities/orden.entity';
-import { Comentario } from 'src/comentarios/entities/comentario.entity';
 import { ComentariosService } from 'src/comentarios/services/comentarios.service';
 import { CuestionarioRespuestaUsuarioService } from 'src/cuestionario-respuesta-usuario/services/cuestionario-respuesta-usuario.service';
-import { CuestionarioRespuestaUsuario } from 'src/cuestionario-respuesta-usuario/entities/cuestionario-respuesta-usuario.entity';
 import { ProgresoCursosService } from 'src/progreso-cursos/services/progreso-cursos.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CreateUsuarioDto, UpdateUsuarioDto } from '../dtos/usuarios.dto';
 
 @Injectable()
 export class UsuariosService {
@@ -22,171 +16,83 @@ export class UsuariosService {
     private readonly comentariosService: ComentariosService,
     private readonly progresoCursosService: ProgresoCursosService,
     private readonly cuestionarioRespuestaUsuarioService: CuestionarioRespuestaUsuarioService,
+    @InjectModel(Usuario.name) private readonly usuariosModel: Model<Usuario>,
   ) {}
-  private usuarios: Usuario[] = [
-    {
-      _id: 'u001',
-      nombre: 'Juan',
-      apellidos: 'Pérez',
-      email: 'juan.perez@example.com',
-      hashContraseña: 'hashedPassword123',
-      rol: [RolUsuario.Estudiante],
-      perfil: {
-        bio: 'Apasionado por la ingeniería y el diseño.',
-        ubicacion: 'Ciudad de México',
-        imagenURL: 'https://example.com/images/juan.jpg',
-        contacto: 'contacto@ejemplo.com',
-        intereses: ['Ingeniería Mecánica', 'Diseño Industrial'],
-      },
-      cursos_comprados_historial: [
-        {
-          cursoId: '101',
-          fechaCompra: new Date('2023-06-20'),
-          estadoAcceso: EstadoAccesoCurso.Activo,
-        },
-      ],
-      curso_progreso: [
-        {
-          progresoCursoId: 'pc101', // Este ID debe corresponder al _id de un objeto ProgresoCurso
-          cursoId: '101',
-        },
-      ],
-    },
-    {
-      _id: 'u002',
-      nombre: 'María',
-      apellidos: 'López',
-      email: 'maria.lopez@example.com',
-      hashContraseña: 'hashedPassword456',
-      rol: [RolUsuario.Estudiante],
-      perfil: {
-        bio: 'Entusiasta de la tecnología y la innovación.',
-        ubicacion: 'Bogotá',
-        imagenURL: 'https://example.com/images/maria.jpg',
-        contacto: 'maria@ejemplo.com',
-        intereses: ['Tecnología', 'Innovación', 'Desarrollo de software'],
-      },
-      cursos_comprados_historial: [
-        {
-          cursoId: '102',
-          fechaCompra: new Date('2023-07-05'),
-          estadoAcceso: EstadoAccesoCurso.Activo,
-        },
-      ],
-      curso_progreso: [
-        {
-          progresoCursoId: 'pc102',
-          cursoId: '102',
-        },
-      ],
-    },
-    {
-      _id: 'u003',
-      nombre: 'Carlos',
-      apellidos: 'García',
-      email: 'carlos.garcia@example.com',
-      hashContraseña: 'hashedPassword789',
-      rol: [RolUsuario.Estudiante, RolUsuario.Editor],
-      perfil: {
-        bio: 'Experto en normativas industriales y certificaciones.',
-        ubicacion: 'Madrid',
-        imagenURL: 'https://example.com/images/carlos.jpg',
-        contacto: 'carlos@ejemplo.com',
-        intereses: ['Normativas', 'Certificaciones', 'Seguridad Industrial'],
-      },
-      cursos_comprados_historial: [
-        {
-          cursoId: '103',
-          fechaCompra: new Date('2023-08-15'),
-          estadoAcceso: EstadoAccesoCurso.Activo,
-        },
-      ],
-      curso_progreso: [
-        {
-          progresoCursoId: 'pc103',
-          cursoId: '103',
-        },
-      ],
-    },
-    // Se pueden añadir más usuarios según sea necesario
-  ];
 
-  findAll(): Usuario[] {
-    return this.usuarios;
+  findAll() {
+    return this.usuariosModel.find().exec();
   }
 
-  findOne(id: string): Usuario {
-    const usuario = this.usuarios.find((usuario) => usuario._id === id);
+  async findOne(usuarioId: string) {
+    const usuario = this.usuariosModel.findById(usuarioId).exec();
+
     if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+      throw new NotFoundException(`Usuario con ID ${usuarioId} no encontrado`);
     }
+
     return usuario;
   }
 
-  create(payload: any): Usuario {
-    // Para este ejemplo, generaremos un ID simple. En un caso real, se podría requerir algo más robusto, como un UUID o un ObjectId de MongoDB.
-    const newId = `u${Math.floor(Math.random() * 10000)}`;
-    const newUsuario: Usuario = {
-      _id: newId,
-      ...payload,
-    };
-
-    this.usuarios.push(newUsuario);
+  async create(data: CreateUsuarioDto) {
+    const newUsuario = await new this.usuariosModel(data);
+    await newUsuario.save();
     return newUsuario;
   }
 
-  update(id: string, payload: any): Usuario {
-    const index = this.usuarios.findIndex((usuario) => usuario._id === id);
-    if (index === -1) {
+  async update(usuarioId: string, changes: UpdateUsuarioDto) {
+    const updateUsuario = await this.usuariosModel
+      .findByIdAndUpdate(usuarioId, { $set: changes }, { new: true })
+      .exec();
+
+    if (!updateUsuario) {
       throw new NotFoundException(
-        `Usuario con ID ${id} no encontrado para actualizar`,
+        `Usuario con ID ${usuarioId} no encontrado para actualizar`,
       );
     }
 
-    // Aquí, simplemente actualizaremos los campos proporcionados en el payload.
-    this.usuarios[index] = { ...this.usuarios[index], ...payload };
-    return this.usuarios[index];
+    return updateUsuario;
   }
 
-  delete(id: string): Usuario {
-    const index = this.usuarios.findIndex((usuario) => usuario._id === id);
-    if (index === -1) {
+  async delete(usuarioId: string) {
+    const usuarioEliminado = await this.usuariosModel
+      .findByIdAndDelete(usuarioId)
+      .exec();
+
+    if (!usuarioEliminado) {
       throw new NotFoundException(
-        `Usuario con ID ${id} no encontrado para eliminar`,
+        `Usuario con ID ${usuarioId} no encontrado para eliminar`,
       );
     }
 
-    const usuario = this.usuarios[index];
-    this.usuarios = this.usuarios.filter((usuario) => usuario._id !== id);
-    return usuario;
+    return usuarioEliminado;
   }
 
-  findCursosComprados(id: string): CursoComprado[] {
-    const usuario = this.findOne(id); // Utiliza el método existente para garantizar que el usuario exista
-    return usuario.cursos_comprados_historial || [];
+  async findCursosComprados(usuarioId: string) {
+    const usuario = await this.findOne(usuarioId);
+    const cursosComprados = usuario.cursos_comprados_historial || [];
+    return cursosComprados;
   }
 
-  findProgresoCursos(id: string): ProgresoId[] {
-    const usuario = this.findOne(id);
-    return usuario.curso_progreso || [];
+  async findProgresoCursos(usuarioId: string) {
+    const usuario = await this.findOne(usuarioId);
+    const progresoCursos = usuario.curso_progreso || [];
+    return progresoCursos;
   }
 
-  findOrdenes(usuarioId: string): Orden[] {
-    const ordenes = this.ordenesService
-      .findAll()
-      .filter((orden) => orden.usuarioId === usuarioId);
+  async findOrdenes(usuarioId: string) {
+    const ordenes = this.ordenesService.filterByUsuarioId(usuarioId);
+
     if (!ordenes) {
       throw new NotFoundException(
-        `Ordenes para el usuario con ID ${usuarioId} no encontradas`,
+        `El usuario con ID ${usuarioId} no tiene ordenes registradas`,
       );
     }
     return ordenes;
   }
 
-  findComentarios(usuarioId: string): Comentario[] {
-    const comentarios = this.comentariosService
-      .findAll()
-      .filter((comentario) => comentario.usuarioId === usuarioId);
+  async findComentarios(usuarioId: string) {
+    const comentarios = this.comentariosService.filterByUserId(usuarioId);
+
     if (!comentarios) {
       throw new NotFoundException(
         `Comentarios para el usuario con ID ${usuarioId} no encontrados`,
@@ -195,39 +101,36 @@ export class UsuariosService {
     return comentarios;
   }
 
-  //CORREGIR
-  findAllCuestionariosRespondidos(
-    usuarioId: string,
-  ): CuestionarioRespuestaUsuario[] {
+  async findAllCuestionariosRespondidos(usuarioId: string) {
     const cuestionariosRespuestaUsuario =
-      this.cuestionarioRespuestaUsuarioService
-        .findAll()
-        .filter((cuestionario) => cuestionario.usuarioId === usuarioId);
+      await this.cuestionarioRespuestaUsuarioService.filterByUsuarioId(
+        usuarioId,
+      );
+
     if (!cuestionariosRespuestaUsuario) {
       throw new NotFoundException(
         `Cuestionarios no encontrados con ID ${usuarioId}`,
       );
     }
+
     return cuestionariosRespuestaUsuario;
   }
 
-  findCuestionarioRespondidoPorCurso(usuarioId: string, cursoId: string) {
-    // const cuestionariosRespuestaUsuario = this.findOne(usuarioId).curso_progreso;
-    // const cuestionarioRespuestaCurso = cuestionariosRespuestaUsuario.find(
-    //   (evaluaciones) => evaluaciones.cursoId === cursoId,
-    // );
-    // const idProgresocurso = cuestionarioRespuestaCurso.progresoCursoId
+  async findCuestionarioRespondido_UsuarioId_CursoId(
+    usuarioId: string,
+    cursoId: string,
+  ) {
+    const cuestionariosRespuesta_Usuario_Curso =
+      await this.cuestionarioRespuestaUsuarioService.filterBy_UsuarioId_CursoId(
+        usuarioId,
+        cursoId,
+      );
 
-    const cuestionariosAllRespuestaUsuario =
-      this.findAllCuestionariosRespondidos(usuarioId);
-    const cuestionariosRespuestasCurso = cuestionariosAllRespuestaUsuario.find(
-      (evaluaciones) => evaluaciones.cursoId === cursoId,
-    );
-    if (!cuestionariosRespuestasCurso) {
+    if (!cuestionariosRespuesta_Usuario_Curso) {
       throw new NotFoundException(
-        `El usuario con ID ${usuarioId} no ha respondido ningun curso con ID ${cursoId}`,
+        `El usuario con ID ${usuarioId} no ha respondido ninguna evaluacion del curso con ID ${cursoId}`,
       );
     }
-    return cuestionariosRespuestasCurso;
+    return cuestionariosRespuesta_Usuario_Curso;
   }
 }

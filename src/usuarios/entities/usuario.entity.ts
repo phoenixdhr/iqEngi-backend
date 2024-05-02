@@ -3,7 +3,6 @@ import { Document, Types } from 'mongoose';
 
 import { Curso } from '../../cursos/entities/curso.entity';
 import { ProgresoCurso } from '../../progreso-cursos/entities/progreso-curso.entity';
-// type id = string; // Cambiado a string para reflejar el uso de MongoDB ObjectId.
 
 export enum RolUsuario {
   Estudiante = 'estudiante',
@@ -26,25 +25,34 @@ export class Perfil extends Document {
   ubicacion?: string;
 
   @Prop()
+  celular?: string;
+
+  @Prop()
+  fechaNacimiento?: Date;
+
+  @Prop()
   imagenURL?: string;
 
   @Prop()
   contacto?: string;
 
-  @Prop()
-  intereses?: string[];
+  @Prop({ default: [] })
+  intereses: Types.Array<string>;
 }
 export const PerfilSchema = SchemaFactory.createForClass(Perfil);
 
 @Schema()
 export class CursoComprado extends Document {
-  @Prop({ type: Types.ObjectId, ref: Curso.name })
+  @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
   cursoId: Types.ObjectId;
 
-  @Prop()
+  @Prop({ required: true })
   fechaCompra: Date;
 
-  @Prop({ enum: EstadoAccesoCurso })
+  @Prop({ required: true })
+  fechaExpiracion: Date;
+
+  @Prop({ enum: EstadoAccesoCurso, required: true })
   estadoAcceso: EstadoAccesoCurso;
 }
 export const CursoCompradoSchema = SchemaFactory.createForClass(CursoComprado);
@@ -64,17 +72,22 @@ export class Usuario extends Document {
   @Prop({ required: true })
   hashContraseña: string;
 
-  @Prop({ enum: RolUsuario, required: true })
-  rol: RolUsuario[];
+  @Prop({
+    type: [String],
+    enum: RolUsuario,
+    required: true,
+    default: [RolUsuario.Estudiante],
+  })
+  rol: Types.Array<RolUsuario>;
 
-  @Prop({ type: PerfilSchema, default: null })
-  perfil?: Perfil;
+  @Prop({ type: PerfilSchema, default: {} })
+  perfil: Perfil;
 
   @Prop({ type: [CursoCompradoSchema], default: [] })
-  cursos_comprados_historial?: CursoComprado[];
+  cursos_comprados_historial: Types.Array<CursoComprado>;
 
   @Prop({ type: [Types.ObjectId], ref: ProgresoCurso.name, default: [] })
-  curso_progreso?: Types.Array<Types.ObjectId>; // Opcional, inicialmente vacío hasta que comiencen un curso
+  curso_progreso: Types.Array<Types.ObjectId>; // Opcional, inicialmente vacío hasta que comiencen un curso
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);

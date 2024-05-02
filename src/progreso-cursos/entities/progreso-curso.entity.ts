@@ -2,17 +2,16 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 import { Curso } from '../../cursos/entities/curso.entity';
-// import { Id } from '../../_common/dtos/id';
-import { Usuario } from '../../usuarios/entities/usuario.entity';
 import { CuestionarioRespuestaUsuario } from '../../cuestionario-respuesta-usuario/entities/cuestionario-respuesta-usuario.entity';
+import { Entidades } from '../../_common/nameEntidaes';
 
 //ENTIDAD
 @Schema()
 export class ProgresoCurso extends Document {
-  @Prop({ type: Types.ObjectId, ref: Curso.name })
+  @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
   cursoId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  @Prop({ type: Types.ObjectId, ref: Entidades.Usuario, required: true })
   usuarioId: Types.ObjectId;
 
   @Prop({
@@ -20,10 +19,10 @@ export class ProgresoCurso extends Document {
     ref: CuestionarioRespuestaUsuario.name,
     default: [],
   })
-  evaluacionUsuarioCuestionarios?: Types.ObjectId[];
+  evaluacionUsuarioCuestionarios: Types.Array<Types.ObjectId>;
 
   @Prop({ required: true, default: 0 })
-  progresoTotal: number;
+  progresoTotal: number; // SE CALCULA EN BASE A LAS UNIDADES QUE EL USUARIO HA COMPLETADO
 }
 
 export const ProgresoCursoSchema = SchemaFactory.createForClass(ProgresoCurso);

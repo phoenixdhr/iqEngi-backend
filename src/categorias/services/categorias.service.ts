@@ -22,9 +22,11 @@ export class CategoriasService {
   // Encuentra una categoría por su ID
   async findOne(id: string) {
     const categoria = await this.categoriaModel.findById(id).exec();
+
     if (!categoria) {
       throw new NotFoundException(`Categoria con ID ${id} no encontrada`);
     }
+
     return categoria;
   }
 
@@ -35,44 +37,43 @@ export class CategoriasService {
   }
 
   // Actualiza una categoría existente por su ID
-  async update(id: string, changes: UpdateCategoriaDto) {
-    const categoria = await this.categoriaModel
-      .findByIdAndUpdate(id, { $set: changes }, { new: true })
+  async update(categoryId: string, changes: UpdateCategoriaDto) {
+    const updateCategoria = await this.categoriaModel
+      .findByIdAndUpdate(categoryId, { $set: changes }, { new: true })
       .exec();
 
-    if (!categoria) {
+    if (!updateCategoria) {
       throw new NotFoundException(
-        `No se encontró ninguna categoria con el ID ${id} para actualizar`,
+        `No se encontró ninguna categoria con el ID ${categoryId} para actualizar`,
       );
     }
 
-    return categoria;
+    return updateCategoria;
   }
 
   // Elimina una categoría por su ID
-  async delete(id: string) {
+  async delete(categoryId: string) {
     const categoriaEliminada = await this.categoriaModel
-      .findByIdAndDelete(id)
+      .findByIdAndDelete(categoryId)
       .exec();
 
     if (!categoriaEliminada) {
       throw new NotFoundException(
-        `Categoria con ID ${id} no encontrada para eliminar`,
+        `Categoria con ID ${categoryId} no encontrada para eliminar`,
       );
     }
     return categoriaEliminada;
   }
 
-  // async findCursosByCategoriaId(id: string) {
-  //   const cursos = this.cursosService.findAll().map((curso) => {
-  //     if (curso.categoriaIds.includes(id)) return curso;
-  //   });
+  async findCursosByCategoriaId(categoryId: string) {
+    const cursosFilterByCategory =
+      await this.cursosService.filterByCategoryId(categoryId);
 
-  //   if (!cursos) {
-  //     throw new NotFoundException(
-  //       `No hay ningun curso registrado con la categoria ID ${id} no encontrados`,
-  //     );
-  //   }
-  //   return cursos;
-  // }
+    if (!cursosFilterByCategory) {
+      throw new NotFoundException(
+        `No hay ningun curso registrado con la categoria ID ${categoryId} no encontrados`,
+      );
+    }
+    return cursosFilterByCategory;
+  }
 }

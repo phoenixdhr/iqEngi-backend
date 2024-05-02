@@ -24,16 +24,16 @@
 
 ## Entidades
 
-  cursos
-  categorias
-  usuarios
-  instructores
+  x categorias
+  x comentarios
+  x cuestionario
+  x cuestionario-respuesta-usuario
+  x cursos
+  estructuraProgramaria
+  x instructores
   ordenes
-  comentarios
   progreso-cursos
-  cuestionario
-  cuestionario-respuesta-usuario
-  
+  x usuarios
 
 ## incializando proyecto  con apiKey particular
 

@@ -17,24 +17,28 @@ class UnidadEducativaDto {
   readonly title: string;
 
   @IsArray()
+  @IsString({ each: true })
   @IsOptional() // Temas puede ser opcional.
   readonly temas?: string[];
 
   @IsMongoId()
   @IsOptional() // idCuestionario puede ser opcional.
   readonly idCuestionario?: string;
+
+  @IsMongoId()
+  readonly idEstructuraProgramaria: string;
 }
 
-class CreateEstructuraProgramariaDto {
+export class CreateEstructuraProgramariaDto {
   @IsNumber()
   readonly modulo: number;
 
   @IsString()
   readonly titleModulo: string;
 
+  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UnidadEducativaDto)
-  @IsArray()
   @IsOptional() // Ahora es opcional para reflejar la posibilidad de que no estén definidas al principio.
   readonly unidades?: UnidadEducativaDto[];
 }
