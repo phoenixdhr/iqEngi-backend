@@ -5,7 +5,7 @@ import { Curso } from '../../cursos/entities/curso.entity';
 import { CuestionarioRespuestaUsuario } from '../../cuestionario-respuesta-usuario/entities/cuestionario-respuesta-usuario.entity';
 import { Entidades } from '../../_common/nameEntidaes';
 
-//ENTIDAD
+// #region ProgresoCurso
 @Schema()
 export class ProgresoCurso extends Document {
   @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })

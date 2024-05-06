@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -9,9 +14,10 @@ import { CreateCategoriaDto, UpdateCategoriaDto } from '../dtos/categorias.dto';
 @Injectable()
 export class CategoriasService {
   constructor(
-    private readonly cursosService: CursosService,
     @InjectModel(Categoria.name)
     private readonly categoriaModel: Model<Categoria>,
+    @Inject(forwardRef(() => CursosService))
+    private readonly cursosService: CursosService,
   ) {}
 
   //#region CRUD service
@@ -67,7 +73,7 @@ export class CategoriasService {
     return categoriaEliminada;
   }
 
-  //#region Find
+  //#region Find import Service
   async findCursosByCategoriaId(categoryId: string) {
     const cursosFilterByCategory =
       await this.cursosService.filterByCategoryId(categoryId);

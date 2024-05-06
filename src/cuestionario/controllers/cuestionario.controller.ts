@@ -14,6 +14,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { CuestionarioService } from '../services/cuestionario.service';
 import {
   CreateCuestionarioDto,
+  CreateOpcionDto,
+  CreatePreguntaDto,
   UpdateCuestionarioDto,
 } from '../dtos/cuestionario.dto';
 import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
@@ -54,5 +56,24 @@ export class CuestionarioController {
   @HttpCode(HttpStatus.OK) // Cambiado a OK porque es más común para la acción DELETE
   delete(@Param('id', MongoIdPipe) id: string) {
     return this.cuestionarioService.delete(id);
+  }
+
+  @Put(':id/pregunta/:idPregunta/opcion-Add')
+  @HttpCode(HttpStatus.OK)
+  addOpcion(
+    @Param('id', MongoIdPipe) id: string,
+    @Param('idPregunta', MongoIdPipe) idPregunta: string,
+    @Body() data: CreateOpcionDto,
+  ) {
+    return this.cuestionarioService.addOpcion(id, idPregunta, data);
+  }
+
+  @Put(':id/pregunta-Add')
+  @HttpCode(HttpStatus.OK)
+  addPregunta(
+    @Param('id', MongoIdPipe) id: string,
+    @Body() payload: CreatePreguntaDto,
+  ) {
+    return this.cuestionarioService.addPregunta(id, payload);
   }
 }

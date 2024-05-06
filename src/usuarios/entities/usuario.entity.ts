@@ -16,6 +16,7 @@ export enum EstadoAccesoCurso {
   Inactivo = 'inactivo',
 }
 
+// #region Perfil
 @Schema()
 export class Perfil extends Document {
   @Prop()
@@ -41,6 +42,7 @@ export class Perfil extends Document {
 }
 export const PerfilSchema = SchemaFactory.createForClass(Perfil);
 
+// #region CursoComprado
 @Schema()
 export class CursoComprado extends Document {
   @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
@@ -57,7 +59,7 @@ export class CursoComprado extends Document {
 }
 export const CursoCompradoSchema = SchemaFactory.createForClass(CursoComprado);
 
-//ENTIDAD
+// #region Usuario
 @Schema()
 export class Usuario extends Document {
   @Prop({ required: true })

@@ -67,16 +67,11 @@ export class CuestionarioRespuestaUsuarioService {
     return respuestaEliminada;
   }
 
+  // #region Filter
   async filterByUsuarioId(usuarioId: string) {
     const respuestas = await this.cuestionarioRespuestaUsuarioModel
       .find({ usuario: usuarioId })
       .exec();
-
-    if (!respuestas) {
-      throw new NotFoundException(
-        `No se encontró ninguna respuesta de cuestionario con el id ${usuarioId}`,
-      );
-    }
 
     return respuestas;
   }
@@ -99,12 +94,6 @@ export class CuestionarioRespuestaUsuarioService {
     const respuestas = await this.cuestionarioRespuestaUsuarioModel
       .find({ usuario: usuarioId, curso: cursoId })
       .exec();
-
-    if (!respuestas) {
-      throw new NotFoundException(
-        `No se encontró ninguna respuesta de cuestionario con el usuario ${usuarioId} y curso ${cursoId}`,
-      );
-    }
 
     return respuestas;
   }

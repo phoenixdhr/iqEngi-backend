@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -11,12 +13,15 @@ import {
   FilterInstructorDto,
   UpdateInstructorDto,
 } from '../dtos/instructores.dto';
+import { CursosService } from '../../cursos/services/cursos.service';
 
 @Injectable()
 export class InstructoresService {
   constructor(
     @InjectModel(Instructores.name)
     private instructorModel: Model<Instructores>,
+    @Inject(forwardRef(() => CursosService))
+    private readonly cursosService: CursosService,
   ) {}
 
   // #region CRUD service
@@ -78,5 +83,44 @@ export class InstructoresService {
     }
 
     return instructorEliminado; // Retorna el documento eliminado
+  }
+
+  // #region Add
+  async addEspecializacion(instructorId: string, especializacion: string[]) {
+    const instructor = await this.instructorModel.findById(instructorId).exec();
+
+    if (!instructor) {
+      throw new NotFoundException(
+        `No se encontró ningún instructor con el ID ${instructorId}`,
+      );
+    }
+
+    instructor.especializacion.push(...especializacion);
+    return await instructor.save();
+  }
+
+  // #region Remove
+  async removeEspecializacion(instructorId: string, especializacion: string) {
+    const instructor = await this.instructorModel.findById(instructorId).exec();
+
+    if (!instructor) {
+      throw new NotFoundException(
+        `No se encontró ningún instructor con el ID ${instructorId}`,
+      );
+    }
+
+    instructor.especializacion.pull(especializacion);
+    return await instructor.save();
+  }
+
+  // #region Find import Service
+  async findCursosByInstructorId(instructorId: string) {
+    const cursos = await this.cursosService.filterByInstructorId(instructorId);
+    if (!cursos) {
+      throw new NotFoundException(
+        `Cursos para el instructor con ID ${instructorId} no encontrados`,
+      );
+    }
+    return cursos;
   }
 }

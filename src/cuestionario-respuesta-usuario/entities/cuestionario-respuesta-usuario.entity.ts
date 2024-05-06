@@ -15,6 +15,7 @@ export enum EstadoCuestionario {
   Sin_empezar = 'sin_empezar',
 }
 
+// #region RespuestaUsuario
 // 'Respuesta' detalla la respuesta dada por un usuario a una pregunta específica dentro de un cuestionario.
 @Schema()
 export class RespuestaUsuario extends Document {
@@ -28,6 +29,7 @@ export class RespuestaUsuario extends Document {
 export const RespuestaUsuarioSchema =
   SchemaFactory.createForClass(RespuestaUsuario);
 
+// #region CuestionarioRespuesta
 // 'RespuestaUsuario' captura las respuestas dadas por un usuario a un cuestionario específico.
 @Schema()
 export class CuestionarioRespuestaUsuario extends Document {

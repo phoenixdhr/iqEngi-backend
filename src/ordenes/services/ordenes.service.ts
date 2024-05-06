@@ -1,15 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { EstadoOrden, Orden } from '../entities/orden.entity'; // Asegúrate de ajustar la ruta de importación
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { CursosService } from 'src/cursos/services/cursos.service';
 
 @Injectable()
 export class OrdenesService {
   constructor(
     @InjectModel(Orden.name) private readonly ordenModel: Model<Orden>,
+    @Inject(forwardRef(() => CursosService))
+    private readonly cursosService: CursosService,
   ) {}
 
-  // Encuentra todas las órdenes
+  // #region CRUD service
   findAll() {
     return this.ordenModel.find().exec();
   }
@@ -59,15 +67,41 @@ export class OrdenesService {
     return ordenEliminada;
   }
 
+  // #region Update
+  async updateEstado(id: string, estado: EstadoOrden) {
+    return this.update(id, { estado });
+  }
+
+  // #region add ObjectID
+  async addCursoToOrden(ordenId: string, cursoId: string) {
+    const orden = await this.findOne(ordenId);
+    await this.cursosService.findOne(cursoId);
+
+    orden.cursos.push(cursoId);
+    await orden.save();
+    return orden;
+  }
+
+  // #region remove ObjectID
+  async removeCursoFromOrden(ordenId: string, cursoId: string) {
+    const orden = await this.findOne(ordenId);
+    await this.cursosService.findOne(cursoId);
+
+    orden.cursos.pull(cursoId);
+    await orden.save();
+    return orden;
+  }
+
+  // #region Filter
   async filterByCursoId(cursoId: string) {
     return this.ordenModel.find({ curso: cursoId }).exec();
   }
 
-  async filterByEstado(estado: EstadoOrden) {
-    return this.ordenModel.find({ estado }).exec();
-  }
-
   async filterByUsuarioId(usuarioId: string) {
     return this.ordenModel.find({ usuario: usuarioId }).exec();
+  }
+
+  async filterByEstado(estado: EstadoOrden) {
+    return this.ordenModel.find({ estado }).exec();
   }
 }

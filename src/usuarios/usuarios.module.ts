@@ -6,7 +6,12 @@ import { OrdenesModule } from 'src/ordenes/ordenes.module';
 import { CuestionarioRespuestaUsuarioModule } from 'src/cuestionario-respuesta-usuario/cuestionario-respuesta-usuario.module';
 import { ProgresoCursosModule } from 'src/progreso-cursos/progreso-cursos.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Usuario, UsuarioSchema } from './entities/usuario.entity';
+import {
+  Perfil,
+  PerfilSchema,
+  Usuario,
+  UsuarioSchema,
+} from './entities/usuario.entity';
 
 @Module({
   imports: [
@@ -14,9 +19,13 @@ import { Usuario, UsuarioSchema } from './entities/usuario.entity';
     OrdenesModule,
     CuestionarioRespuestaUsuarioModule,
     ProgresoCursosModule,
-    MongooseModule.forFeature([{ name: Usuario.name, schema: UsuarioSchema }]),
+    MongooseModule.forFeature([
+      { name: Usuario.name, schema: UsuarioSchema },
+      { name: Perfil.name, schema: PerfilSchema },
+    ]),
   ],
   controllers: [UsuariosController],
   providers: [UsuariosService],
+  exports: [UsuariosService],
 })
 export class UsuariosModule {}

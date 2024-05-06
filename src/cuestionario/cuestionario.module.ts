@@ -5,12 +5,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   Cuestionario,
   CuestionarioSchema,
+  Pregunta,
+  PreguntaSchema,
 } from './entities/cuestionario.entity';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Cuestionario.name, schema: CuestionarioSchema },
+      { name: Pregunta.name, schema: PreguntaSchema },
     ]),
   ],
   providers: [CuestionarioService],

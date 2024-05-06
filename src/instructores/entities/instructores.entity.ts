@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-//ENTIDAD
+// #region Instructores
 @Schema({ collection: 'Instructores' })
 export class Instructores extends Document {
   @Prop({ required: true })
@@ -16,7 +16,6 @@ export class Instructores extends Document {
   @Prop({ default: [] })
   especializacion: Types.Array<string>;
 
-  // #region definir
   @Prop()
   calificacionPromedio?: number; // Opcional, se pide encuesta al terminar el curso
 

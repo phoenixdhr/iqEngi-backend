@@ -4,6 +4,7 @@ import { Document, Types } from 'mongoose';
 import { Cuestionario } from '../../cuestionario/entities/cuestionario.entity';
 import { Entidades } from '../../_common/nameEntidaes';
 
+// #region UnidadEducativa
 @Schema()
 export class UnidadEducativa extends Document {
   @Prop({ unique: true, required: true })
@@ -30,6 +31,7 @@ export class UnidadEducativa extends Document {
 export const UnidadEducativaSchema =
   SchemaFactory.createForClass(UnidadEducativa);
 
+// #region EstructuraProgramaria
 @Schema()
 export class EstructuraProgramaria extends Document {
   @Prop({ unique: true, required: true })

@@ -5,15 +5,23 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   EstructuraProgramaria,
   EstructuraProgramariaSchema,
+  UnidadEducativa,
+  UnidadEducativaSchema,
 } from './entities/estructura-programaria.entity';
+import { UnidadEducativaService } from './services/unidad-educativa.service';
+import { CuestionarioModule } from 'src/cuestionario/cuestionario.module';
+import { UnidadEducativaController } from './controllers/unidad-educativa.service.controller';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: EstructuraProgramaria.name, schema: EstructuraProgramariaSchema },
+      { name: UnidadEducativa.name, schema: UnidadEducativaSchema },
     ]),
+    CuestionarioModule,
   ],
-  providers: [EstructuraProgramariaService],
-  controllers: [EstructuraProgramariaController],
+  providers: [EstructuraProgramariaService, UnidadEducativaService],
+  controllers: [EstructuraProgramariaController, UnidadEducativaController],
+  exports: [EstructuraProgramariaService],
 })
 export class EstructuraProgramariaModule {}

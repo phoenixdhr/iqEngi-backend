@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { CursosService } from '../services/cursos.service';
 import { CreateCursoDto, UpdateCursoDto } from '../dtos/cursos.dto';
 import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
+import { CreateEstructuraProgramariaDto } from 'src/estructura-programaria/dtos/estructura-Programaria.dto';
 
 @ApiTags('cursos')
 @Controller('cursos')
@@ -76,5 +77,18 @@ export class CursosController {
   @HttpCode(HttpStatus.OK)
   findCuestionarios(@Param('id', MongoIdPipe) id: string) {
     return this.cursoService.findCuestionariosByCursoId(id);
+  }
+
+  @Put(':id/estructura-programaria')
+  @HttpCode(HttpStatus.OK)
+  addEstructuraProgramaria(
+    @Param('id', MongoIdPipe) id: string,
+    @Body()
+    estructuraProgramaria: CreateEstructuraProgramariaDto,
+  ) {
+    return this.cursoService.addEstructuraProgramaria(
+      id,
+      estructuraProgramaria,
+    );
   }
 }

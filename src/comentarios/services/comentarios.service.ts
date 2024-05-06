@@ -11,6 +11,7 @@ export class ComentariosService {
     private readonly comentarioModel: Model<Comentario>,
   ) {}
 
+  // #region CRUD service
   async findAll() {
     const allComentarios = await this.comentarioModel.find().exec();
     return allComentarios;
@@ -60,29 +61,30 @@ export class ComentariosService {
     return comentarioEliminado;
   }
 
+  // #region Filter
   async filterByCursoId(cursoId: string) {
-    const comentarios = await this.comentarioModel
+    const comentariosXcurso = await this.comentarioModel
       .find({ curso: cursoId })
       .exec();
-    if (!comentarios) {
+    if (!comentariosXcurso) {
       throw new NotFoundException(
         `No se encontró ningún comentario para el curso con el id ${cursoId}`,
       );
     }
-    return comentarios;
+    return comentariosXcurso;
   }
 
   async filterByUserId(userId: string) {
-    const comentarios = await this.comentarioModel
+    const comentariosxUsuario = await this.comentarioModel
       .find({ usuario: userId })
       .exec();
 
-    if (!comentarios) {
+    if (!comentariosxUsuario) {
       throw new NotFoundException(
         `No se encontró ningún comentario para el usuario con el id ${userId}`,
       );
     }
 
-    return comentarios;
+    return comentariosxUsuario;
   }
 }

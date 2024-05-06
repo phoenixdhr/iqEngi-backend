@@ -18,6 +18,7 @@ import { environment } from './_common/enviroments';
 import configEnv from './_common/configEnv';
 import { configValidationSchema } from './_common/configValidationSchema';
 import { EstructuraProgramariaModule } from './estructura-programaria/estructura-programaria.module';
+import { MongooseUtilsServiceModule } from './_mongoose-utils-service/_mongoose-utils-service.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { EstructuraProgramariaModule } from './estructura-programaria/estructura
       load: [configEnv],
       validationSchema: configValidationSchema,
     }),
+    MongooseUtilsServiceModule,
     CursosModule,
     CategoriasModule,
     UsuariosModule,

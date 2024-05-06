@@ -12,14 +12,14 @@ export enum EstadoOrden {
   Reembolsada = 'reembolsada', // La orden ha sido reembolsada
 }
 
-//ENTIDAD
+// #region Orden
 @Schema()
 export class Orden extends Document {
   @Prop({ type: Types.ObjectId, ref: Usuario.name, required: true })
   usuarioId: Types.ObjectId;
 
   @Prop({ type: [Types.ObjectId], ref: Curso.name, required: true })
-  cursos: Types.Array<Curso>;
+  cursos: Types.Array<Types.ObjectId>;
 
   @Prop({ required: true })
   fechaCompra?: Date; // ESTA FECHA SE GUARDARA CUANDO EL "estado" SEA "Completa" o "Reembolsada" o "Cancelada"

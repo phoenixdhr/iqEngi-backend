@@ -12,7 +12,7 @@ export enum TipoPregunta {
   Ordenamiento = 'ordenamiento',
 }
 
-// Esquema y clase para Opciones
+// #region Opcion
 @Schema()
 export class Opcion extends Document {
   @Prop({ required: true })
@@ -24,8 +24,7 @@ export class Opcion extends Document {
 
 export const OpcionSchema = SchemaFactory.createForClass(Opcion);
 
-// // Esquema embebido referenciadp
-// Esquema y clase para Pregunta
+// #region Pregunta
 @Schema()
 export class Pregunta extends Document {
   @Prop({ required: true })
@@ -35,16 +34,16 @@ export class Pregunta extends Document {
   tipo: TipoPregunta;
 
   @Prop({ type: [OpcionSchema], default: [] })
-  opciones: Types.Array<Opcion>;
+  opciones: Types.DocumentArray<Opcion>;
 }
 
 export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);
 
-// Esquema y clase para Cuestionario
+// #region Cuestionario
 @Schema()
 export class Cuestionario extends Document {
-  @Prop({ type: Types.ObjectId, ref: Entidades.Curso, required: true })
-  cursoId: Types.ObjectId;
+  // @Prop({ type: Types.ObjectId, ref: Entidades.Curso, required: true })
+  // cursoId: Types.ObjectId;
 
   @Prop()
   titulo: string;
@@ -53,7 +52,7 @@ export class Cuestionario extends Document {
   descripcion: string;
 
   @Prop({ type: [PreguntaSchema], default: [] })
-  preguntas: Types.Array<Pregunta>;
+  preguntas: Types.DocumentArray<Pregunta>;
 
   @Prop({ default: new Date() })
   fecha: Date;

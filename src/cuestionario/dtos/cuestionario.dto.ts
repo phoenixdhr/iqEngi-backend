@@ -10,7 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { PartialType } from '@nestjs/swagger';
+import { OmitType, PartialType } from '@nestjs/swagger';
 import {
   Opcion,
   Pregunta,
@@ -48,10 +48,10 @@ export class CreatePreguntaDto {
 export class UpdatePreguntaDto extends PartialType(CreatePreguntaDto) {}
 
 // #region CuestionarioDto
-export class CreateCuestionarioDto {
-  @IsMongoId()
-  @IsString()
-  readonly cursoId: string;
+export class CreateCuestionarioAllDto {
+  // @IsMongoId()
+  // @IsString()
+  // readonly cursoId: string;
 
   @IsString()
   readonly titulo: string;
@@ -72,5 +72,9 @@ export class CreateCuestionarioDto {
   @IsMongoId()
   readonly unidadEducativaId: string;
 }
+
+export class CreateCuestionarioDto extends PartialType(
+  OmitType(CreateCuestionarioAllDto, ['unidadEducativaId']),
+) {}
 
 export class UpdateCuestionarioDto extends PartialType(CreateCuestionarioDto) {}

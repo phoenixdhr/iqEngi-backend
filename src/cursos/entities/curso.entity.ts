@@ -11,7 +11,7 @@ export enum Nivel {
   Avanzado = 'Avanzado',
 }
 
-//ENTIDAD
+// #region Curso
 @Schema()
 export class Curso extends Document {
   @Prop({ required: true })
@@ -55,13 +55,13 @@ export class Curso extends Document {
     ref: EstructuraProgramaria.name,
     default: [],
   })
-  estructuraProgramaria: Types.Array<EstructuraProgramaria>; // Opcional, pero crítico para el desarrollo del curso
+  estructuraProgramaria: Types.Array<Types.ObjectId>; // Opcional, pero crítico para el desarrollo del curso
 
   @Prop()
   fechaLanzamiento?: Date;
 
   @Prop({ type: [Types.ObjectId], ref: Categoria.name, default: [] })
-  categorias: Types.Array<Categoria>; // Requerido, debe categorizarse desde el inicio
+  categorias: Types.Array<Types.ObjectId>; // Requerido, debe categorizarse desde el inicio
 }
 
 export const CursoSchema = SchemaFactory.createForClass(Curso);

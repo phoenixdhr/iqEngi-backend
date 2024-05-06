@@ -6,11 +6,11 @@ import {
   ValidateNested,
   IsMongoId, // Importación añadida
 } from 'class-validator';
-import { PartialType } from '@nestjs/swagger';
+import { OmitType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 // #region UnidadEducativaDto
-export class CreateUnidadEducativaDto {
+export class CreateUnidadEducativaAllDto {
   @IsNumber()
   readonly unidad: number;
 
@@ -29,6 +29,10 @@ export class CreateUnidadEducativaDto {
   @IsMongoId()
   readonly idEstructuraProgramaria: string;
 }
+
+export class CreateUnidadEducativaDto extends PartialType(
+  OmitType(CreateUnidadEducativaAllDto, ['idEstructuraProgramaria']),
+) {}
 
 export class UpdateUnidadEducativaDto extends PartialType(
   CreateUnidadEducativaDto,

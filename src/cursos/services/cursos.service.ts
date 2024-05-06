@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { Curso } from '../entities/curso.entity';
 import { OrdenesService } from '../../ordenes/services/ordenes.service';
@@ -8,16 +13,34 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateCursoDto, UpdateCursoDto } from '../dtos/cursos.dto';
 
+import { CreateEstructuraProgramariaDto } from 'src/estructura-programaria/dtos/estructura-Programaria.dto';
+import { MongooseUtilsService } from 'src/_mongoose-utils-service/services/_mongoose-utils-service.service';
+import { EstructuraProgramariaService } from 'src/estructura-programaria/services/estructura-programaria.service';
+import { InstructoresService } from 'src/instructores/services/instructores.service';
+import { CategoriasService } from 'src/categorias/services/categorias.service';
+import { UsuariosService } from 'src/usuarios/services/usuarios.service';
+
 @Injectable()
 export class CursosService {
   constructor(
+    @InjectModel(Curso.name) private readonly cursoModel: Model<Curso>,
+
+    @Inject(forwardRef(() => OrdenesService))
     private readonly ordenesService: OrdenesService,
+    @Inject(forwardRef(() => CategoriasService))
+    private readonly categoriasService: CategoriasService,
+    @Inject(forwardRef(() => UsuariosService))
+    private readonly usuariosService: UsuariosService,
+
     private readonly comentariosService: ComentariosService,
     private readonly cuestionarioService: CuestionarioService,
-    @InjectModel(Curso.name) private readonly cursoModel: Model<Curso>,
+    private readonly utils: MongooseUtilsService,
+    private readonly instructoresService: InstructoresService,
+    private readonly estructuraProgramariaService: EstructuraProgramariaService,
   ) {}
   private counter = 103;
 
+  // #region CRUD Cursos
   findAll() {
     return this.cursoModel.find().exec();
   }
@@ -64,6 +87,7 @@ export class CursosService {
     return cursoEliminado;
   }
 
+  // #region Find import Service
   async findOrdenesByCursoId(cursoId: string) {
     // Utiliza el servicio de ordenes para buscar ordenes relacionados con el cursoId
     const ordenes = await this.ordenesService.filterByCursoId(cursoId);
@@ -93,151 +117,174 @@ export class CursosService {
     return cuestionarios;
   }
 
-  async filterByCategoryId(categoryId: string) {
-    const cursos = this.cursoModel.find({ categoria: categoryId }).exec();
-    if (!cursos) {
+  async findUsuariosByCursoId(cursoId: string) {
+    // Utiliza el servicio de ordenes para buscar ordenes relacionados con el cursoId
+    const usuarios = await this.usuariosService.filterByCursoId(cursoId);
+    if (!usuarios) {
       throw new NotFoundException(
-        `no se encontro ningun curso con id ${categoryId}`,
+        `Usuarios para el curso con ID ${cursoId} no encontrados`,
       );
     }
+    return usuarios;
+  }
+
+  // #region Filter methods
+  async filterByCategoryId(categoryId: string) {
+    const cursos = this.cursoModel.find({ categoria: categoryId }).exec();
     return cursos;
   }
 
+  async filterByInstructorId(instructorId: string) {
+    const cursos = this.cursoModel.find({ instructor: instructorId }).exec();
+    return cursos;
+  }
+
+  // #region Add ObjectId
   async addInstructor(cursoId: string, instructorId: string) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
+    const curso = await this.findOne(cursoId);
+    const instructor = await this.instructoresService.findOne(instructorId);
+
     if (!curso) {
       throw new NotFoundException(
         `no se encontro ningun curso con id ${cursoId}`,
       );
     }
+
+    if (!instructor) {
+      throw new NotFoundException(
+        `no se encontro ningun instructor con id ${instructorId}`,
+      );
+    }
+
     curso.instructor = new Types.ObjectId(instructorId);
     return curso.save();
   }
 
-  async addAprenderas(cursoId: string, aprenderas: string[]) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
-    if (!curso) {
-      throw new NotFoundException(
-        `no se encontro ningun curso con id ${cursoId}`,
-      );
-    }
-    curso.aprenderas.push(...aprenderas);
-    return curso.save();
-  }
-
-  async addObjetivos(cursoId: string, objetivos: string[]) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
-    if (!curso) {
-      throw new NotFoundException(
-        `no se encontro ningun curso con id ${cursoId}`,
-      );
-    }
-    curso.objetivos.push(...objetivos);
-    return curso.save();
-  }
-  async addDirigidoA(cursoId: string, dirigidoA: string[]) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
-    if (!curso) {
-      throw new NotFoundException(
-        `no se encontro ningun curso con id ${cursoId}`,
-      );
-    }
-    curso.dirigidoA.push(...dirigidoA);
-    return curso.save();
-  }
-
-  async addEstructuraProgramaria(
-    cursoId: string,
-    estructuraProgramariaId: string[],
-  ) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
-    if (!curso) {
-      throw new NotFoundException(
-        `no se encontro ningun curso con id ${cursoId}`,
-      );
-    }
-    curso.estructuraProgramaria.push(...estructuraProgramariaId);
-    return curso.save();
-  }
-
   async addCategoria(cursoId: string, categoriaId: string) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
+    const curso = await this.findOne(cursoId);
+    const categoria = await this.categoriasService.findOne(categoriaId);
+
     if (!curso) {
       throw new NotFoundException(
         `no se encontro ningun curso con id ${cursoId}`,
+      );
+    }
+
+    if (!categoria) {
+      throw new NotFoundException(
+        `no se encontro ninguna categoria con id ${categoriaId}`,
       );
     }
     curso.categorias.push(categoriaId);
     return curso.save();
   }
 
-  async removeInstructor(cursoId: string) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
+  // #region Add ObjectId Schema
+  async addEstructuraProgramaria(
+    cursoId: string,
+    estructuraProgramaria: CreateEstructuraProgramariaDto,
+  ) {
+    const curso = await this.findOne(cursoId);
     if (!curso) {
       throw new NotFoundException(
         `no se encontro ningun curso con id ${cursoId}`,
       );
     }
+    const newEstructuraProgramaria =
+      await this.estructuraProgramariaService.create(estructuraProgramaria);
+
+    curso.estructuraProgramaria.push(newEstructuraProgramaria._id);
+    curso.save();
+    return newEstructuraProgramaria;
+  }
+
+  // #region Add methods
+  async addAprenderas(cursoId: string, aprenderas: string[]) {
+    this.utils.pushToArray(this.cursoModel, 'aprenderas', cursoId, aprenderas);
+  }
+
+  async addObjetivos(cursoId: string, objetivos: string[]) {
+    this.utils.pushToArray(this.cursoModel, 'objetivos', cursoId, objetivos);
+  }
+
+  async addDirigidoA(cursoId: string, dirigidoA: string[]) {
+    this.utils.pushToArray(this.cursoModel, 'dirigidoA', cursoId, dirigidoA);
+  }
+
+  // #region Remove ObjectId
+  async removeInstructor(cursoId: string, instructorId: string) {
+    const curso = await this.findOne(cursoId);
+    const instructor = await this.instructoresService.findOne(instructorId);
+
+    if (!curso) {
+      throw new NotFoundException(
+        `no se encontro ningun curso con id ${cursoId}`,
+      );
+    }
+
+    if (!instructor) {
+      throw new NotFoundException(
+        `no se encontro ningun instructor con id ${instructorId}`,
+      );
+    }
+
     curso.instructor = null;
     return curso.save();
   }
 
-  async removeAprenderas(cursoId: string, aprenderas: string) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
+  async removeCategoria(cursoId: string, categoriaId: string) {
+    const curso = await this.findOne(cursoId);
+    const categoria = await this.categoriasService.findOne(categoriaId);
+
     if (!curso) {
       throw new NotFoundException(
         `no se encontro ningun curso con id ${cursoId}`,
       );
     }
-    curso.aprenderas.pull(aprenderas);
-    return curso.save();
-  }
 
-  async removeObjetivos(cursoId: string, objetivos: string) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
-    if (!curso) {
+    if (!categoria) {
       throw new NotFoundException(
-        `no se encontro ningun curso con id ${cursoId}`,
+        `no se encontro ninguna categoria con id ${categoriaId}`,
       );
     }
-    curso.objetivos.pull(objetivos);
-    // curso.objetivos = curso.objetivos.filter((item) => item !== objetivos);
+
+    curso.categorias.pull(categoriaId);
     return curso.save();
   }
 
-  async removeDirigidoA(cursoId: string, dirigidoA: string) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
-    if (!curso) {
-      throw new NotFoundException(
-        `no se encontro ningun curso con id ${cursoId}`,
-      );
-    }
-    curso.dirigidoA.pull(dirigidoA);
-    return curso.save();
-  }
-
+  // #region Remove ObjectId Schema
   async removeEstructuraProgramaria(
     cursoId: string,
     estructuraProgramariaId: string,
   ) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
+    const curso = await this.findOne(cursoId);
     if (!curso) {
       throw new NotFoundException(
         `no se encontro ningun curso con id ${cursoId}`,
       );
     }
+
+    this.estructuraProgramariaService.delete(estructuraProgramariaId);
     curso.estructuraProgramaria.pull(estructuraProgramariaId);
     return curso.save();
   }
 
-  async removeCategoria(cursoId: string, categoriaId: string) {
-    const curso = await this.cursoModel.findById(cursoId).exec();
-    if (!curso) {
-      throw new NotFoundException(
-        `no se encontro ningun curso con id ${cursoId}`,
-      );
-    }
-    curso.categorias.pull(categoriaId);
-    return curso.save();
+  // #region Remove methods
+
+  async removeAprenderas(cursoId: string, aprenderas: string) {
+    this.utils.pullFromArray(
+      this.cursoModel,
+      'aprenderas',
+      cursoId,
+      aprenderas,
+    );
+  }
+
+  async removeObjetivos(cursoId: string, objetivos: string) {
+    this.utils.pullFromArray(this.cursoModel, 'objetivos', cursoId, objetivos);
+  }
+
+  async removeDirigidoA(cursoId: string, dirigidoA: string) {
+    this.utils.pullFromArray(this.cursoModel, 'dirigidoA', cursoId, dirigidoA);
   }
 }
