@@ -13,6 +13,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 import { UnidadEducativaService } from '../services/unidad-educativa.service';
 import { CreateCuestionarioDto } from 'src/cuestionario/dtos/cuestionario.dto';
+import { UpdateUnidadEducativaDto } from '../dtos/estructura-Programaria.dto';
 
 @ApiTags('unidad-educativa')
 @Controller('unidad-educativa')
@@ -65,5 +66,14 @@ export class UnidadEducativaController {
     @Body() payload: CreateCuestionarioDto,
   ) {
     return this.unidadEducativaService.addCuestionarioId(id, payload);
+  }
+
+  @Put(':id/')
+  @HttpCode(HttpStatus.OK)
+  update(
+    @Param('id', MongoIdPipe) id: string,
+    @Body() payload: UpdateUnidadEducativaDto,
+  ) {
+    return this.unidadEducativaService.updateUnidadEducativa(id, payload);
   }
 }

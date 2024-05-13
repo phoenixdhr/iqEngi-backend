@@ -59,14 +59,23 @@ export class CreateCursoCompradoDto {
   @IsMongoId()
   readonly cursoId: string;
 
+  // NOTA PARA CORREGIR. ESTA FECHA DEBERÍA SER AUTOMÁTICA CUANDO SE COMPRA EL CURSO, QUITAR ISOPTIONAL
   @IsDateString()
+  @IsOptional()
   readonly fechaCompra: Date;
 
+  // NOTA PARA CORREGIR. ESTA FECHA DEBERÍA SER AUTOMÁTICA CUANDO SE COMPRA EL CURSO, QUITAR ISOPTIONAL
   @IsDateString()
+  @IsOptional()
   readonly fechaExpiracion: Date;
 
   @IsEnum(EstadoAccesoCurso)
-  readonly estadoAcceso: EstadoAccesoCurso;
+  @IsOptional()
+  readonly estadoAcceso?: EstadoAccesoCurso;
+
+  @IsMongoId()
+  @IsOptional()
+  readonly progresoCursoId?: string; // Utilizamos string[] para simplificar, suponiendo que ProgresoId sea una referencia a un ID de tipo string
 }
 
 export class UpdateCursoCompradoDto extends PartialType(
@@ -100,12 +109,19 @@ export class CreateUsuarioDto {
   @ValidateNested({ each: true })
   @Type(() => CreateCursoCompradoDto)
   @IsOptional()
-  readonly cursos_comprados_historial?: CreateCursoCompradoDto[];
-
-  @IsArray()
-  @IsMongoId({ each: true })
-  @IsOptional()
-  readonly curso_progreso?: string[]; // Utilizamos string[] para simplificar, suponiendo que ProgresoId sea una referencia a un ID de tipo string
+  readonly cursos_comprados?: CreateCursoCompradoDto[];
 }
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}
+
+// #region AddCuestionarioDto
+export class AddCuestionarioDto {
+  @IsMongoId()
+  readonly cursoId: string;
+
+  @IsMongoId()
+  readonly idEstructuraProgramaria: string;
+
+  @IsMongoId()
+  readonly unidadEducativaId: string;
+}

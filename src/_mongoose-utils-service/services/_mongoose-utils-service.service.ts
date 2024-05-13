@@ -52,8 +52,8 @@ export class MongooseUtilsService {
   // Método para añadir elementos a un array de cualquier documento
   async pushToArray<T extends Document>(
     model: Model<T>,
-    arrayName: keyof T & string,
     docId: string,
+    arrayName: keyof T & string,
     elements: Array<T[keyof T]>,
   ) {
     const document = await model.findById(docId).exec();
@@ -75,8 +75,8 @@ export class MongooseUtilsService {
   // Método para eliminar elementos de un array de cualquier documento
   async pullFromArray<T extends Document>(
     model: Model<T>,
-    arrayName: keyof T & string,
     docId: string,
+    arrayName: keyof T & string,
     element: any,
   ) {
     const document = await model.findById(docId).exec();

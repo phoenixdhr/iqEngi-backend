@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CuestionarioRespuestaUsuario } from '../entities/cuestionario-respuesta-usuario.entity';
+import {
+  CuestionarioRespuestaUsuario,
+  RespuestaUsuario,
+} from '../entities/cuestionario-respuesta-usuario.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   CreateCuestionarioRespuestaUsuarioDto,
+  CreateRespuestaUsuarioDTO,
   UpdateCuestionarioRespuestaUsuarioDto,
 } from '../dtos/cuestionario-respuesta-usuario.dto';
 
@@ -12,6 +16,9 @@ export class CuestionarioRespuestaUsuarioService {
   constructor(
     @InjectModel(CuestionarioRespuestaUsuario.name)
     private readonly cuestionarioRespuestaUsuarioModel: Model<CuestionarioRespuestaUsuario>,
+
+    @InjectModel(RespuestaUsuario.name)
+    private readonly respuestaUsuarioModel: Model<RespuestaUsuario>,
   ) {}
 
   findAll() {
@@ -67,6 +74,14 @@ export class CuestionarioRespuestaUsuarioService {
     return respuestaEliminada;
   }
 
+  // #region Add My Respuesta
+  async addMyRespuesta(data: CreateRespuestaUsuarioDTO) {
+    const newRespuesta = new this.respuestaUsuarioModel(data);
+
+    await newRespuesta.save();
+    return newRespuesta;
+  }
+
   // #region Filter
   async filterByUsuarioId(usuarioId: string) {
     const respuestas = await this.cuestionarioRespuestaUsuarioModel
@@ -75,7 +90,6 @@ export class CuestionarioRespuestaUsuarioService {
 
     return respuestas;
   }
-
   async filterByCursoId(cursoId: string) {
     const respuestas = await this.cuestionarioRespuestaUsuarioModel
       .find({ curso: cursoId })
@@ -96,6 +110,17 @@ export class CuestionarioRespuestaUsuarioService {
       .exec();
 
     return respuestas;
+  }
+
+  async findBy_UsuarioId_CuestionarioId(
+    usuarioId: string,
+    cuestionarioId: string,
+  ) {
+    const cuestionarioRespuestas = await this.cuestionarioRespuestaUsuarioModel
+      .findOne({ usuarioId, cuestionarioId })
+      .exec();
+
+    return cuestionarioRespuestas;
   }
 
   async filterByCuestionarioId(cuestionarioId: string) {

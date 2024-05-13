@@ -23,7 +23,7 @@ export class RespuestaUsuario extends Document {
   preguntaId: Types.ObjectId; // Identificador de la pregunta a la que se responde.
 
   @Prop({ type: [Types.ObjectId], ref: Opcion.name, required: true })
-  respuesta: Types.Array<Opcion> | Types.Array<Types.ObjectId>; // Igualmente, especifica que las respuestas deben ser los IDs de las opciones.
+  respuestaId: Types.DocumentArray<Opcion> | Types.Array<Types.ObjectId>; // Igualmente, especifica que las respuestas deben ser los IDs de las opciones.
 }
 
 export const RespuestaUsuarioSchema =
@@ -49,7 +49,7 @@ export class CuestionarioRespuestaUsuario extends Document {
     type: [RespuestaUsuarioSchema],
     default: [],
   })
-  respuestas: Types.Array<RespuestaUsuario>;
+  respuestas: Types.DocumentArray<RespuestaUsuario>;
 
   @Prop()
   fechaRespuesta?: Date; // FECHA EN LA QUE SE EVALUÓ EL CUESTIONARIO , CON EstadoCuestionario = "Aprobado" o "Desaprobado

@@ -1,7 +1,7 @@
 import {
   Controller,
   Get,
-  Post,
+  // Post,
   Body,
   Put,
   Param,
@@ -12,10 +12,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 
 import { ProgresoCursosService } from '../services/progreso-cursos.service';
-import {
-  CreateProgresoCursoDto,
-  UpdateProgresoCursoDto,
-} from '../dtos/progresoCurso.dto';
+import { UpdateProgresoCursoDto } from '../dtos/progresoCurso.dto';
 import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 
 @ApiTags('progreso-cursos')
@@ -35,11 +32,16 @@ export class ProgresoCursosController {
     return this.progresoCursosService.findOne(id);
   }
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() payload: CreateProgresoCursoDto) {
-    return this.progresoCursosService.create(payload);
-  }
+  // SE CREA DESDE USUARIOS
+  // @Post(':id/cursos/:cursoId/create-progreso')
+  // @HttpCode(HttpStatus.CREATED)
+  // create(
+  //   @Param('id', MongoIdPipe) id: string,
+  //   @Param('cursoId', MongoIdPipe) cursoId: string,
+  //   @Body() payload: CreateProgresoCursoDto,
+  // ) {
+  //   return this.progresoCursosService.create(id, cursoId, payload);
+  // }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK) // Corrección: HttpStatus.UPDATE no existe, debe ser HttpStatus.OK para una operación PUT

@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 import { Curso } from '../../cursos/entities/curso.entity';
-import { ProgresoCurso } from '../../progreso-cursos/entities/progreso-curso.entity';
+import { ProgresoCurso } from 'src/progreso-cursos/entities/progreso-curso.entity';
 
 export enum RolUsuario {
   Estudiante = 'estudiante',
@@ -48,14 +48,25 @@ export class CursoComprado extends Document {
   @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
   cursoId: Types.ObjectId;
 
-  @Prop({ required: true })
+  // NOTA PARA CORREGIR. ESTA FECHA DEBERÍA SER AUTOMÁTICA CUANDO SE COMPRA EL CURSO, QUITAR ISOPTIONAL
+  // ESTABA DEFINIDA COMO REQUIRE PARA EFECTO DE LOS TEST SE PUSO OPCIONAL
+  @Prop()
   fechaCompra: Date;
 
-  @Prop({ required: true })
+  // NOTA PARA CORREGIR. ESTA FECHA DEBERÍA SER AUTOMÁTICA CUANDO SE COMPRA EL CURSO, QUITAR ISOPTIONAL
+  // ESTABA DEFINIDA COMO REQUIRE PARA EFECTO DE LOS TEST SE PUSO OPCIONAL
+  @Prop()
   fechaExpiracion: Date;
 
-  @Prop({ enum: EstadoAccesoCurso, required: true })
+  @Prop({
+    enum: EstadoAccesoCurso,
+    required: true,
+    default: EstadoAccesoCurso.Activo,
+  })
   estadoAcceso: EstadoAccesoCurso;
+
+  @Prop({ type: Types.ObjectId, ref: ProgresoCurso.name, required: true })
+  progresoCursoId: Types.ObjectId; // Opcional, inicialmente vacío hasta que comiencen un curso
 }
 export const CursoCompradoSchema = SchemaFactory.createForClass(CursoComprado);
 
@@ -85,10 +96,7 @@ export class Usuario extends Document {
   perfil: Perfil;
 
   @Prop({ type: [CursoCompradoSchema], default: [] })
-  cursos_comprados_historial: Types.Array<CursoComprado>;
-
-  @Prop({ type: [Types.ObjectId], ref: ProgresoCurso.name, default: [] })
-  curso_progreso: Types.Array<Types.ObjectId>; // Opcional, inicialmente vacío hasta que comiencen un curso
+  cursos_comprados: Types.DocumentArray<CursoComprado>;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { EstructuraProgramariaService } from './services/estructura-programaria.service';
 import { EstructuraProgramariaController } from './controllers/estructura-programaria.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -18,10 +18,10 @@ import { UnidadEducativaController } from './controllers/unidad-educativa.servic
       { name: EstructuraProgramaria.name, schema: EstructuraProgramariaSchema },
       { name: UnidadEducativa.name, schema: UnidadEducativaSchema },
     ]),
-    CuestionarioModule,
+    forwardRef(() => CuestionarioModule),
   ],
   providers: [EstructuraProgramariaService, UnidadEducativaService],
   controllers: [EstructuraProgramariaController, UnidadEducativaController],
-  exports: [EstructuraProgramariaService],
+  exports: [EstructuraProgramariaService, UnidadEducativaService],
 })
 export class EstructuraProgramariaModule {}

@@ -21,7 +21,7 @@ import { Type } from 'class-transformer';
 // #region OpcionDTO
 export class CreateOpcionDto {
   @IsString()
-  readonly texto: string;
+  readonly textOpcion: string;
 
   @IsInt()
   @Min(0) // Acepta números mayores o iguales a 0
@@ -36,7 +36,7 @@ export class CreatePreguntaDto {
   readonly enunciado: string;
 
   @IsEnum(TipoPregunta)
-  readonly tipo: TipoPregunta;
+  readonly tipoPregunta: TipoPregunta;
 
   @IsArray()
   @ValidateNested({ each: true })
@@ -54,10 +54,10 @@ export class CreateCuestionarioAllDto {
   // readonly cursoId: string;
 
   @IsString()
-  readonly titulo: string;
+  readonly tituloCuestionario: string;
 
   @IsString()
-  readonly descripcion: string;
+  readonly descripcionCuestionario: string;
 
   @IsArray()
   @ValidateNested({ each: true })

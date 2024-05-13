@@ -9,7 +9,9 @@ describe('ControllersController', () => {
       controllers: [EstructuraProgramariaController],
     }).compile();
 
-    controller = module.get<EstructuraProgramariaController>(EstructuraProgramariaController);
+    controller = module.get<EstructuraProgramariaController>(
+      EstructuraProgramariaController,
+    );
   });
 
   it('should be defined', () => {

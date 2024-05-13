@@ -22,7 +22,7 @@ export class CreateRespuestaUsuarioDTO {
   @IsArray()
   @IsMongoId({ each: true })
   @ArrayNotEmpty()
-  respuesta: string[];
+  respuestaId: string[];
 }
 
 export class UpdateRespuestaUsuarioDTO extends PartialType(
@@ -35,8 +35,8 @@ export class CreateCuestionarioRespuestaUsuarioDto {
   usuarioId: string;
 
   @IsMongoId()
-  @IsOptional()
-  cursoId?: string; // sera extraido de Cuestionario usando CuestionarioId
+  // @IsOptional()
+  cursoId: string; // sera extraido de Cuestionario usando CuestionarioId
 
   @IsMongoId()
   @IsOptional()

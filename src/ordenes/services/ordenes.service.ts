@@ -8,6 +8,7 @@ import { EstadoOrden, Orden } from '../entities/orden.entity'; // Asegúrate de 
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CursosService } from 'src/cursos/services/cursos.service';
+import { CreateOrdenDto } from '../dtos/orden.dto';
 
 @Injectable()
 export class OrdenesService {
@@ -32,7 +33,7 @@ export class OrdenesService {
   }
 
   // Crea una nueva orden
-  async create(data: any) {
+  async create(data: CreateOrdenDto) {
     // Genera un nuevo ID basado en el máximo actual y lo convierte a string
     const newOrden = new this.ordenModel(data);
     await newOrden.save();

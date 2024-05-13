@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Cuestionario, Pregunta } from '../entities/cuestionario.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,10 +14,16 @@ import {
   UpdateCuestionarioDto,
   UpdatePreguntaDto,
 } from '../dtos/cuestionario.dto';
+import { UnidadEducativaService } from 'src/estructura-programaria/services/unidad-educativa.service';
+import { EstructuraProgramariaService } from 'src/estructura-programaria/services/estructura-programaria.service';
 
 @Injectable()
 export class CuestionarioService {
   constructor(
+    @Inject(forwardRef(() => UnidadEducativaService))
+    private readonly unidadEducativaService: UnidadEducativaService,
+    @Inject(forwardRef(() => EstructuraProgramariaService))
+    private readonly estructuraProgramariaService: EstructuraProgramariaService,
     @InjectModel(Cuestionario.name)
     private readonly cuestionarioModel: Model<Cuestionario>,
     @InjectModel(Pregunta.name) private readonly preguntaModel: Model<Pregunta>,
@@ -171,11 +182,16 @@ export class CuestionarioService {
     preguntaId: string,
     data: CreateOpcionDto,
   ) {
-    const cuestionario = await this.findOne(cuestionarioId);
-    const pregunta = cuestionario.preguntas.id(preguntaId);
-    const opcion = new this.preguntaModel(data);
+    const cuestionario: Cuestionario = await this.findOne(cuestionarioId);
 
-    pregunta.opciones.push(opcion);
+    const pregunta: Pregunta = cuestionario.preguntas.id(preguntaId);
+    if (!pregunta) {
+      throw new NotFoundException(
+        `No se encontró ninguna pregunta con el id ${preguntaId}`,
+      );
+    }
+
+    pregunta.opciones.push(data);
     await cuestionario.save();
 
     return pregunta;
@@ -266,6 +282,38 @@ export class CuestionarioService {
     await cuestionario.save();
 
     return pregunta;
+  }
+
+  //#region Find
+  // NOTA NO SE ESTA USANDO findUnidadEducativaIdCursoIdByCuestionarioId
+  async findUnidadEducativaIdCursoIdByCuestionarioId(cuestionarioId: string) {
+    const cuestionario = await this.cuestionarioModel
+      .findById(cuestionarioId)
+      .exec();
+
+    if (!cuestionario) {
+      throw new NotFoundException(
+        `No se encontró ningún cuestionario con el id ${cuestionarioId}`,
+      );
+    }
+    const unidadEducativa =
+      await this.unidadEducativaService.filterdByIdCuestionario(cuestionarioId);
+
+    if (!unidadEducativa) {
+      throw new NotFoundException(
+        `No se encontró ninguna unidad educativa con el id ${cuestionarioId}`,
+      );
+    }
+
+    const estructuraProgramaria =
+      await this.estructuraProgramariaService.findOne(
+        unidadEducativa.idEstructuraProgramaria.toString(),
+      );
+
+    const unidadEducativaId: string = unidadEducativa._id.toString();
+    const cursoId: string = estructuraProgramaria.cursoId.toString();
+
+    return { unidadEducativaId, cursoId };
   }
 
   //#region Filter

@@ -16,7 +16,7 @@ export enum TipoPregunta {
 @Schema()
 export class Opcion extends Document {
   @Prop({ required: true })
-  texto: string;
+  textOpcion: string;
 
   @Prop({ required: true })
   esCorrecta: number; // 0: Incorrecta, 1: Correcta, si hay numeros mayores a 1, se considera una pregunta con ordenamiento
@@ -31,7 +31,7 @@ export class Pregunta extends Document {
   enunciado: string;
 
   @Prop({ required: true, enum: TipoPregunta })
-  tipo: TipoPregunta;
+  tipoPregunta: TipoPregunta;
 
   @Prop({ type: [OpcionSchema], default: [] })
   opciones: Types.DocumentArray<Opcion>;
@@ -46,10 +46,10 @@ export class Cuestionario extends Document {
   // cursoId: Types.ObjectId;
 
   @Prop()
-  titulo: string;
+  tituloCuestionario: string;
 
   @Prop()
-  descripcion: string;
+  descripcionCuestionario: string;
 
   @Prop({ type: [PreguntaSchema], default: [] })
   preguntas: Types.DocumentArray<Pregunta>;

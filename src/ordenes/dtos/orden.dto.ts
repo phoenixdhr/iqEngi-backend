@@ -2,7 +2,7 @@ import {
   IsArray,
   IsDate,
   IsEnum,
-  IsNumber,
+  // IsNumber,
   ArrayNotEmpty,
   IsMongoId,
   IsOptional,
@@ -24,11 +24,19 @@ export class CreateOrdenDto {
   @IsOptional()
   readonly fechaCompra?: Date;
 
-  @IsNumber()
-  readonly montoTotal: number;
+  // @IsNumber()
+  // readonly montoTotal: number;
 
   @IsEnum(EstadoOrden)
   readonly estado?: EstadoOrden;
 }
 
 export class UpdateOrdenDto extends PartialType(CreateOrdenDto) {}
+
+//////////////////////////////////////////////
+export class ArrayCursosId {
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsMongoId({ each: true })
+  readonly cursos: string[];
+}

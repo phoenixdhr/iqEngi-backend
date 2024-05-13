@@ -17,7 +17,7 @@ export class UnidadEducativa extends Document {
   temas: Types.Array<string>;
 
   @Prop({ type: Types.ObjectId, ref: Cuestionario.name })
-  idCuestionario?: Types.ObjectId | Cuestionario; // Opcional, puede que algunas unidades no tengan cuestionarios asociados
+  idCuestionario?: Types.ObjectId; // Opcional, al inicio las unidades no tienen un cuestionarios asociados
 
   @Prop({
     type: Types.ObjectId,
@@ -34,6 +34,9 @@ export const UnidadEducativaSchema =
 // #region EstructuraProgramaria
 @Schema()
 export class EstructuraProgramaria extends Document {
+  @Prop({ type: Types.ObjectId, ref: Entidades.Curso, required: true })
+  cursoId: Types.ObjectId;
+
   @Prop({ unique: true, required: true })
   modulo: number;
 
@@ -41,7 +44,7 @@ export class EstructuraProgramaria extends Document {
   titleModulo: string;
 
   @Prop({ type: [UnidadEducativaSchema], default: [] })
-  unidades: Types.Array<UnidadEducativa>;
+  unidades: Types.DocumentArray<UnidadEducativa>;
 }
 
 export const EstructuraProgramariaSchema = SchemaFactory.createForClass(

@@ -14,7 +14,7 @@ export class ProgresoCursosService {
     private readonly progresoCursoModel: Model<ProgresoCurso>,
   ) {}
 
-  findAll() {
+  async findAll() {
     return this.progresoCursoModel.find().exec();
   }
 
@@ -32,8 +32,15 @@ export class ProgresoCursosService {
     return progresoCurso;
   }
 
-  async create(data: CreateProgresoCursoDto) {
-    const newProgresoCurso = new this.progresoCursoModel(data);
+  //SE USA EN USUARIOS SERVICE
+  async createProgresoCurso(
+    usuarioId: string,
+    cursoId: string,
+    data?: CreateProgresoCursoDto,
+  ) {
+    const dataComplete = { ...data, usuarioId, cursoId };
+    const newProgresoCurso = new this.progresoCursoModel(dataComplete);
+
     await newProgresoCurso.save();
     return newProgresoCurso;
   }
@@ -52,6 +59,7 @@ export class ProgresoCursosService {
     return updateProgresoCurso;
   }
 
+  // NOTA: NO SE PUEDE ELIMINAR UN PROGRESO DE CURSO
   async delete(pCursoId: string) {
     const progresoCursoEliminado = await this.progresoCursoModel
       .findByIdAndDelete(pCursoId)
@@ -64,5 +72,38 @@ export class ProgresoCursosService {
     }
 
     return progresoCursoEliminado;
+  }
+
+  // #region Filter
+  async filterByRespuestaCuestionarioId(respuestaCuestionarioId: string) {
+    const progresoCursos = await this.progresoCursoModel
+      .find({ respuestaCuestionarioId })
+      .exec();
+
+    return progresoCursos;
+  }
+
+  async filterByUsuarioId(usuarioId: string) {
+    const progresoCursos = await this.progresoCursoModel
+      .find({ usuarioId })
+      .exec();
+
+    return progresoCursos;
+  }
+
+  async filterByCursoId(cursoId: string) {
+    const progresoCursos = await this.progresoCursoModel
+      .find({ cursoId })
+      .exec();
+
+    return progresoCursos;
+  }
+
+  async filterByUsuarioCursoId(usuarioId: string, cursoId: string) {
+    const progresoCursos = await this.progresoCursoModel
+      .findOne({ usuarioId, cursoId })
+      .exec();
+
+    return progresoCursos;
   }
 }

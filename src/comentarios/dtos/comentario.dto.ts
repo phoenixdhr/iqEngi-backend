@@ -4,10 +4,16 @@ import {
   IsOptional,
   IsMongoId,
   IsDate,
+  IsNotEmpty,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  OmitType,
+  PartialType,
+} from '@nestjs/swagger';
 
-export class CreateComentariosDto {
+export class CreateComentariosAllDto {
   @IsMongoId()
   @ApiProperty({ description: 'ID del curso asociado al comentario' })
   readonly cursoId: string;
@@ -18,6 +24,7 @@ export class CreateComentariosDto {
 
   @IsString()
   @ApiProperty({ description: 'Contenido del comentario' })
+  @IsNotEmpty()
   readonly comentario: string;
 
   @IsNumber()
@@ -30,5 +37,9 @@ export class CreateComentariosDto {
   @ApiProperty({ description: 'Fecha cuando se realiza el comentario' })
   readonly fecha?: Date;
 }
+
+export class CreateComentariosDto extends PartialType(
+  OmitType(CreateComentariosAllDto, ['usuarioId', 'cursoId']),
+) {}
 
 export class UpdateComentariosDto extends PartialType(CreateComentariosDto) {}

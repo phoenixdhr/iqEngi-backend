@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UnidadEducativa } from '../entities/estructura-programaria.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,10 +19,11 @@ import { CreateCuestionarioDto } from 'src/cuestionario/dtos/cuestionario.dto';
 @Injectable()
 export class UnidadEducativaService {
   constructor(
+    @Inject(forwardRef(() => CuestionarioService))
+    private readonly cuestionarioService: CuestionarioService,
     @InjectModel(UnidadEducativa.name)
     private readonly unidadEducativaModel: Model<UnidadEducativa>,
     private readonly estructuraProgramariaService: EstructuraProgramariaService,
-    private readonly cuestionarioService: CuestionarioService,
     private readonly utils: MongooseUtilsService,
   ) {}
 
@@ -62,25 +68,49 @@ export class UnidadEducativaService {
     return estructuraProgramaria;
   }
 
-  //#region Update Schema
+  //#region updateUnidadEducativa
   async updateUnidadEducativa(
     unidadEducativaId: string,
     changes: UpdateUnidadEducativaDto,
   ) {
+    // Actualizar el DOCUMENTO independiente UnidadEducativa
     const unidadEducativa = await this.unidadEducativaModel
       .findByIdAndUpdate(unidadEducativaId, { $set: changes }, { new: true })
       .exec();
 
     if (!unidadEducativa) {
       throw new NotFoundException(
-        `no se encontro ninguna unidad educativa con id ${unidadEducativaId} para actualizar`,
+        `No se encontró ninguna unidad educativa con ID ${unidadEducativaId} para actualizar`,
       );
     }
+
+    const estructuraProgramariaId =
+      unidadEducativa.idEstructuraProgramaria.toString();
+
+    // Obtener la estructura programaria para actualizar el subdocumento
+    const estructuraProgramaria =
+      await this.estructuraProgramariaService.findOne(estructuraProgramariaId);
+    if (!estructuraProgramaria) {
+      throw new NotFoundException(
+        `No se encontró ninguna estructura programaria con ID ${estructuraProgramariaId}`,
+      );
+    }
+
+    // Encontrar y actualizar el SUBDOCUMENTO
+    const subUnidad = estructuraProgramaria.unidades.id(unidadEducativaId);
+    if (!subUnidad) {
+      throw new NotFoundException(
+        `No se encontró ninguna unidad educativa con ID ${unidadEducativaId} en la estructura programaria`,
+      );
+    }
+
+    subUnidad.set(changes);
+    await estructuraProgramaria.save();
 
     return unidadEducativa;
   }
 
-  //#region Remove Schema
+  //#region removeUnidadEducativa
   async removeUnidadEducativa(unidadEducativaId: string) {
     const unidadEducativa = await this.unidadEducativaModel
       .findByIdAndDelete(unidadEducativaId)
@@ -107,8 +137,8 @@ export class UnidadEducativaService {
   async addTemaToUnidadEducativa(unidadEducativaId: string, temas: string[]) {
     this.utils.pushToArray(
       this.unidadEducativaModel,
-      'temas',
       unidadEducativaId,
+      'temas',
       temas,
     );
   }
@@ -119,6 +149,23 @@ export class UnidadEducativaService {
     data: CreateCuestionarioDto,
   ) {
     const unidadEducativa = await this.findUnidadEducativa(unidadEducativaId);
+    if (unidadEducativa.idCuestionario) {
+      throw new Error(
+        `La unidad educativa ya tiene un cuestionario asignado con id ${unidadEducativa.idCuestionario}`,
+      );
+    }
+
+    const idEstructuraProgramaria =
+      unidadEducativa.idEstructuraProgramaria.toString();
+
+    const estructuraProgramaria =
+      await this.estructuraProgramariaService.findOne(idEstructuraProgramaria);
+    if (!estructuraProgramaria) {
+      throw new NotFoundException(
+        `no se encontro ninguna estructura programaria con id ${idEstructuraProgramaria}`,
+      );
+    }
+
     const dataCuestionario = { ...data, unidadEducativaId: unidadEducativaId };
 
     const cuestionario =
@@ -126,8 +173,21 @@ export class UnidadEducativaService {
 
     await cuestionario.save();
 
-    unidadEducativa.idCuestionario = cuestionario._id;
-    unidadEducativa.save();
+    const idCuestionario = cuestionario._id.toString();
+
+    const subUnidad = estructuraProgramaria.unidades.id(unidadEducativaId);
+    if (!subUnidad) {
+      throw new NotFoundException(
+        `No se encontró ninguna unidad educativa con id ${unidadEducativaId}`,
+      );
+    }
+
+    subUnidad.set({ idCuestionario });
+    await estructuraProgramaria.save();
+
+    unidadEducativa.idCuestionario = idCuestionario;
+    await unidadEducativa.save();
+
     return unidadEducativa.populate('idCuestionario');
   }
 
@@ -138,8 +198,8 @@ export class UnidadEducativaService {
   ) {
     this.utils.pullFromArray(
       this.unidadEducativaModel,
-      'temas',
       unidadEducativaId,
+      'temas',
       temaId,
     );
   }
@@ -152,5 +212,13 @@ export class UnidadEducativaService {
 
     unidadEducativa.idCuestionario = null;
     return unidadEducativa.save();
+  }
+
+  //#region Filter
+  async filterdByIdCuestionario(idCuestionario: string) {
+    const unidadEducativa = await this.unidadEducativaModel
+      .findOne({ idCuestionario })
+      .exec();
+    return unidadEducativa;
   }
 }

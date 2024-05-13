@@ -39,7 +39,10 @@ export class UpdateUnidadEducativaDto extends PartialType(
 ) {}
 
 // #region EstructuraProgramariaDto
-export class CreateEstructuraProgramariaDto {
+export class CreateEstructuraAllProgramariaDto {
+  @IsMongoId()
+  readonly cursoId: string;
+
   @IsNumber()
   readonly modulo: number;
 
@@ -52,6 +55,10 @@ export class CreateEstructuraProgramariaDto {
   @IsOptional() // Ahora es opcional para reflejar la posibilidad de que no estén definidas al principio.
   readonly unidades?: CreateUnidadEducativaDto[];
 }
+
+export class CreateEstructuraProgramariaDto extends PartialType(
+  OmitType(CreateEstructuraAllProgramariaDto, ['cursoId']),
+) {}
 
 export class UpdateEstructuraProgramariaDto extends PartialType(
   CreateEstructuraProgramariaDto,

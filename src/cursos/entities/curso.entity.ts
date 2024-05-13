@@ -55,7 +55,9 @@ export class Curso extends Document {
     ref: EstructuraProgramaria.name,
     default: [],
   })
-  estructuraProgramaria: Types.Array<Types.ObjectId>; // Opcional, pero crítico para el desarrollo del curso
+  estructuraProgramaria:
+    | Types.Array<Types.ObjectId>
+    | Types.DocumentArray<EstructuraProgramaria>; // Opcional, pero crítico para el desarrollo del curso
 
   @Prop()
   fechaLanzamiento?: Date;

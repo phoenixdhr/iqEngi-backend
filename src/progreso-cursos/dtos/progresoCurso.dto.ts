@@ -19,7 +19,7 @@ export class CreateProgresoCursoDto {
   @IsArray()
   @IsMongoId({ each: true }) // Usando IsMongoId para asegurar que los IDs son ObjectIds válidos
   @IsOptional()
-  evaluacionUsuario?: string[];
+  cuestionariosRespuestaUsuarioId?: string[];
 
   @IsNumber()
   @IsNotEmpty()

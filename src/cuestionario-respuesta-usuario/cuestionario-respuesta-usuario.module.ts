@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   CuestionarioRespuestaUsuario,
   CuestionarioRespuestaUsuarioSchema,
+  RespuestaUsuario,
+  RespuestaUsuarioSchema,
 } from './entities/cuestionario-respuesta-usuario.entity';
 
 @Module({
@@ -14,6 +16,7 @@ import {
         name: CuestionarioRespuestaUsuario.name,
         schema: CuestionarioRespuestaUsuarioSchema,
       },
+      { name: RespuestaUsuario.name, schema: RespuestaUsuarioSchema },
     ]),
   ],
   providers: [CuestionarioRespuestaUsuarioService],

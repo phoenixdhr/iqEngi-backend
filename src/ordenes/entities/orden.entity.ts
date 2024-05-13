@@ -21,14 +21,31 @@ export class Orden extends Document {
   @Prop({ type: [Types.ObjectId], ref: Curso.name, required: true })
   cursos: Types.Array<Types.ObjectId>;
 
-  @Prop({ required: true })
-  fechaCompra?: Date; // ESTA FECHA SE GUARDARA CUANDO EL "estado" SEA "Completa" o "Reembolsada" o "Cancelada"
+  @Prop()
+  fechaCompra?: Date; // NOTA ESTA FECHA SE GUARDARA CUANDO EL "estado" SEA "Completa" o "Reembolsada" o "Cancelada"
 
-  @Prop({ required: true })
-  montoTotal: number; // ESTE MONTO QUE SE DEBE PAGAR POR TODOS LOS CURSOS
+  @Prop()
+  montoTotal: number; // Monto que se paga por todos los curos, es autocalculado
 
   @Prop({ enum: EstadoOrden, default: EstadoOrden.Pendiente })
   estado: EstadoOrden;
 }
 
 export const OrdenSchema = SchemaFactory.createForClass(Orden);
+
+OrdenSchema.pre('save', async function (next) {
+  try {
+    if (this.isNew || this.isModified('cursos')) {
+      const populatedOrden = await this.populate('cursos');
+      const arrayCursos =
+        populatedOrden.cursos as unknown as Types.DocumentArray<Curso>;
+      this.montoTotal = arrayCursos.reduce(
+        (acc, curso) => acc + curso.precio,
+        0,
+      );
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});

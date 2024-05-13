@@ -1,7 +1,7 @@
 import {
   Controller,
   Get,
-  Post,
+  // Post,
   Body,
   Put,
   Param,
@@ -12,10 +12,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 
 import { ComentariosService } from '../services/comentarios.service';
-import {
-  CreateComentariosDto,
-  UpdateComentariosDto,
-} from '../dtos/comentario.dto';
+import { UpdateComentariosDto } from '../dtos/comentario.dto';
 import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 
 @ApiTags('comentarios')
@@ -35,11 +32,12 @@ export class ComentariosController {
     return this.comentariosService.findOne(id);
   }
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() payload: CreateComentariosDto) {
-    return this.comentariosService.create(payload);
-  }
+  // NOTA el comentario se crea desde usuario
+  // @Post()
+  // @HttpCode(HttpStatus.CREATED)
+  // create(@Body() payload: CreateComentariosDto) {
+  //   return this.comentariosService.create(payload);
+  // }
 
   @Put(':id')
   @HttpCode(HttpStatus.OK) // Cambiado a HttpStatus.OK ya que HttpStatus.UPDATE no existe

@@ -139,6 +139,13 @@ export class CursosService {
     return cursos;
   }
 
+  async filterByEstructuraProgramariaId(estructuraProgramariaId: string) {
+    const cursos = this.cursoModel
+      .find({ estructuraProgramaria: estructuraProgramariaId })
+      .exec();
+    return cursos;
+  }
+
   // #region Add ObjectId
   async addInstructor(cursoId: string, instructorId: string) {
     const curso = await this.findOne(cursoId);
@@ -190,8 +197,11 @@ export class CursosService {
         `no se encontro ningun curso con id ${cursoId}`,
       );
     }
+
+    const data = { ...estructuraProgramaria, cursoId };
+
     const newEstructuraProgramaria =
-      await this.estructuraProgramariaService.create(estructuraProgramaria);
+      await this.estructuraProgramariaService.create(data);
 
     curso.estructuraProgramaria.push(newEstructuraProgramaria._id);
     curso.save();
@@ -200,15 +210,15 @@ export class CursosService {
 
   // #region Add methods
   async addAprenderas(cursoId: string, aprenderas: string[]) {
-    this.utils.pushToArray(this.cursoModel, 'aprenderas', cursoId, aprenderas);
+    this.utils.pushToArray(this.cursoModel, cursoId, 'aprenderas', aprenderas);
   }
 
   async addObjetivos(cursoId: string, objetivos: string[]) {
-    this.utils.pushToArray(this.cursoModel, 'objetivos', cursoId, objetivos);
+    this.utils.pushToArray(this.cursoModel, cursoId, 'objetivos', objetivos);
   }
 
   async addDirigidoA(cursoId: string, dirigidoA: string[]) {
-    this.utils.pushToArray(this.cursoModel, 'dirigidoA', cursoId, dirigidoA);
+    this.utils.pushToArray(this.cursoModel, cursoId, 'dirigidoA', dirigidoA);
   }
 
   // #region Remove ObjectId
@@ -274,17 +284,17 @@ export class CursosService {
   async removeAprenderas(cursoId: string, aprenderas: string) {
     this.utils.pullFromArray(
       this.cursoModel,
-      'aprenderas',
       cursoId,
+      'aprenderas',
       aprenderas,
     );
   }
 
   async removeObjetivos(cursoId: string, objetivos: string) {
-    this.utils.pullFromArray(this.cursoModel, 'objetivos', cursoId, objetivos);
+    this.utils.pullFromArray(this.cursoModel, cursoId, 'objetivos', objetivos);
   }
 
   async removeDirigidoA(cursoId: string, dirigidoA: string) {
-    this.utils.pullFromArray(this.cursoModel, 'dirigidoA', cursoId, dirigidoA);
+    this.utils.pullFromArray(this.cursoModel, cursoId, 'dirigidoA', dirigidoA);
   }
 }

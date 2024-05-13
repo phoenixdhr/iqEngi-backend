@@ -1,13 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Perfil, Usuario } from '../entities/usuario.entity';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Types } from 'mongoose';
+
+import { CursoComprado, Perfil, Usuario } from '../entities/usuario.entity';
 
 import { OrdenesService } from '../../ordenes/services/ordenes.service';
 import { ComentariosService } from 'src/comentarios/services/comentarios.service';
 import { CuestionarioRespuestaUsuarioService } from 'src/cuestionario-respuesta-usuario/services/cuestionario-respuesta-usuario.service';
 import { ProgresoCursosService } from 'src/progreso-cursos/services/progreso-cursos.service';
+import { CursosService } from 'src/cursos/services/cursos.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
+  AddCuestionarioDto,
   CreateCursoCompradoDto,
   CreatePerfilDto,
   CreateUsuarioDto,
@@ -15,16 +24,35 @@ import {
 } from '../dtos/usuarios.dto';
 import { MongooseUtilsService } from 'src/_mongoose-utils-service/services/_mongoose-utils-service.service';
 import { ObjectId } from 'mongodb';
+import { CuestionarioService } from 'src/cuestionario/services/cuestionario.service';
+import {
+  EstructuraProgramaria,
+  // UnidadEducativa,
+} from 'src/estructura-programaria/entities/estructura-programaria.entity';
+import { UnidadEducativaService } from 'src/estructura-programaria/services/unidad-educativa.service';
+import { ArrayCursosId } from 'src/ordenes/dtos/orden.dto';
+import { CreateComentariosDto } from 'src/comentarios/dtos/comentario.dto';
+import { ProgresoCurso } from 'src/progreso-cursos/entities/progreso-curso.entity';
+import { CreateRespuestaUsuarioDTO } from 'src/cuestionario-respuesta-usuario/dtos/cuestionario-respuesta-usuario.dto';
 
 @Injectable()
 export class UsuariosService {
   constructor(
+    @Inject(forwardRef(() => CursosService))
+    private readonly cursoService: CursosService,
+
     private readonly ordenesService: OrdenesService,
     private readonly comentariosService: ComentariosService,
     private readonly progresoCursosService: ProgresoCursosService,
     private readonly cuestionarioRespuestaUsuarioService: CuestionarioRespuestaUsuarioService,
+    private readonly cuestionarioService: CuestionarioService,
+    private readonly unidadEducativaService: UnidadEducativaService,
+
     @InjectModel(Usuario.name) private readonly usuariosModel: Model<Usuario>,
     @InjectModel(Perfil.name) private readonly perfilesModel: Model<Perfil>,
+    @InjectModel(CursoComprado.name)
+    private readonly cursoCompradoModel: Model<CursoComprado>,
+
     private readonly utils: MongooseUtilsService,
   ) {}
 
@@ -77,32 +105,188 @@ export class UsuariosService {
     return usuarioEliminado;
   }
 
+  // #region Add CursoComprado
+  async addCursoComprado(
+    usuarioId: string,
+    cursoCompradoDoc: CreateCursoCompradoDto,
+  ) {
+    const usuario = await this.usuariosModel.findById(usuarioId).exec();
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${usuarioId} no encontrado`);
+    }
+
+    const cursoId = cursoCompradoDoc.cursoId;
+    const curso = await this.cursoService.findOne(cursoId);
+    if (!curso) {
+      throw new NotFoundException(`Curso con ID ${cursoId} no encontrado`);
+    }
+
+    const newProgresoCurso: ProgresoCurso =
+      await this.progresoCursosService.createProgresoCurso(usuarioId, cursoId);
+    const progresoCursoId = newProgresoCurso._id;
+
+    const dataToCursoComprado = { ...cursoCompradoDoc, progresoCursoId };
+    const newCursoComprado = new this.cursoCompradoModel(dataToCursoComprado);
+    await newCursoComprado.save();
+
+    usuario.cursos_comprados.push(newCursoComprado);
+    await usuario.save();
+
+    return usuario;
+  }
+
+  // async addProgresoCurso(usuarioId: string, progresoCursoId) {
+  //   const usuario = await this.findOne(usuarioId) as Usuario;
+
+  //   usuario.cursos_comprados.
+
+  //   this.utils.pushToArray(
+  //     this.usuariosModel,
+  //     usuarioId,
+  //     'cursos_comprados_historial',
+  //     progresoCursoId,
+  //   ]);
+  // }
+
+  // #region Add Cuestionario-Respuesta
+  async addCuestionarioRespuestaToProgesoCurso(
+    usuarioId: string,
+    data: AddCuestionarioDto,
+  ) {
+    // Buscar usuario por ID
+    const usuario = await this.usuariosModel.findById(usuarioId).exec();
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${usuarioId} no encontrado`);
+    }
+
+    const { cursoId, idEstructuraProgramaria, unidadEducativaId } = data;
+
+    // Buscar curso por ID
+    const curso = await this.cursoService.findOne(cursoId);
+    if (!curso) {
+      throw new NotFoundException(`Curso con ID ${cursoId} no encontrado`);
+    }
+
+    // Poblar la estructura programaria del curso
+    const cursoCompleto = await curso.populate('estructuraProgramaria');
+
+    const arrayEstructuraProgramaria =
+      cursoCompleto.estructuraProgramaria as Types.DocumentArray<EstructuraProgramaria>;
+
+    const estructuraProgramaria = arrayEstructuraProgramaria.find((ep) => {
+      return ep._id.toString() === idEstructuraProgramaria.toString();
+    });
+
+    if (!estructuraProgramaria) {
+      throw new NotFoundException(
+        `Estructura Programaria con ID ${idEstructuraProgramaria} no encontrada en el curso ${cursoId}`,
+      );
+    }
+
+    // Encontrar la unidad educativa específica dentro de la estructura programaria
+    const arrayUnidades = estructuraProgramaria.unidades;
+
+    const subUnidad = arrayUnidades.find((u) => {
+      return u._id.toString() === unidadEducativaId.toString();
+    });
+
+    if (!subUnidad) {
+      throw new NotFoundException(
+        `Unidad Educativa con ID ${unidadEducativaId} no encontrada en la estructura programaria ${idEstructuraProgramaria} del curso ${cursoId}`,
+      );
+    }
+
+    const cuestionarioId = subUnidad.idCuestionario.toString();
+
+    // Crear Cuestionario-Respuesta-Usuario
+    const dataCreate = {
+      usuarioId,
+      cursoId,
+      unidadEducativaId,
+      cuestionarioId,
+    };
+
+    const cuestionarioRespuestaUsuario =
+      await this.cuestionarioRespuestaUsuarioService.create(dataCreate);
+
+    const progresoCurso =
+      await this.progresoCursosService.filterByUsuarioCursoId(
+        usuarioId,
+        cursoId,
+      );
+
+    if (!progresoCurso) {
+      throw new NotFoundException(
+        `No se encontró ningún progreso de curso con el usuario ${usuarioId} y curso ${cursoId}`,
+      );
+    }
+
+    progresoCurso.cuestionariosRespuestaUsuarioId.push(
+      cuestionarioRespuestaUsuario._id,
+    );
+    progresoCurso.save();
+
+    return {
+      progresoCurso: progresoCurso,
+      cuestionarioRespuestaUsuario: cuestionarioRespuestaUsuario,
+    };
+  }
+
+  // #region Add Respuesta
+  async addRespuesta(
+    usuarioId: string,
+    cuestionarioId: string,
+    data: CreateRespuestaUsuarioDTO,
+  ) {
+    await this.findOne(usuarioId);
+
+    const cuestionarioRespuestas =
+      await this.cuestionarioRespuestaUsuarioService.findBy_UsuarioId_CuestionarioId(
+        usuarioId,
+        cuestionarioId,
+      );
+
+    if (!cuestionarioRespuestas) {
+      throw new NotFoundException(
+        `El usuario con ID ${usuarioId} no tiene acceso al cuestionario con ID ${cuestionarioId}`,
+      );
+    }
+
+    cuestionarioRespuestas.respuestas.push(data);
+    await cuestionarioRespuestas.save();
+    return cuestionarioRespuestas.respuestas;
+  }
+
+  // #region Create Orden
+  async createOrden(usuarioId: string, arrayCursos: ArrayCursosId) {
+    await this.findOne(usuarioId);
+
+    const { cursos } = arrayCursos;
+    const data = { usuarioId, cursos: cursos };
+    const newOrden = await this.ordenesService.create(data);
+    return newOrden;
+  }
+
+  // #region Create Comentario
+  async createComentario(
+    usuarioId: string,
+    cursoId: string,
+    data: CreateComentariosDto,
+  ) {
+    this.findOne(usuarioId);
+    await this.cursoService.findOne(cursoId);
+
+    const newdata = { ...data, usuarioId, cursoId };
+
+    const newComentario = await this.comentariosService.create(newdata);
+    return newComentario;
+  }
+
   // #region add
   async addInteres(usuarioId: string, interes: string[]) {
     const usuario = await this.findOne(usuarioId);
     const perfilId = usuario.perfil._id;
-    this.utils.pushToArray(this.perfilesModel, 'intereses', perfilId, interes);
-  }
-
-  async addCursoComprado(
-    usuarioId: string,
-    cursoCompradoDoc: CreateCursoCompradoDto[],
-  ) {
-    this.utils.pushToArray(
-      this.usuariosModel,
-      'cursos_comprados_historial',
-      usuarioId,
-      cursoCompradoDoc,
-    );
-  }
-
-  async addProgresoCurso(usuarioId: string, progresoCursoId: string[]) {
-    this.utils.pushToArray(
-      this.usuariosModel,
-      'curso_progreso',
-      usuarioId,
-      progresoCursoId,
-    );
+    this.utils.pushToArray(this.perfilesModel, perfilId, 'intereses', interes);
   }
 
   // #region remove
@@ -121,20 +305,20 @@ export class UsuariosService {
   async removeCursoComprado(usuarioId: string, cursoCompradoId: string) {
     this.utils.pullFromArray(
       this.usuariosModel,
-      'cursos_comprados_historial',
       usuarioId,
+      'cursos_comprados',
       cursoCompradoId,
     );
   }
 
-  async removeProgresoCurso(usuarioId: string, progresoCursoId: string) {
-    this.utils.pullFromArray(
-      this.usuariosModel,
-      'curso_progreso',
-      usuarioId,
-      progresoCursoId,
-    );
-  }
+  // async removeProgresoCurso(usuarioId: string, progresoCursoId: string) {
+  //   this.utils.pullFromArray(
+  //     this.usuariosModel,
+  //     usuarioId,
+  //     'progreso_cursos',
+  //     progresoCursoId,
+  //   );
+  // }
 
   // #region Update
   async updatePerfil(usuarioId: string, perfil: CreatePerfilDto) {
@@ -163,19 +347,20 @@ export class UsuariosService {
       );
     }
 
-    const cursosComprados = usuario.cursos_comprados_historial;
+    const cursosComprados = usuario.cursos_comprados;
     return cursosComprados;
   }
 
-  async findProgresoCursos(usuarioId: string) {
-    const usuario = await this.findOne(usuarioId);
-    if (!usuario) {
-      throw new NotFoundException(
-        `El usuario con ID ${usuarioId} no tiene progreso en cursos`,
+  async findProgresoCursosByUsuaioIdCursoId(
+    usuarioId: string,
+    cursoId: string,
+  ) {
+    const progresoCurso =
+      await this.progresoCursosService.filterByUsuarioCursoId(
+        usuarioId,
+        cursoId,
       );
-    }
-    const progresoCursos = usuario.curso_progreso;
-    return progresoCursos;
+    return progresoCurso;
   }
 
   // #region Find import Service
@@ -239,7 +424,7 @@ export class UsuariosService {
   async filterByCursoId(cursoId: string) {
     const allUsuarios = await this.findAll();
     const usuariosXcurso = allUsuarios.filter((usuario) =>
-      usuario.cursos_comprados_historial.some(
+      usuario.cursos_comprados.some(
         (curso) => curso.cursoId === new ObjectId(cursoId),
       ),
     );

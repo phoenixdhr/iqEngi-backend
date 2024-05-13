@@ -19,10 +19,10 @@ export class ProgresoCurso extends Document {
     ref: CuestionarioRespuestaUsuario.name,
     default: [],
   })
-  evaluacionUsuarioCuestionarios: Types.Array<Types.ObjectId>;
+  cuestionariosRespuestaUsuarioId: Types.Array<Types.ObjectId>;
 
   @Prop({ required: true, default: 0 })
-  progresoTotal: number; // SE CALCULA EN BASE A LAS UNIDADES QUE EL USUARIO HA COMPLETADO
+  progresoTotal: number; // NOTA: SE CALCULA EN BASE A LAS UNIDADES QUE EL USUARIO HA COMPLETADO
 }
 
 export const ProgresoCursoSchema = SchemaFactory.createForClass(ProgresoCurso);
