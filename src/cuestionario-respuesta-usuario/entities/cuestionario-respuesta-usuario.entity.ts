@@ -23,7 +23,7 @@ export class RespuestaUsuario extends Document {
   preguntaId: Types.ObjectId; // Identificador de la pregunta a la que se responde.
 
   @Prop({ type: [Types.ObjectId], ref: Opcion.name, required: true })
-  respuestaId: Types.DocumentArray<Opcion> | Types.Array<Types.ObjectId>; // Igualmente, especifica que las respuestas deben ser los IDs de las opciones.
+  respuestaId: Types.Array<Types.ObjectId>; // Igualmente, especifica que las respuestas deben ser los IDs de las opciones.
 }
 
 export const RespuestaUsuarioSchema =

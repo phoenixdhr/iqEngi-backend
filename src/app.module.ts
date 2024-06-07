@@ -19,6 +19,7 @@ import configEnv from './_common/configEnv';
 import { configValidationSchema } from './_common/configValidationSchema';
 import { EstructuraProgramariaModule } from './estructura-programaria/estructura-programaria.module';
 import { MongooseUtilsServiceModule } from './_mongoose-utils-service/_mongoose-utils-service.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { MongooseUtilsServiceModule } from './_mongoose-utils-service/_mongoose-
     CuestionarioRespuestaUsuarioModule,
     DatabaseModule,
     EstructuraProgramariaModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -39,6 +39,9 @@
 
 `NODE_API_KEY=CHULAtor npm run start --watch`
 
+## comando para iniciar nest en produccion
+nest start --watch
+
 
 
 ## Description
