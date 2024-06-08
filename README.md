@@ -38,6 +38,7 @@
 ## incializando proyecto  con apiKey particular
 
 `NODE_API_KEY=CHULAtor npm run start --watch`
+`NODE_ENV=dev npm run start --watch`
 
 ## comando para iniciar nest en produccion
 nest start --watch
