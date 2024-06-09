@@ -83,7 +83,7 @@ export class Usuario extends Document {
   email: string;
 
   @Prop({ required: true })
-  hashContraseña: string;
+  hashPassword: string;
 
   @Prop({
     enum: RolUsuario,

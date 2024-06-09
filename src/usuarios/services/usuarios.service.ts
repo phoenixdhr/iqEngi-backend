@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Types } from 'mongoose';
+import * as bcrypt from 'bcrypt';
 
 import { CursoComprado, Perfil, Usuario } from '../entities/usuario.entity';
 
@@ -40,7 +41,6 @@ export class UsuariosService {
   constructor(
     @Inject(forwardRef(() => CursosService))
     private readonly cursoService: CursosService,
-
     private readonly ordenesService: OrdenesService,
     private readonly comentariosService: ComentariosService,
     private readonly progresoCursosService: ProgresoCursosService,
@@ -72,9 +72,17 @@ export class UsuariosService {
   }
 
   async create(data: CreateUsuarioDto) {
-    const newUsuario = await new this.usuariosModel(data);
-    await newUsuario.save();
-    return newUsuario;
+    const { password, ...rest } = data;
+    const hash = await bcrypt.hash(password, 10);
+
+    const newUsuario = new this.usuariosModel({
+      ...rest,
+      hashPassword: hash,
+    });
+    const respNewUsario = await newUsuario.save();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { hashPassword, ...NewUsarioWPass } = respNewUsario.toJSON();
+    return NewUsarioWPass;
   }
 
   async update(usuarioId: string, changes: UpdateUsuarioDto) {

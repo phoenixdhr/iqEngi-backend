@@ -94,7 +94,7 @@ export class CreateUsuarioDto {
   readonly email: string;
 
   @IsString()
-  readonly hashContraseña: string;
+  readonly password: string;
 
   @IsEnum(RolUsuario)
   @IsOptional()

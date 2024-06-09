@@ -9,7 +9,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
-  UseGuards,
+  // UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
@@ -24,9 +24,9 @@ import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 import { ArrayCursosId } from 'src/ordenes/dtos/orden.dto';
 import { CreateComentariosDto } from 'src/comentarios/dtos/comentario.dto';
 import { CreateRespuestaUsuarioDTO } from 'src/cuestionario-respuesta-usuario/dtos/cuestionario-respuesta-usuario.dto';
-import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
+// import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 
-@UseGuards(ApiKeyGuard)
+// @UseGuards(ApiKeyGuard)
 @ApiTags('usuarios')
 @Controller('usuarios')
 export class UsuariosController {
