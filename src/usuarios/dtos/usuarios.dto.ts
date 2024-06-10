@@ -125,3 +125,11 @@ export class AddCuestionarioDto {
   @IsMongoId()
   readonly unidadEducativaId: string;
 }
+
+export class UserPasswordDto {
+  @IsEmail()
+  readonly email: string;
+
+  @IsString()
+  readonly password: string;
+}

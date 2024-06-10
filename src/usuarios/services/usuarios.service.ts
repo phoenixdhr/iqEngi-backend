@@ -85,6 +85,11 @@ export class UsuariosService {
     return NewUsarioWPass;
   }
 
+  async findByEmail(email: string) {
+    const usuario = await this.usuariosModel.findOne({ email }).exec();
+    return usuario;
+  }
+
   async update(usuarioId: string, changes: UpdateUsuarioDto) {
     const updateUsuario = await this.usuariosModel
       .findByIdAndUpdate(usuarioId, { $set: changes }, { new: true })
