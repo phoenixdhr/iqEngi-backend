@@ -8,14 +8,17 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { OrdenesService } from '../services/ordenes.service';
 import { CreateOrdenDto, UpdateOrdenDto } from '../dtos/orden.dto'; // Asume que tienes DTOs definidos para crear y actualizar
 import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('ordenes')
+@UseGuards(AuthGuard('jwt')) // Asegúrate de que tengas un guardia configurado
 @Controller('ordenes')
 export class OrdenesController {
   constructor(private readonly ordenesService: OrdenesService) {}
