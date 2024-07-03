@@ -9,6 +9,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -16,13 +17,20 @@ import { CursosService } from '../services/cursos.service';
 import { CreateCursoDto, UpdateCursoDto } from '../dtos/cursos.dto';
 import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 import { CreateEstructuraProgramariaDto } from 'src/estructura-programaria/dtos/estructura-Programaria.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Public } from 'src/auth/decorators/public.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { RolesDec } from 'src/auth/decorators/roles.decorator';
+import { RolEnum } from 'src/auth/models/roles.model';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('cursos')
 @Controller('cursos')
 export class CursosController {
   constructor(private readonly cursoService: CursosService) {}
 
   @Get()
+  @Public()
   @HttpCode(HttpStatus.OK)
   getAll() {
     return this.cursoService.findAll();
@@ -41,6 +49,7 @@ export class CursosController {
   }
 
   @Post()
+  @RolesDec(RolEnum.ADMINISTRADOR, RolEnum.EDITOR)
   @HttpCode(HttpStatus.CREATED)
   create(@Body() payload: CreateCursoDto) {
     return this.cursoService.create(payload);

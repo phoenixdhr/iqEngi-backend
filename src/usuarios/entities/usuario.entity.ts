@@ -3,13 +3,7 @@ import { Document, Types } from 'mongoose';
 
 import { Curso } from '../../cursos/entities/curso.entity';
 import { ProgresoCurso } from 'src/progreso-cursos/entities/progreso-curso.entity';
-
-export enum RolUsuario {
-  Estudiante = 'estudiante',
-  Instructor = 'instructor',
-  Editor = 'editor',
-  Administrador = 'administrador',
-}
+import { RolEnum } from 'src/auth/models/roles.model';
 
 export enum EstadoAccesoCurso {
   Activo = 'activo',
@@ -86,11 +80,11 @@ export class Usuario extends Document {
   hashPassword: string;
 
   @Prop({
-    enum: RolUsuario,
+    enum: RolEnum,
     required: true,
-    default: RolUsuario.Estudiante,
+    default: RolEnum.ESTUDIANTE,
   })
-  rol: RolUsuario;
+  rol: RolEnum;
 
   @Prop({ type: PerfilSchema, default: {} })
   perfil: Perfil;

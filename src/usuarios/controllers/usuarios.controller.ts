@@ -9,9 +9,12 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Req,
+  UseGuards,
   // UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Request } from 'express';
 
 import { UsuariosService } from '../services/usuarios.service';
 import {
@@ -24,9 +27,15 @@ import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 import { ArrayCursosId } from 'src/ordenes/dtos/orden.dto';
 import { CreateComentariosDto } from 'src/comentarios/dtos/comentario.dto';
 import { CreateRespuestaUsuarioDTO } from 'src/cuestionario-respuesta-usuario/dtos/cuestionario-respuesta-usuario.dto';
+import { PayloadToken } from 'src/auth/models/token.model';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { RolesDec } from 'src/auth/decorators/roles.decorator';
+import { RolEnum } from 'src/auth/models/roles.model';
+import { Public } from 'src/auth/decorators/public.decorator';
 // import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 
-// @UseGuards(ApiKeyGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('usuarios')
 @Controller('usuarios')
 export class UsuariosController {
@@ -35,43 +44,51 @@ export class UsuariosController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all users' })
+  @RolesDec(RolEnum.ADMINISTRADOR)
   getAll() {
     return this.usuariosService.findAll();
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
+  @RolesDec(RolEnum.ADMINISTRADOR)
   getOne(@Param('id', MongoIdPipe) id: string) {
+    console.log('get :id', id);
     return this.usuariosService.findOne(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @Public()
   create(@Body() createUsuarioDto: CreateUsuarioDto) {
     return this.usuariosService.create(createUsuarioDto);
   }
 
-  @Put(':id')
+  @Put('/update')
   @HttpCode(HttpStatus.OK) // Corrige el status a OK ya que UPDATE no es un código de estado HTTP válido
-  update(
-    @Param('id', MongoIdPipe) id: string,
-    @Body() updateUsuarioDto: UpdateUsuarioDto,
-  ) {
+  update(@Req() req: Request, @Body() updateUsuarioDto: UpdateUsuarioDto) {
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
+    console.log('id', id);
+    console.log('req.user', req.user);
     return this.usuariosService.update(id, updateUsuarioDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT) // Utiliza NO_CONTENT para las operaciones de eliminación que no retornan contenido
+  @RolesDec(RolEnum.ADMINISTRADOR, RolEnum.ESTUDIANTE)
   delete(@Param('id', MongoIdPipe) id: string) {
     this.usuariosService.delete(id);
   }
 
-  @Get(':id/curso/:id/progreso-cursos')
+  @Get('curso/:id/progreso-cursos')
   @HttpCode(HttpStatus.OK)
   getProgresoCursos(
-    @Param('id', MongoIdPipe) id: string,
+    @Req() req: Request,
     @Param('id', MongoIdPipe) idCurso: string,
   ) {
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
     return this.usuariosService.findProgresoCursosByUsuaioIdCursoId(
       id,
       idCurso,
@@ -79,28 +96,35 @@ export class UsuariosController {
   }
 
   // #region Cursos Comprados
-  @Put(':id/cursos-comprados')
+
+  @Put('cursos-comprados/put')
   @HttpCode(HttpStatus.OK)
-  addCursoComprado(
-    @Param('id', MongoIdPipe) id: string,
-    @Body() data: CreateCursoCompradoDto,
-  ) {
+  addCursoComprado(@Req() req: Request, @Body() data: CreateCursoCompradoDto) {
+    const userJwt = req.user as PayloadToken;
+    console.log('userJwt', req.user);
+    const id = userJwt.sub;
     return this.usuariosService.addCursoComprado(id, data);
   }
 
-  @Get(':id/cursos-comprados')
+  @Get('cursos-comprados/get')
   @HttpCode(HttpStatus.OK)
-  getCursosComprados(@Param('id', MongoIdPipe) id: string) {
+  getCursosComprados(@Req() req: Request) {
+    console.log('11111111111111111111111');
+
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
+    console.log('userJwt', req.user);
+    console.log('22222222222222222222222');
+
     return this.usuariosService.findCursosComprados(id);
   }
 
   // #region Cuestionarios Respuesta
-  @Put(':id/add-cuestionario-respuesta')
+  @Put('add-cuestionario-respuesta')
   @HttpCode(HttpStatus.OK)
-  addCuestionarioResp(
-    @Param('id', MongoIdPipe) id: string,
-    @Body() data: AddCuestionarioDto,
-  ) {
+  addCuestionarioResp(@Req() req: Request, @Body() data: AddCuestionarioDto) {
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
     return this.usuariosService.addCuestionarioRespuestaToProgesoCurso(
       id,
       data,
@@ -108,13 +132,15 @@ export class UsuariosController {
   }
 
   // #region Respuestas Add
-  @Put(':id/cuestionario/:cuestionarioId')
+  @Put('add-Respuesta/:cuestionarioId')
   @HttpCode(HttpStatus.OK)
   addRespuesta(
-    @Param('id', MongoIdPipe) id: string,
+    @Req() req: Request,
     @Param('cuestionarioId', MongoIdPipe) cuestionarioId: string,
     @Body() data: CreateRespuestaUsuarioDTO,
   ) {
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
     return this.usuariosService.addRespuesta(id, cuestionarioId, data);
   }
 
@@ -128,26 +154,47 @@ export class UsuariosController {
     return this.usuariosService.createOrden(id, arrayCursos);
   }
 
+  @Put('create-orden')
+  @HttpCode(HttpStatus.OK)
+  createOrden2(@Req() req: Request, @Body() arrayCursos: ArrayCursosId) {
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
+
+    return this.usuariosService.createOrden(id, arrayCursos);
+  }
+
   @Get(':id/ordenes')
   @HttpCode(HttpStatus.OK)
   getOrdenes(@Param('id', MongoIdPipe) id: string) {
     return this.usuariosService.findOrdenes(id);
   }
 
-  // #region Comentarios
-  @Get(':id/comentarios')
+  @Get('ordenes')
   @HttpCode(HttpStatus.OK)
-  getComentarios(@Param('id', MongoIdPipe) id: string) {
+  getOrdenes2(@Req() req: Request) {
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
+    return this.usuariosService.findOrdenes(id);
+  }
+
+  // #region Comentarios
+  @Get('comentarios')
+  @HttpCode(HttpStatus.OK)
+  getComentarios(@Req() req: Request) {
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
     return this.usuariosService.findComentarios(id);
   }
 
-  @Post(':id/curso/:cursoId/comentarios')
+  @Post('curso/:cursoId/comentarios')
   @HttpCode(HttpStatus.CREATED)
   addComentario(
-    @Param('id', MongoIdPipe) id: string,
+    @Req() req: Request,
     @Param('cursoId', MongoIdPipe) cursoId: string,
     @Body() data: CreateComentariosDto,
   ) {
+    const userJwt = req.user as PayloadToken;
+    const id = userJwt.sub;
     return this.usuariosService.createComentario(id, cursoId, data);
   }
 }

@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartialType, ApiProperty } from '@nestjs/swagger';
-import { RolUsuario } from '../entities/usuario.entity';
+import { RolEnum } from 'src/auth/models/roles.model';
 import { EstadoAccesoCurso } from '../entities/usuario.entity';
 
 // #region PerfilDto
@@ -96,9 +96,9 @@ export class CreateUsuarioDto {
   @IsString()
   readonly password: string;
 
-  @IsEnum(RolUsuario)
+  @IsEnum(RolEnum)
   @IsOptional()
-  readonly rol?: RolUsuario;
+  readonly rol?: RolEnum;
 
   @ValidateNested()
   @Type(() => CreatePerfilDto)

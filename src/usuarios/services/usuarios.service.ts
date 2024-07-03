@@ -62,7 +62,9 @@ export class UsuariosService {
   }
 
   async findOne(usuarioId: string) {
-    const usuario = this.usuariosModel.findById(usuarioId).exec();
+    console.log('usuarioId', usuarioId);
+    const usuario = await this.usuariosModel.findById(usuarioId).exec();
+    console.log('usuario', usuario);
 
     if (!usuario) {
       throw new NotFoundException(`Usuario con ID ${usuarioId} no encontrado`);
