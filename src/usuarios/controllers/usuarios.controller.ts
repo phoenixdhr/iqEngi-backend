@@ -28,12 +28,11 @@ import { ArrayCursosId } from 'src/ordenes/dtos/orden.dto';
 import { CreateComentariosDto } from 'src/comentarios/dtos/comentario.dto';
 import { CreateRespuestaUsuarioDTO } from 'src/cuestionario-respuesta-usuario/dtos/cuestionario-respuesta-usuario.dto';
 import { PayloadToken } from 'src/auth/models/token.model';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles-auth/roles.guard';
 import { RolesDec } from 'src/auth/decorators/roles.decorator';
 import { RolEnum } from 'src/auth/models/roles.model';
 import { Public } from 'src/auth/decorators/public.decorator';
-// import { ApiKeyGuard } from 'src/auth/guards/api-key.guard';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('usuarios')

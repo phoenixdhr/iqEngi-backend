@@ -17,9 +17,9 @@ import { CursosService } from '../services/cursos.service';
 import { CreateCursoDto, UpdateCursoDto } from '../dtos/cursos.dto';
 import { MongoIdPipe } from 'src/_common/pipes/mongo-id/mongo-id.pipe';
 import { CreateEstructuraProgramariaDto } from 'src/estructura-programaria/dtos/estructura-Programaria.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { RolesGuard } from 'src/auth/guards/roles-auth/roles.guard';
 import { RolesDec } from 'src/auth/decorators/roles.decorator';
 import { RolEnum } from 'src/auth/models/roles.model';
 

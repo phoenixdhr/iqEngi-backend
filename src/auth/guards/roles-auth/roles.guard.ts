@@ -9,9 +9,9 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 
-import { ROLES_KEY } from '../decorators/roles.decorator';
-import { PayloadToken } from '../models/token.model';
-import { RolEnum } from '../models/roles.model';
+import { ROLES_KEY } from '../../decorators/roles.decorator';
+import { PayloadToken } from '../../models/token.model';
+import { RolEnum } from '../../models/roles.model';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

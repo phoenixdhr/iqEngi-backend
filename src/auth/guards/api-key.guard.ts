@@ -12,6 +12,8 @@ import { IS_PUBLC_KEY } from '../decorators/public.decorator';
 import configEnv from 'src/_common/configEnv';
 import { ConfigType } from '@nestjs/config';
 
+// Este Guard solo fue para ejemplificar como se envia una key y como se compara con la key que se tiene en el archivo .env
+// pero no se usa en el proyecto, y no es necesario para el proyecto
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
   constructor(
@@ -34,9 +36,6 @@ export class ApiKeyGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<Request>();
     const authHeader = request.header('Auth');
-    // Lógica de autenticación/autorización
-    // console.log(this.configService.mongo.apiKey);
-    // console.log(authHeader);
 
     const isAuth = authHeader === this.configService.mongo.apiKey;
 

@@ -10,6 +10,9 @@ export default registerAs('configEnv', () => {
   const apiKey = process.env.API_KEY;
   const uri = `${connection}://${user}:${password}@${host}:${port}/`;
   const jwtSecret = process.env.JWT_SECRET;
+  const googleClientId = process.env.GOOGLE_CLIENT_ID;
+  const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const googleCallbackUrl = process.env.REDIRECT_URI;
 
   return {
     mongo: {
@@ -23,6 +26,11 @@ export default registerAs('configEnv', () => {
       uri,
     },
     jwtSecret,
+    googleOauth: {
+      googleClientId,
+      googleClientSecret,
+      googleCallbackUrl,
+    },
   };
 });
 
