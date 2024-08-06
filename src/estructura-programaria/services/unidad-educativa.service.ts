@@ -52,7 +52,6 @@ export class UnidadEducativaService {
   ) {
     const estructuraProgramaria =
       await this.estructuraProgramariaService.findOne(idEstructuraProgramaria);
-    console.log(estructuraProgramaria);
 
     const data = {
       ...unidadEducativa,

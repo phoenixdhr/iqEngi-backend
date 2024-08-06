@@ -27,7 +27,6 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
     );
 
-    console.log('requiredRoles', requiredRoles);
     // Si no se definen roles requeridos, permitir el acceso
     if (!requiredRoles) {
       return true;
@@ -35,11 +34,9 @@ export class RolesGuard implements CanActivate {
 
     // Obtener la solicitud HTTP y los datos del usuario
     const request = context.switchToHttp().getRequest();
-    console.log('request.user', request.user);
     const user = request.user as PayloadToken;
     const userRole = user.rol as RolEnum;
 
-    console.log('userRole', userRole);
     // Verificar si el rol del usuario está entre los roles requeridos
     const hasRole = requiredRoles.includes(userRole);
     if (!hasRole) {

@@ -78,12 +78,7 @@ export class AuthService {
       );
 
       const data = await response.json();
-      console.log('data NEWWWWWWWWWWWWWWWWWWWW:         ', data);
-      console.log('=====================================');
-      console.log(
-        'access_token NEWWWWWWWWWWWWWWWWWWWW:         ',
-        data.access_token,
-      );
+
       // Retorna el nuevo token de acceso
 
       return data.access_token;

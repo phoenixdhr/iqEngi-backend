@@ -52,7 +52,6 @@ export class UsuariosController {
   @HttpCode(HttpStatus.OK)
   @RolesDec(RolEnum.ADMINISTRADOR)
   getOne(@Param('id', MongoIdPipe) id: string) {
-    console.log('get :id', id);
     return this.usuariosService.findOne(id);
   }
 
@@ -68,8 +67,7 @@ export class UsuariosController {
   update(@Req() req: Request, @Body() updateUsuarioDto: UpdateUsuarioDto) {
     const userJwt = req.user as PayloadToken;
     const id = userJwt.sub;
-    console.log('id', id);
-    console.log('req.user', req.user);
+
     return this.usuariosService.update(id, updateUsuarioDto);
   }
 
@@ -100,7 +98,6 @@ export class UsuariosController {
   @HttpCode(HttpStatus.OK)
   addCursoComprado(@Req() req: Request, @Body() data: CreateCursoCompradoDto) {
     const userJwt = req.user as PayloadToken;
-    console.log('userJwt', req.user);
     const id = userJwt.sub;
     return this.usuariosService.addCursoComprado(id, data);
   }
@@ -108,12 +105,9 @@ export class UsuariosController {
   @Get('cursos-comprados/get')
   @HttpCode(HttpStatus.OK)
   getCursosComprados(@Req() req: Request) {
-    console.log('11111111111111111111111');
 
     const userJwt = req.user as PayloadToken;
     const id = userJwt.sub;
-    console.log('userJwt', req.user);
-    console.log('22222222222222222222222');
 
     return this.usuariosService.findCursosComprados(id);
   }
