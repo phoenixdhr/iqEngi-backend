@@ -4,6 +4,7 @@ import { Document, Types } from 'mongoose';
 import { Categoria } from '../../categorias/entities/categoria.entity';
 import { Instructores } from '../../instructores/entities/instructores.entity';
 import { EstructuraProgramaria } from '../../estructura-programaria/entities/estructura-programaria.entity';
+import { ICurso } from './curso.interfaz';
 
 export enum Nivel {
   Principiante = 'Principiante',
@@ -13,7 +14,7 @@ export enum Nivel {
 
 // #region Curso
 @Schema()
-export class Curso extends Document {
+export class Curso extends Document implements ICurso {
   @Prop({ required: true })
   title: string;
 

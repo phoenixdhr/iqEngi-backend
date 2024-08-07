@@ -2,9 +2,57 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type CursoType {
+  id: ID!
+  title: String!
+  descripcionCorta: String!
+  nivel: String
+  instructor: ID
+  duracionHoras: Float
+  imagenURL: String
+  precio: Float
+  descuentos: Float
+  calificacion: Float
+  aprenderas: [String!]!
+  objetivos: [String!]!
+  dirigidoA: [String!]!
+  estructuraProgramaria: [ID!]!
+  fechaLanzamiento: DateTime
+  categorias: [ID!]!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Query {
+  cursos: [CursoType!]!
+  curso(id: ID!): CursoType!
   helloWorld: String!
 
   """Generate a random number"""
   RamdomNumberTo(to: Int = 10): Int!
+}
+
+type Mutation {
+  createCurso(dto: CursoInput!): CursoType!
+}
+
+input CursoInput {
+  title: String!
+  descripcionCorta: String!
+  nivel: String
+  instructor: ID
+  duracionHoras: Float
+  imagenURL: String
+  precio: Float
+  descuentos: Float
+  calificacion: Float
+  aprenderas: [String!]! = []
+  objetivos: [String!]! = []
+  dirigidoA: [String!]! = []
+  estructuraProgramaria: [ID!]! = []
+  fechaLanzamiento: DateTime
+  categorias: [ID!]! = []
 }

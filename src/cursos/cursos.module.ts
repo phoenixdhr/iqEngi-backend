@@ -10,6 +10,7 @@ import { CategoriasModule } from 'src/categorias/categorias.module';
 import { InstructoresModule } from 'src/instructores/instructores.module';
 import { EstructuraProgramariaModule } from 'src/estructura-programaria/estructura-programaria.module';
 import { UsuariosModule } from 'src/usuarios/usuarios.module';
+import { CursosResolver } from './resolvers-gql/cursos.resolver';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { UsuariosModule } from 'src/usuarios/usuarios.module';
     EstructuraProgramariaModule,
   ],
   controllers: [CursosController],
-  providers: [CursosService],
+  providers: [CursosService, CursosResolver],
   exports: [CursosService],
 })
 export class CursosModule {}
