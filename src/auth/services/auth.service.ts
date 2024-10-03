@@ -2,27 +2,31 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { UserPasswordDto } from 'src/usuarios/dtos/usuarios.dto';
-import { UsuariosService } from 'src/usuarios/services/usuarios.service';
-import { Usuario } from 'src/usuarios/entities/usuario.entity';
-import { PayloadToken } from '../models/token.model';
+import {
+  CreateUsuarioDto,
+  UserPasswordDto,
+} from 'src/usuario/dtos/usuario.dto';
+import { UsuarioService } from 'src/usuario/services/usuario.service';
+import { UsuarioType } from 'src/usuario/entities/usuario.entity';
+import { JwtPayload } from '../models/token.model';
 import { Request } from 'express';
 import { UserGoogle } from '../models/perfil.google';
+import { userAndJWT, UserRequest } from '../entities/type-gql/user_jwt.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usuariosService: UsuariosService,
+    private readonly usuariosService: UsuarioService,
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(userPassword: UserPasswordDto): Promise<object> {
+  // #region AUTH JWT
+  async validatePassword(userPassword: UserPasswordDto): Promise<UserRequest> {
     const user = await this.usuariosService.findByEmail(userPassword.email);
 
     if (!user) {
       throw new UnauthorizedException('Usuario no existe');
     }
-
     const isPasswordValid = await bcrypt.compare(
       userPassword.password,
       user.hashPassword,
@@ -34,11 +38,12 @@ export class AuthService {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { hashPassword, ...result } = user.toObject();
-    return result;
+
+    return result as UserRequest;
   }
 
-  async generateJWT(user: Usuario): Promise<object> {
-    const payload: PayloadToken = { rol: user.rol, sub: user._id };
+  async generateJWT(user: UserRequest): Promise<userAndJWT> {
+    const payload = { roles: user.roles, sub: user._id };
 
     const firma = this.jwtService.sign(payload);
 
@@ -48,7 +53,26 @@ export class AuthService {
     };
   }
 
-  googleLogin(req: Request) {
+  async validatePayload(payload: JwtPayload): Promise<UsuarioType> {
+    const user = await this.usuariosService.findOne(payload.sub);
+
+    //Falta el codigo que valida si ha validado el correo, lo dejo para despues
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario no existe');
+    }
+
+    return user as UsuarioType;
+  }
+
+  // funcion que se vuelve a ejecutar cuando el token esta por expirar
+  async revalidateToken(user: UserRequest): Promise<userAndJWT> {
+    return this.generateJWT(user);
+  }
+
+  //#region AUTH GOOGLE
+
+  async googleLogin(req: Request) {
     if (!req.user) {
       return 'No user from google :C';
     }
@@ -130,5 +154,10 @@ export class AuthService {
       // Lanza un error si no se puede revocar el token de acceso
       throw new Error('Failed to revoke the access token.');
     }
+  }
+
+  //#region Funciones 2
+  async signup(user: CreateUsuarioDto): Promise<UsuarioType> {
+    return this.usuariosService.create(user);
   }
 }

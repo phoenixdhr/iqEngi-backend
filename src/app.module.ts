@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { CursosModule } from './cursos/cursos.module';
-import { CategoriasModule } from './categorias/categorias.module';
-import { UsuariosModule } from './usuarios/usuarios.module';
-import { InstructoresModule } from './instructores/instructores.module';
-import { OrdenesModule } from './ordenes/ordenes.module';
-import { ComentariosModule } from './comentarios/comentarios.module';
-import { ProgresoCursosModule } from './progreso-cursos/progreso-cursos.module';
+import { CursoModule } from './curso/curso.module';
+import { CategoriaModule } from './categoria/categoria.module';
+import { UsuarioModule } from './usuario/usuario.module';
+import { InstructorModule } from './instructor/instructor.module';
+import { OrdenModule } from './orden/orden.module';
+import { ComentarioModule } from './comentario/comentario.module';
+import { ProgresoCursoModule } from './progreso-curso/progreso-curso.module';
 import { CuestionarioModule } from './cuestionario/cuestionario.module';
 import { CuestionarioRespuestaUsuarioModule } from './cuestionario-respuesta-usuario/cuestionario-respuesta-usuario.module';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -21,8 +21,9 @@ import { EstructuraProgramariaModule } from './estructura-programaria/estructura
 import { MongooseUtilsServiceModule } from './_mongoose-utils-service/_mongoose-utils-service.module';
 import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
-import { HelloWorldModule } from './hello-world/hello-world.module';
+// import { HelloWorldModule } from './hello-world/hello-world.module';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -42,19 +43,20 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       validationSchema: configValidationSchema,
     }),
     MongooseUtilsServiceModule,
-    CursosModule,
-    CategoriasModule,
-    UsuariosModule,
-    InstructoresModule,
-    OrdenesModule,
-    ComentariosModule,
-    ProgresoCursosModule,
+    CursoModule,
+    CategoriaModule,
+    UsuarioModule,
+    InstructorModule,
+    OrdenModule,
+    ComentarioModule,
+    ProgresoCursoModule,
     CuestionarioModule,
     CuestionarioRespuestaUsuarioModule,
     DatabaseModule,
     EstructuraProgramariaModule,
     AuthModule,
-    HelloWorldModule,
+    // HelloWorldModule,
+    SeedModule,
   ],
   controllers: [],
   providers: [],

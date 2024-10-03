@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-import { Curso } from '../../cursos/entities/curso.entity';
+import { Curso } from '../../curso/entities/curso.entity';
 import { Cuestionario } from '../../cuestionario/entities/cuestionario.entity';
 import { Pregunta } from '../../cuestionario/entities/cuestionario.entity';
 import { Opcion } from '../../cuestionario/entities/cuestionario.entity';

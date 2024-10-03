@@ -35,6 +35,27 @@
   progreso-cursos
   x usuarios
 
+  _______________________
+  
+Categoria
+Comentario
+Cuestionario
+Pregunta
+CuestionarioRespuestaUsuario
+RespuestaUsuario
+Curso
+EstructuraProgramaria
+UnidadEducativa
+Instructor
+Orden
+ProgresoCurso
+Usuario
+Perfil
+CursoComprado
+
+
+
+
 ## incializando proyecto  con apiKey particular
 
 `NODE_API_KEY=CHULAtor npm run start --watch`

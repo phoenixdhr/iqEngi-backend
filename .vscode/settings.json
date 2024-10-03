@@ -1,0 +1,93 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#65c89b",
+        "activityBar.background": "#65c89b",
+        "activityBar.foreground": "#15202b",
+        "activityBar.inactiveForeground": "#15202b99",
+        "activityBarBadge.background": "#945bc4",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "commandCenter.border": "#15202b99",
+        "sash.hoverBorder": "#65c89b",
+        "statusBar.background": "#42b883",
+        "statusBar.foreground": "#15202b",
+        "statusBarItem.hoverBackground": "#359268",
+        "statusBarItem.remoteBackground": "#42b883",
+        "statusBarItem.remoteForeground": "#15202b",
+        "titleBar.activeBackground": "#42b883",
+        "titleBar.activeForeground": "#15202b",
+        "titleBar.inactiveBackground": "#42b88399",
+        "titleBar.inactiveForeground": "#15202b99"
+    },
+    "peacock.remoteColor": "#42b883",
+
+
+    // Ocultar archivos de test
+    "files.exclude": {
+      "**/*.spec.ts": true,
+      "**/*.test.ts": true  // Si también deseas ocultar archivos .test.ts
+    },
+
+
+    "favorites.resources": [
+        {
+            "filePath": "src/auth",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/usuarios",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/app.module.ts",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/main.ts",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/schema.gql",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/_mongoose-utils-service",
+            "group": "Default"
+        },
+        {
+            "filePath": ".env",
+            "group": "Default"
+        },
+        {
+            "filePath": ".env.example",
+            "group": "Default"
+        },
+        {
+            "filePath": ".env.production",
+            "group": "Default"
+        },
+        {
+            "filePath": ".env.staging",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/curso",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/usuario",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/seed",
+            "group": "Default"
+        }
+    ],
+    "favorites.groups": [
+      "Default"
+    ],
+    "favorites.currentGroup": "Default",
+    "favorites.sortOrder": "ASC",
+
+
+
+}

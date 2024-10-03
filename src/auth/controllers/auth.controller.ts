@@ -13,21 +13,36 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 
 import { AuthService } from '../services/auth.service';
-import { Usuario } from 'src/usuarios/entities/usuario.entity';
+import { Usuario, UsuarioType } from 'src/usuario/entities/usuario.entity';
 import { GoogleOauthGuard } from '../guards/google-oauth.guard/google-oauth.guard';
 import { UserGoogle } from '../models/perfil.google';
 import { CheckGoogleTokenExpiryGuard } from '../guards/check-google-token.guard/check-google-token.guard';
+import { CreateUsuarioDto } from 'src/usuario/dtos/usuario.dto';
+import { UserRequest } from '../entities/type-gql/user_jwt.entity';
 
 @Controller('auth') // Define que esta clase es un controlador y el prefijo de las rutas es 'auth'
 export class AuthController {
   constructor(private authService: AuthService) {} // Inyecta el servicio de autenticación
 
-  @UseGuards(AuthGuard('local')) // Aplica el guard de autenticación local (nombre de usuario y contraseña)
+  @HttpCode(HttpStatus.CREATED) // Establece el código de estado HTTP en 201 (CREATED)
+  @Post('signup') // Define una ruta POST en 'auth/signup
+  async signup(@Req() req: Request) {
+    // Extrae los datos de usuario del objeto Request
+    const user = req.body as CreateUsuarioDto;
+    // Crea un nuevo usuario en la base de datos
+    const newUser = await this.authService.signup(user);
+    // Devuelve el nuevo usuario creado
+    return newUser;
+  }
+
+  @UseGuards(AuthGuard('passport-local')) // Aplica el guard de autenticación local (nombre de usuario y contraseña)
   @HttpCode(HttpStatus.OK) // Establece el código de estado HTTP en 200 (OK)
   @Post('login') // Define una ruta POST en 'auth/login'
   async login(@Req() req: Request) {
-    const user = req.user as Usuario; // Extrae el usuario autenticado del objeto Request
-    return this.authService.generateJWT(user); // Genera y devuelve un token JWT para el usuario
+    const user = req.user as UserRequest; // Extrae el usuario autenticado del objeto Request
+    const user_jwt = await this.authService.generateJWT(user); // Genera y devuelve un token JWT para el usuario
+
+    return user_jwt;
   }
 
   @Get('login/google') // Define una ruta GET en 'auth/google'

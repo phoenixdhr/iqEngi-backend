@@ -19,18 +19,21 @@ export interface ProfileGoogle {
     name: string;
     given_name: string;
     family_name: string;
-    picture: string;
+    picture?: string;
     email: string;
     email_verified: boolean;
   };
 }
 
-export interface UserGoogle {
+export interface UserAuth {
   email: string;
   email_verified: boolean;
   firstName: string;
   lastName: string;
-  picture: string;
-  accessToken: string;
-  refreshToken: string;
+  picture?: string;
+}
+
+export interface UserGoogle extends UserAuth {
+  accessToken?: string;
+  refreshToken?: string;
 }

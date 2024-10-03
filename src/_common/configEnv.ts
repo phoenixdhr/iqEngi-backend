@@ -1,6 +1,7 @@
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('configEnv', () => {
+  const environment = process.env.NODE_ENV || 'development';
   const dbName = process.env.MONGO_DB;
   const user = process.env.MONGO_INITDB_ROOT_USERNAME;
   const password = process.env.MONGO_INITDB_ROOT_PASSWORD;
@@ -15,6 +16,7 @@ export default registerAs('configEnv', () => {
   const googleCallbackUrl = process.env.REDIRECT_URI;
 
   return {
+    environment,
     mongo: {
       dbName,
       user,
