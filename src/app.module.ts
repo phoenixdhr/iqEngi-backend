@@ -1,62 +1,61 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { CursoModule } from './curso/curso.module';
-import { CategoriaModule } from './categoria/categoria.module';
-import { UsuarioModule } from './usuario/usuario.module';
-import { InstructorModule } from './instructor/instructor.module';
-import { OrdenModule } from './orden/orden.module';
-import { ComentarioModule } from './comentario/comentario.module';
-import { ProgresoCursoModule } from './progreso-curso/progreso-curso.module';
-import { CuestionarioModule } from './cuestionario/cuestionario.module';
-import { CuestionarioRespuestaUsuarioModule } from './cuestionario-respuesta-usuario/cuestionario-respuesta-usuario.module';
+import { CursoModule } from './modules/curso/curso.module';
+import { CategoriaModule } from './modules/categoria/categoria.module';
+import { UsuarioModule } from './modules/usuario/usuario.module';
+import { InstructorModule } from './modules/instructor/instructor.module';
+import { OrdenModule } from './modules/orden/orden.module';
+import { ComentarioModule } from './modules/comentario/comentario.module';
+import { CuestionarioModule } from './modules/cuestionario/cuestionario.module';
+import { CuestionarioRespuestaModule } from './modules/cuestionario-respuesta/cuestionario-respuesta.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
-import { DatabaseModule } from './_database/database.module';
-import { environment } from './_common/enviroments';
-import configEnv from './_common/configEnv';
-import { configValidationSchema } from './_common/configValidationSchema';
-import { EstructuraProgramariaModule } from './estructura-programaria/estructura-programaria.module';
-import { MongooseUtilsServiceModule } from './_mongoose-utils-service/_mongoose-utils-service.module';
-import { AuthModule } from './auth/auth.module';
+import { DatabaseModule } from './database/database.module';
+import { fileEnvironment } from './common/enviroments/fileEnvironment';
+import configEnv from './common/enviroments/configEnv';
+import { configValidationSchema } from './common/enviroments/configValidationSchema';
+import { MongooseUtilsServiceModule } from './mongoose-utils-service/mongoose-utils-service.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { join } from 'path';
-// import { HelloWorldModule } from './hello-world/hello-world.module';
+
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import { SeedModule } from './seed/seed.module';
+// import { SeedModule } from './seed/seed.module';
+import { CalificacionModule } from './modules/calificacion/calificacion.module';
+import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.module';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      // debug: false,
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
-    }),
+    // GraphQLModule.forRoot<ApolloDriverConfig>({
+    //   driver: ApolloDriver,
+    //   autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+    //   // debug: false,
+    //   playground: false,
+    //   plugins: [ApolloServerPluginLandingPageLocalDefault()],
+    // }),
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
-        ? environment[process.env.NODE_ENV]
+        ? fileEnvironment[process.env.NODE_ENV]
         : '.env',
       isGlobal: true,
       load: [configEnv],
       validationSchema: configValidationSchema,
     }),
     MongooseUtilsServiceModule,
-    CursoModule,
+    DatabaseModule,
+    AuthModule,
+    CalificacionModule,
     CategoriaModule,
-    UsuarioModule,
+    ComentarioModule,
+    CuestionarioModule,
+    CuestionarioRespuestaModule,
+    CursoModule,
+    CursoCompradoModule,
     InstructorModule,
     OrdenModule,
-    ComentarioModule,
-    ProgresoCursoModule,
-    CuestionarioModule,
-    CuestionarioRespuestaUsuarioModule,
-    DatabaseModule,
-    EstructuraProgramariaModule,
-    AuthModule,
-    // HelloWorldModule,
-    SeedModule,
+    UsuarioModule,
+    // SeedModule,
   ],
   controllers: [],
   providers: [],

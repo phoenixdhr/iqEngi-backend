@@ -1,0 +1,26 @@
+import { Module } from '@nestjs/common';
+import { CuestionarioService } from './services/cuestionario.service';
+import { CuestionarioController } from './controllers/cuestionario.controller';
+import { MongooseModule } from '@nestjs/mongoose';
+
+import { CuestionarioResolver } from './resolvers/cuestionario.resolver';
+import {
+  Cuestionario,
+  CuestionarioSchema,
+} from './entities/cuestionario.entity';
+import { Pregunta, PreguntaSchema } from './entities/pregunta.entity';
+import { Opcion, OpcionSchema } from './entities/opcion.entity';
+
+@Module({
+  imports: [
+    MongooseModule.forFeature([
+      { name: Cuestionario.name, schema: CuestionarioSchema },
+      { name: Pregunta.name, schema: PreguntaSchema },
+      { name: Opcion.name, schema: OpcionSchema },
+    ]),
+  ],
+  providers: [CuestionarioService, CuestionarioResolver],
+  controllers: [CuestionarioController],
+  exports: [CuestionarioService],
+})
+export class CuestionarioModule {}

@@ -1,5 +1,4 @@
-import { RolEnum } from 'src/auth/enums/roles.model';
-import { Nivel } from 'src/curso/entities/curso.entity';
+import { Nivel, RolEnum } from "src/common/enums";
 
 export const SEED_CATEGORIA = [
   {
