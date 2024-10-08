@@ -10,6 +10,10 @@ import {
 } from './entities/cuestionario.entity';
 import { Pregunta, PreguntaSchema } from './entities/pregunta.entity';
 import { Opcion, OpcionSchema } from './entities/opcion.entity';
+import { PreguntaService } from './services/pregunta.service';
+import { OpcionService } from './services/opcion.service';
+import { OpcionResolver } from './resolvers/opcion.resolver';
+import { PreguntaResolver } from './resolvers/pregunta.resolver';
 
 @Module({
   imports: [
@@ -19,7 +23,7 @@ import { Opcion, OpcionSchema } from './entities/opcion.entity';
       { name: Opcion.name, schema: OpcionSchema },
     ]),
   ],
-  providers: [CuestionarioService, CuestionarioResolver],
+  providers: [CuestionarioService, CuestionarioResolver, PreguntaService, OpcionService, OpcionResolver, PreguntaResolver],
   controllers: [CuestionarioController],
   exports: [CuestionarioService],
 })

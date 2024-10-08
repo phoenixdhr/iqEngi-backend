@@ -27,13 +27,13 @@ import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.mod
 
 @Module({
   imports: [
-    // GraphQLModule.forRoot<ApolloDriverConfig>({
-    //   driver: ApolloDriver,
-    //   autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-    //   // debug: false,
-    //   playground: false,
-    //   plugins: [ApolloServerPluginLandingPageLocalDefault()],
-    // }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      // debug: false,
+      playground: false,
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
+    }),
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
         ? fileEnvironment[process.env.NODE_ENV]

@@ -10,6 +10,12 @@ import { CursoResolver } from './resolvers/curso.resolver';
 import { Modulo, ModuloSchema } from './entities/modulo.entity';
 import { Unidad, UnidadSchema } from './entities/unidad.entity';
 import { Material, MaterialSchema } from './entities/material.entity';
+import { ModuloResolver } from './resolvers/modulo.resolver';
+import { UnidadResolver } from './resolvers/unidad.resolver';
+import { MaterialResolver } from './resolvers/material.resolver';
+import { MaterialService } from './services/material.service';
+import { UnidadService } from './services/unidad.service';
+import { ModuloService } from './services/modulo.service';
 
 @Module({
   imports: [
@@ -27,7 +33,16 @@ import { Material, MaterialSchema } from './entities/material.entity';
     // InstructorModule,
   ],
   controllers: [CursoController],
-  providers: [CursoService, CursoResolver],
+  providers: [
+    CursoService,
+    CursoResolver,
+    ModuloResolver,
+    UnidadResolver,
+    MaterialResolver,
+    MaterialService,
+    UnidadService,
+    ModuloService,
+  ],
   exports: [CursoService],
 })
 export class CursoModule {}

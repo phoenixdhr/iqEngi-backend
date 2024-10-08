@@ -12,6 +12,8 @@ import {
   RespuestaPregunta,
   RespuestaPreguntaUsuarioSchema as RespuestaPreguntaSchema,
 } from './entities/respuesta-pregunta.entity';
+import { RespuestaPreguntaService } from './services/respuesta-pregunta.service';
+import { RespuestaPreguntaResolver } from './resolvers/respuesta-pregunta.resolver';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import {
       { name: RespuestaPregunta.name, schema: RespuestaPreguntaSchema },
     ]),
   ],
-  providers: [CuestionarioRespuestaService, RespuestaCuestionarioResolver],
+  providers: [CuestionarioRespuestaService, RespuestaCuestionarioResolver, RespuestaPreguntaService, RespuestaPreguntaResolver],
   controllers: [CuestionarioRespuestaController],
   exports: [CuestionarioRespuestaService],
 })
