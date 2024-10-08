@@ -9,6 +9,7 @@ import { OrdenModule } from './modules/orden/orden.module';
 import { ComentarioModule } from './modules/comentario/comentario.module';
 import { CuestionarioModule } from './modules/cuestionario/cuestionario.module';
 import { CuestionarioRespuestaModule } from './modules/cuestionario-respuesta/cuestionario-respuesta.module';
+
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
@@ -21,7 +22,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { join } from 'path';
 
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-// import { SeedModule } from './seed/seed.module';
+
 import { CalificacionModule } from './modules/calificacion/calificacion.module';
 import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.module';
 
@@ -30,9 +31,13 @@ import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.mod
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      // debug: false,
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
+      playground: false, // Deshabilitamos el playground deprecado
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault({ embed: true }), // Usamos el nuevo plugin
+      ],
+      subscriptions: {
+        'graphql-ws': true, // (NUEVO) Habilitamos las suscripciones con graphql-ws
+      },
     }),
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV
