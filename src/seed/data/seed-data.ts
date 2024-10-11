@@ -1,4 +1,4 @@
-import { Nivel, RolEnum } from "src/common/enums";
+import { Nivel, RolEnum } from 'src/common/enums';
 
 export const SEED_CATEGORIA = [
   {

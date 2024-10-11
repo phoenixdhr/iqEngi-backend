@@ -25,6 +25,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 
 import { CalificacionModule } from './modules/calificacion/calificacion.module';
 import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.mod
     InstructorModule,
     OrdenModule,
     UsuarioModule,
+    MailModule,
     // SeedModule,
   ],
   controllers: [],

@@ -15,14 +15,18 @@ import {
   CursoComprado,
   CursoCompradoSchema,
 } from '../curso-comprado/entities/curso-comprado.entity';
+import { MailModule } from '../mail/mail.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    MailModule,
     ComentarioModule,
     OrdenModule,
     CuestionarioRespuestaModule,
     CuestionarioModule,
     forwardRef(() => CursoModule),
+    forwardRef(() => AuthModule),
     MongooseModule.forFeature([
       { name: Usuario.name, schema: UsuarioSchema },
       { name: Perfil.name, schema: PerfilSchema },

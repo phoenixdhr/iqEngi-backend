@@ -14,3 +14,22 @@ quote_type = single
 [*.md]
 max_line_length = off
 trim_trailing_whitespace = false
+
+
+# # Editor configuration, see https://editorconfig.org
+# root = true
+
+# [*]
+# charset = utf-8
+# indent_style = space
+# indent_size = 2
+# insert_final_newline = true
+# trim_trailing_whitespace = true
+
+# [*.ts]
+# # Las propiedades específicas para TypeScript pueden manejarse con ESLint o Prettier
+# # Por lo tanto, no es necesario incluir 'quote_type' aquí
+
+# [*.md]
+# # Las reglas específicas para Markdown también pueden manejarse con otras herramientas
+# # 'max_line_length' y otras reglas avanzadas no son soportadas por EditorConfig

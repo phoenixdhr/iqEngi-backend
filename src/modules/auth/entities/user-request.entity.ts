@@ -8,7 +8,7 @@ export class UserRequest implements UserGoogle {
   _id: string;
 
   @Field(() => [RolEnum])
-  roles: RolEnum[];
+  roles: [RolEnum];
 
   @Field(() => Int, { nullable: true })
   iat: number;

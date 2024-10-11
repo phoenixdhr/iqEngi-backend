@@ -1,9 +1,9 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth/jwt-auth.guard';
-import { RolesGuard } from 'src/modules/auth/guards/roles-auth/roles.guard';
+import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
+import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth/jwt-auth.guard';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtGqlAuthGuard, RolesGuard)
 @ApiTags('cursos')
 @Controller('cursos')
 export class CursoController {}

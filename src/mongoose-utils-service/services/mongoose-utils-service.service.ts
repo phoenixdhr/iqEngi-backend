@@ -1,61 +1,69 @@
 // // mongoose-utils.service.ts
 // import { Injectable, NotFoundException } from '@nestjs/common';
-// import { Model } from 'mongoose';
+// import { Model, Document } from 'mongoose';
 
 // @Injectable()
 // export class MongooseUtilsService {
 //   // Método para añadir elementos a un array de cualquier documento
-//   async pushToArray<T>(
+//   async pushToArray<T extends Document>(
 //     model: Model<T>,
-//     arrayName: string,
 //     docId: string,
-//     element: Array<any>,
+//     arrayName: keyof T & string,
+//     elements: Array<T[keyof T]>,
 //   ) {
 //     const document = await model.findById(docId).exec();
-//     document[arrayName].push(...element);
-
 //     if (!document) {
 //       throw new NotFoundException(
-//         `Documento ${model.name} con ID ${docId} no encontrado`,
+//         `Documento ${model.modelName} con ID ${docId} no encontrado`,
 //       );
 //     }
 
-//     return document.save();
+//     if (Array.isArray(document[arrayName])) {
+//       (document[arrayName] as any).push(...elements);
+//       document.save();
+//       return document;
+//     } else {
+//       throw new Error(`La propiedad ${arrayName} no es un array.`);
+//     }
 //   }
 
 //   // Método para eliminar elementos de un array de cualquier documento
-//   async pullFromArray<T>(
+//   async pullFromArray<T extends Document>(
 //     model: Model<T>,
-//     arrayName: string,
 //     docId: string,
-//     element: Array<any>,
+//     arrayName: keyof T & string,
+//     element: any,
 //   ) {
 //     const document = await model.findById(docId).exec();
-//     document[arrayName].pull(element);
-
 //     if (!document) {
 //       throw new NotFoundException(
-//         `Documento ${model.name} con ID ${docId} no encontrado`,
+//         `Documento ${model.modelName} con ID ${docId} no encontrado`,
 //       );
 //     }
 
-//     return document.save();
+//     if (Array.isArray(document[arrayName])) {
+//       (document[arrayName] as any).pull(element);
+//       document.save();
+//       return document;
+//     } else {
+//       throw new Error(`La propiedad ${arrayName} no es un array.`);
+//     }
 //   }
 // }
 
-// mongoose-utils.service.ts
+//______________________________________________
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Model, Document } from 'mongoose';
+import { Model, Document, Types } from 'mongoose';
 
 @Injectable()
 export class MongooseUtilsService {
   // Método para añadir elementos a un array de cualquier documento
-  async pushToArray<T extends Document>(
+  async pushToArray<T extends Document, K extends keyof T>(
     model: Model<T>,
     docId: string,
-    arrayName: keyof T & string,
-    elements: Array<T[keyof T]>,
-  ) {
+    arrayName: K,
+    elements: T[K] extends Types.Array<infer U> ? U[] : never,
+  ): Promise<T> {
     const document = await model.findById(docId).exec();
     if (!document) {
       throw new NotFoundException(
@@ -63,35 +71,40 @@ export class MongooseUtilsService {
       );
     }
 
-    if (Array.isArray(document[arrayName])) {
-      (document[arrayName] as any).push(...elements);
-      document.save();
+    const arrayField = document[arrayName];
+    if (arrayField instanceof Types.Array) {
+      arrayField.push(...elements);
+      await document.save();
       return document;
     } else {
-      throw new Error(`La propiedad ${arrayName} no es un array.`);
+      throw new Error(
+        `La propiedad ${String(arrayName)} no es un array de Mongoose.`,
+      );
     }
   }
 
   // Método para eliminar elementos de un array de cualquier documento
-  async pullFromArray<T extends Document>(
+  async pullFromArray<T extends Document, K extends keyof T>(
     model: Model<T>,
     docId: string,
-    arrayName: keyof T & string,
-    element: any,
-  ) {
+    arrayName: K,
+    element: T[K] extends Types.Array<infer U> ? U : never,
+  ): Promise<T> {
     const document = await model.findById(docId).exec();
     if (!document) {
-      throw new NotFoundException(
-        `Documento ${model.modelName} con ID ${docId} no encontrado`,
-      );
+      throw new NotFoundException(`Documento ${model.modelName}
+         con ID ${docId} no encontrado`);
     }
 
-    if (Array.isArray(document[arrayName])) {
-      (document[arrayName] as any).pull(element);
-      document.save();
+    const arrayField = document[arrayName];
+    if (arrayField instanceof Types.Array) {
+      arrayField.pull(element);
+      await document.save();
       return document;
     } else {
-      throw new Error(`La propiedad ${arrayName} no es un array.`);
+      throw new Error(
+        `La propiedad ${String(arrayName)} no es un array de Mongoose.`,
+      );
     }
   }
 }

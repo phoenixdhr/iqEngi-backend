@@ -12,6 +12,7 @@ export interface UserGoogle extends UserAuth {
   firstName: string;
   lastName: string;
   picture?: string;
+  isGoogleAuth?: boolean;
   accessToken?: string;
   refreshToken?: string;
 }

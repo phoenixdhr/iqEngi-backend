@@ -1,6 +1,15 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
+    // "moduleResolution": "node",
+    // "esModuleInterop": true,
+    // "paths": {
+    //   "@/*": ["src/*"]
+    // },
+
+
+    // "module": "ESNext",
+    "lib": ["ES2021"],
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,

@@ -17,6 +17,7 @@ import { RolEnum } from 'src/common/enums/rol.enum';
 import { CreatePerfilInput } from '../perfil-dtos/create-perfil.input';
 import { Type } from 'class-transformer';
 import { IUsuarioInput } from '../../interfaces/usuario.interface';
+import { UserGoogle } from 'src/modules/auth/interfaces/google-user.interface';
 
 @InputType()
 export class CreateUsuarioInput implements IUsuarioInput {
@@ -39,6 +40,11 @@ export class CreateUsuarioInput implements IUsuarioInput {
   @IsOptional()
   @IsBoolean()
   email_verified: boolean = false;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isGoogleAuth?: boolean = false;
 
   @Field()
   @IsString()
@@ -66,8 +72,41 @@ export class CreateUsuarioInput implements IUsuarioInput {
   @IsBoolean()
   notificaciones: boolean = true;
 
-  @Field(() => Boolean, { nullable: true })
+  // @Field(() => UserStatus, { nullable: true })
+  // @IsEnum(UserStatus)
+  // @IsOptional()
+  // status: UserStatus = UserStatus.ACTIVE;
+}
+
+export class CreateUserGoogleAuth implements UserGoogle {
+  @Field()
   @IsNotEmpty()
+  @IsString()
+  firstName: string;
+
+  @Field()
+  @IsNotEmpty()
+  @IsString()
+  lastName: string;
+
+  @Field()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
   @IsBoolean()
-  isActive: boolean = true;
+  email_verified: boolean = false;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  picture?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  isGoogleAuth?: boolean = true;
 }

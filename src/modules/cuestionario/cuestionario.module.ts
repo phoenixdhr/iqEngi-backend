@@ -23,7 +23,14 @@ import { PreguntaResolver } from './resolvers/pregunta.resolver';
       { name: Opcion.name, schema: OpcionSchema },
     ]),
   ],
-  providers: [CuestionarioService, CuestionarioResolver, PreguntaService, OpcionService, OpcionResolver, PreguntaResolver],
+  providers: [
+    CuestionarioService,
+    CuestionarioResolver,
+    PreguntaService,
+    OpcionService,
+    OpcionResolver,
+    PreguntaResolver,
+  ],
   controllers: [CuestionarioController],
   exports: [CuestionarioService],
 })

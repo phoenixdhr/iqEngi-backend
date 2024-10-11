@@ -19,4 +19,6 @@ export interface IRespuestaCuestionario {
 export type IRespuestaCuestionarioInput = Omit<
   IRespuestaCuestionario,
   'fecha' | '_id' | 'respuestas'
-> & { respuestas: CreateRespuestaPreguntaInput[] };
+> & {
+  respuestas: CreateRespuestaPreguntaInput[];
+};

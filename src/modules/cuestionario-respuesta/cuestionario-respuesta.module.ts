@@ -25,7 +25,12 @@ import { RespuestaPreguntaResolver } from './resolvers/respuesta-pregunta.resolv
       { name: RespuestaPregunta.name, schema: RespuestaPreguntaSchema },
     ]),
   ],
-  providers: [CuestionarioRespuestaService, RespuestaCuestionarioResolver, RespuestaPreguntaService, RespuestaPreguntaResolver],
+  providers: [
+    CuestionarioRespuestaService,
+    RespuestaCuestionarioResolver,
+    RespuestaPreguntaService,
+    RespuestaPreguntaResolver,
+  ],
   controllers: [CuestionarioRespuestaController],
   exports: [CuestionarioRespuestaService],
 })

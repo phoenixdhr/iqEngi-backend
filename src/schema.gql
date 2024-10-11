@@ -132,7 +132,9 @@ type Usuario {
   picture: String
   perfil: Perfil
   notificaciones: Boolean!
-  isActive: Boolean!
+  status: UserStatus!
+  deletedAt: DateTime
+  deletedBy: ID
 }
 
 """Roles disponibles para los usuarios"""
@@ -144,6 +146,14 @@ enum RolEnumGql {
   SUPERADMIN
 }
 
+"""Estados de un usuario"""
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  DELETED
+  SUSPENDED
+}
+
 type RespuestaPregunta {
   _id: ID!
   preguntaId: Pregunta!
@@ -151,15 +161,181 @@ type RespuestaPregunta {
   respuestaAbierta: String
 }
 
+type UsuarioOutput {
+  _id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  email_verified: Boolean!
+  roles: [RolEnumGql!]!
+  picture: String
+  perfil: Perfil
+  notificaciones: Boolean!
+  status: UserStatus!
+  deletedAt: DateTime
+  deletedBy: ID
+}
+
+type Comentario {
+  _id: ID!
+  usuarioId: Usuario!
+  cursoId: Curso!
+  comentario: String!
+  fecha: DateTime!
+}
+
+type UserRequest {
+  _id: ID!
+  roles: [RolEnumGql!]!
+  iat: Int
+  exp: Int
+  email: String!
+  email_verified: Boolean!
+  firstName: String!
+  lastName: String!
+  picture: String
+}
+
+type UserJwtOutput {
+  user: UserRequest!
+  accessToken: String!
+}
+
+type Calificacion {
+  _id: ID!
+  usuarioId: Usuario!
+  cursoId: Curso!
+  valor: Int!
+  comentario: String
+  fecha: DateTime!
+}
+
 type Query {
+  login(loginUserInput: LoginUserInput!): UserJwtOutput!
+  tuki: String!
+
+  """Obtiene una lista de usuarios, opcionalmente filtrados por roles."""
+  usuarios(
+    """Filtrar usuarios por roles específicos."""
+    roles: RolesInput
+    offset: Int = 0
+    limit: Int = 10
+    search: String
+  ): [UsuarioOutput!]!
+  usuario(id: ID!): UsuarioOutput!
+
+  """Obtiene una lista de usuarios eliminados."""
+  usuariosEliminados(offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
+  comentarios: [Comentario!]!
+  comentario(id: ID!): Comentario!
+  comentariosPorCurso(cursoId: ID!): [Comentario!]!
+  comentariosPorUsuario(usuarioId: ID!): [Comentario!]!
+  calificaciones: [Calificacion!]!
+  calificacion(id: ID!): Calificacion!
+  calificacionesPorCurso(cursoId: ID!): [Calificacion!]!
+  calificacionesPorUsuario(usuarioId: ID!): [Calificacion!]!
+  promedioCalificaciones(cursoId: ID!): Float!
   categorias: [Categoria!]!
+  categoria(id: ID!): Categoria!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+input RolesInput {
+  roles: [RolEnumGql!]
 }
 
 type Mutation {
+  signup(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
+  createUsuario(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
+  updateUsuario(id: ID!, updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
+  updatePassword(id: ID!, updatePasswordInput: UpdatePasswordInput!): UsuarioOutput!
+  removeUsuario(idRemove: ID!, idThanos: ID!): UsuarioOutput!
+  createComentario(createComentarioInput: CreateComentarioInput!): Comentario!
+  updateComentario(id: ID!, updateComentarioInput: UpdateComentarioInput!): Comentario!
+  removeComentario(id: ID!): Comentario!
+  createCalificacion(createCalificacionInput: CreateCalificacionInput!): Calificacion!
+  updateCalificacion(id: ID!, updateCalificacionInput: UpdateCalificacionInput!): Calificacion!
+  removeCalificacion(id: ID!): Calificacion!
   createCategoria(createCategoriaInput: CreateCategoriaInput!): Categoria!
+  updateCategoria(id: ID!, updateCategoriaInput: UpdateCategoriaInput!): Categoria!
+  removeCategoria(id: ID!): Categoria!
+}
+
+input CreateUsuarioInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  email_verified: Boolean = false
+  isGoogleAuth: Boolean = false
+  password: String!
+  roles: [RolEnumGql!]! = [ESTUDIANTE]
+  picture: String
+  perfil: CreatePerfilInput
+  notificaciones: Boolean = true
+}
+
+input CreatePerfilInput {
+  bio: String
+  ubicacion: String
+  celular: String
+  fechaNacimiento: DateTime
+  contacto: String
+  intereses: [String!]
+}
+
+input UpdateUsuarioInput {
+  firstName: String
+  lastName: String
+  email: String
+  email_verified: Boolean = false
+  isGoogleAuth: Boolean = false
+  roles: [RolEnumGql!] = [ESTUDIANTE]
+  picture: String
+  perfil: CreatePerfilInput
+  notificaciones: Boolean = true
+}
+
+input UpdatePasswordInput {
+  oldPassword: String!
+  newPassword: String!
+}
+
+input CreateComentarioInput {
+  usuarioId: ID!
+  cursoId: ID!
+  comentario: String!
+}
+
+input UpdateComentarioInput {
+  usuarioId: ID
+  cursoId: ID
+  comentario: String
+}
+
+input CreateCalificacionInput {
+  usuarioId: ID!
+  cursoId: ID!
+  valor: Int!
+  comentario: String
+}
+
+input UpdateCalificacionInput {
+  usuarioId: ID
+  cursoId: ID
+  valor: Int
+  comentario: String
 }
 
 input CreateCategoriaInput {
   nombre: String!
+  descripcion: String
+}
+
+input UpdateCategoriaInput {
+  nombre: String
   descripcion: String
 }

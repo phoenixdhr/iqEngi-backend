@@ -78,7 +78,11 @@
             "group": "Default"
         },
         {
-            "filePath": "src/seed",
+            "filePath": "src/modules/usuario",
+            "group": "Default"
+        },
+        {
+            "filePath": "src/modules/auth",
             "group": "Default"
         }
     ],
