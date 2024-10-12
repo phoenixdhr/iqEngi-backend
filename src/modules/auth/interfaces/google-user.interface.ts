@@ -16,3 +16,13 @@ export interface UserGoogle extends UserAuth {
   accessToken?: string;
   refreshToken?: string;
 }
+
+export interface PerfilResponse {
+  id?: string;
+  email?: string;
+  verified_email?: boolean;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
+}

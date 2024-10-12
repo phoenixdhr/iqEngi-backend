@@ -53,6 +53,20 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       refreshToken, // Token de refresco
     };
 
+    // // Aquí, puedes manejar la lógica para encontrar o crear el usuario
+    // const user = await this.authService.validateOAuthLogin(
+    //   email,
+    //   displayName,
+    //   'google',
+    //   id,
+    // );
+
+    // if (!user) {
+    //   return done(new UnauthorizedException(), false);
+    // }
+
+    // done(null, user);
+
     return user; // Devuelve el objeto de usuario
   }
 }

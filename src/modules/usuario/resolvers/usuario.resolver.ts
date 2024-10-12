@@ -2,7 +2,7 @@
 
 import { UseGuards } from '@nestjs/common';
 import { UsuarioOutput } from '../dtos/usuarios-dtos/usuario.output';
-import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth/jwt-auth.guard';
+import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 
 // Importaciones de GraphQL
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';

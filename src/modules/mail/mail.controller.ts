@@ -1,28 +1,30 @@
-import { Controller, Get, Post } from '@nestjs/common';
-import { Usuario } from '../usuario/entities/usuario.entity';
+// }
+import { Controller, Get, Query, Redirect } from '@nestjs/common';
 import { MailService } from './mail.service';
 
-@Controller('mail')
+@Controller('email')
 export class MailController {
   constructor(private readonly mailService: MailService) {}
 
-  @Post('send')
-  async sendMail() {
-    console.log('tuki1');
-    const mockUser = {
-      email: 'phoenixdhr@gmail.com',
-      firstName: 'Dany',
-    } as Usuario;
-    const mockToken = 'dummy-token';
-    console.log('tuki2');
-    await this.mailService.sendVerificationEmail(mockUser, mockToken);
-    return 'Email sent';
+  /**
+   * Verifica el email del usuario a través de un token.
+   * Redirige al usuario a una URL de éxito o error según el resultado de la verificación.
+   * @param token - Token de verificación recibido como parámetro de consulta.
+   * @returns URL de redirección basada en el resultado de la verificación.
+   */
+  @Get('verify-email')
+  @Redirect() // Redirige automáticamente a la URL que retorna el método.
+  async verifyEmail(@Query('token') token: string) {
+    const redirectUrl = await this.mailService.verifyEmail(token);
+    return { url: redirectUrl }; // Redirecciona a la URL devuelta por el servicio.
   }
 
-  // @Post('tuki')
-  @Get('tuki')
-  async sendtuki() {
-    console.log('tuki3');
-    return 'tuki';
+  /**
+   * Punto final para confirmar la verificación de email exitosa.
+   * @returns Mensaje de éxito al verificar el email.
+   */
+  @Get('verification-success')
+  async verificationSuccess() {
+    return '¡Correo verificado exitosamente!'; // Mensaje de confirmación de verificación.
   }
 }

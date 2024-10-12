@@ -9,9 +9,10 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 import { Usuario } from '../entities/usuario.entity';
+import * as jwt from 'jsonwebtoken';
 
 import * as bcrypt from 'bcrypt';
 import { UpdateUsuarioInput } from '../dtos/usuarios-dtos/update-usuario.input';
@@ -26,6 +27,8 @@ import {
   CreateUserGoogleAuth,
   CreateUsuarioInput,
 } from '../dtos/usuarios-dtos/create-usuario.input';
+import configEnv from 'src/common/enviroments/configEnv';
+import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class UsuarioService {
@@ -34,26 +37,31 @@ export class UsuarioService {
     @Inject(forwardRef(() => JwtAuthService))
     private readonly jwtAuthService: JwtAuthService,
     private readonly mailService: MailService,
+    @Inject(configEnv.KEY)
+    private readonly configService: ConfigType<typeof configEnv>,
   ) {}
 
   /**
-   * Crea un nuevo usuario.
-   * @param createUsuarioInput Datos para crear el usuario.
-   * @returns El usuario creado.
-   * @throws ConflictException si el email ya está en uso.
+   * Crea un nuevo usuario en la base de datos.
+   * Envia un correo de verificación al usuario.
+   * @param createUsuarioInput - Datos necesarios para crear el usuario, incluyendo email y contraseña.
+   * @returns El usuario creado con los datos encriptados y otros detalles necesarios.
+   * @throws ConflictException - Si el email ya está registrado en la base de datos.
+   * @throws InternalServerErrorException - Si ocurre algún error durante la creación del usuario.
    */
   async create(createUsuarioInput: CreateUsuarioInput): Promise<UsuarioOutput> {
     const { email, password, ...rest } = createUsuarioInput;
 
-    // Verificar si el email ya existe
+    // Verificar si el email ya existe en la base de datos
     const existingUsuario = await this.usuarioModel.findOne({ email }).exec();
     if (existingUsuario) {
       throw new ConflictException(`El email ${email} ya está en uso`);
     }
 
-    // Encriptar la contraseña
+    // Encriptar la contraseña antes de guardarla
     const hashPassword = await bcrypt.hash(password, 10);
 
+    // Crear una nueva instancia del usuario con la contraseña encriptada y otros datos
     const newUsuario = new this.usuarioModel({
       email,
       hashPassword,
@@ -61,25 +69,35 @@ export class UsuarioService {
     });
 
     try {
+      // Guardar el usuario en la base de datos
       const savedUser = await newUsuario.save();
 
-      const payload = {
+      // Crear un payload para el token de verificación
+      const payload: UserRequest = {
         roles: savedUser.roles,
         sub: savedUser._id,
+        email: savedUser.email,
       } as unknown as UserRequest;
 
-      // Generar token de verificación
-      const verificationToken = await this.jwtAuthService.generateJWT(payload);
-
-      // Enviar correo de verificación
-      await this.mailService.sendVerificationEmail(
-        savedUser,
-        verificationToken.accessToken,
+      // Generar el token de verificación con un tiempo de expiración de 1 hora
+      const verificationToken = jwt.sign(
+        payload,
+        this.configService.jwtSecret,
+        {
+          expiresIn: '1h',
+        },
       );
 
+      // Enviar correo electrónico de verificación con el token
+      await this.mailService.sendVerificationEmail(
+        savedUser,
+        verificationToken,
+      );
+
+      // Retornar el usuario guardado como salida del método
       return savedUser;
     } catch (error) {
-      // Manejo de errores en la creación
+      // Manejar posibles errores durante la creación del usuario
       throw new InternalServerErrorException(
         'Error al crear el usuario',
         error.message,

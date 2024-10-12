@@ -250,6 +250,7 @@ input RolesInput {
 
 type Mutation {
   signup(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
+  sendVerificationEmailAgain: UserJwtOutput!
   createUsuario(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
   updateUsuario(id: ID!, updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
   updatePassword(id: ID!, updatePasswordInput: UpdatePasswordInput!): UsuarioOutput!

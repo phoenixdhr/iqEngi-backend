@@ -1,6 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { UsuarioModule } from 'src/modules/usuario/usuario.module';
-import { LocalStrategy } from './jwt-auth/strategy/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './controllers/auth.controller';
 import { JwtModule } from '@nestjs/jwt';
@@ -12,10 +11,13 @@ import { GoogleAuthService } from './google-auth/google-auth.service';
 import { JwtAuthService } from './jwt-auth/jwt-auth.service';
 import { JwtAuthResolver } from './jwt-auth/jwt-auth.resolver';
 import { GoogleAuthResolver } from './google-auth/google-auth.resolver';
+import { MailModule } from '../mail/mail.module';
+import { GoogleAuthController } from './google-auth/google-auth.controller';
 
 @Module({
   imports: [
     PassportModule,
+    MailModule,
     forwardRef(() => UsuarioModule),
     JwtModule.registerAsync({
       inject: [configEnv.KEY],
@@ -26,7 +28,6 @@ import { GoogleAuthResolver } from './google-auth/google-auth.resolver';
     }),
   ],
   providers: [
-    LocalStrategy,
     JwtStrategy,
     JwtAuthService,
     JwtAuthResolver,
@@ -34,7 +35,7 @@ import { GoogleAuthResolver } from './google-auth/google-auth.resolver';
     GoogleAuthService,
     GoogleAuthResolver,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, GoogleAuthController],
   exports: [JwtAuthService, GoogleAuthService],
 })
 export class AuthModule {}
