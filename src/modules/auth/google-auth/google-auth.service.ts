@@ -1,28 +1,37 @@
-import { Injectable } from '@nestjs/common';
-
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsuarioService } from 'src/modules/usuario/services/usuario.service';
-//import { PerfilResponse, UserGoogle } from '../interfaces/google-user.interface';
+import { CreateUserGoogleAuth } from 'src/modules/usuario/dtos/usuarios-dtos/create-usuario.input';
 import { TokenExpiredResponse } from '../interfaces/google-perfil.interface';
-import { PerfilResponse } from '../interfaces/google-user.interface';
+import { ITokens } from '../interfaces/jwt-response-token.interface';
 
 @Injectable()
 export class GoogleAuthService {
-  constructor(private readonly usuariosService: UsuarioService) {}
+  constructor(private readonly usuarioService: UsuarioService) {}
 
-  // async googleLogin(req: Request) {
-  //   if (!req.user) {
-  //     return 'No user from google :C';
-  //   }
+  /**
+   * Busca o crea un usuario en la base de datos basado en el perfil de Google.
+   * @param profile - Perfil del usuario obtenido de Google.
+   * @returns El usuario creado o encontrado en la base de datos.
+   */
+  async findOrCreateUser(profile: CreateUserGoogleAuth) {
+    // Crear o buscar al usuario en base al perfil de Google proporcionado.
+    const user = await this.usuarioService.createOAuthUserEstudiante(profile);
+    return user;
+  }
 
-  //   return {
-  //     message: 'User information from google :)',
-  //     user: req.user,
-  //   };
-  // }
-
-  // #region Check Google Guard
-  async getNewAccessToken(refreshToken: string): Promise<string> {
+  /**
+   * Obtiene un nuevo token de acceso utilizando el refresh token de Google.
+   * @param refreshToken - El token de actualización proporcionado por Google.
+   * @returns El nuevo token de acceso.
+   * @throws InternalServerErrorException si no se puede obtener el token de acceso.
+   */
+  async getTokens(refreshToken: string): Promise<string> {
     try {
+      // Solicitud POST a Google para obtener un nuevo token de acceso.
       const response = await fetch(
         'https://accounts.google.com/o/oauth2/token',
         {
@@ -39,60 +48,69 @@ export class GoogleAuthService {
         },
       );
 
-      const data = (await response.json()) as { access_token: string };
-      console.log('data1                ', data);
-      // Retorna el nuevo token de acceso
+      if (!response.ok) {
+        // Captura el error con el código de estado y el mensaje.
+        const errorText = await response.text();
+        throw new InternalServerErrorException(
+          `Error al obtener tokens de Google: ${errorText}`,
+        );
+      }
 
+      const data: ITokens = await response.json();
       return data.access_token;
     } catch (error) {
-      // Lanza un error si no se puede obtener el nuevo token de acceso
-      throw new Error(`Failed to validate the access token: ${error.message}`);
-    }
-  }
-
-  async getProfile(token: string): Promise<PerfilResponse> {
-    try {
-      // Realiza una solicitud GET a la API de Google OAuth 2.0 para obtener el perfil del usuario
-      const response = await fetch(
-        `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${token}`,
+      throw new InternalServerErrorException(
+        `No se pudo obtener un nuevo token de acceso de Google: ${error.message}`,
       );
-
-      const data: PerfilResponse = await response.json();
-
-      return data;
-    } catch (error) {
-      // Lanza un error si no se puede obtener el perfil del usuario
-      throw new Error(`Failed to validate the access token: ${error.message}`);
     }
   }
 
+  /**
+   * Verifica si un token de acceso de Google ha expirado.
+   * @param token - El token de acceso de Google.
+   * @returns Un booleano que indica si el token ha expirado.
+   * @throws UnauthorizedException si el token no es válido o ha expirado.
+   */
   async isTokenExpired(token: string): Promise<boolean> {
     try {
-      // Realiza una solicitud GET a la API de Google OAuth 2.0 para validar el token de acceso
       const response = await fetch(
         `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`,
       );
+      if (!response.ok) {
+        throw new UnauthorizedException('Token de acceso inválido o expirado');
+      }
 
       const data: TokenExpiredResponse = await response.json();
-      const expiredIn = data.expires_in;
 
-      if (!expiredIn || expiredIn < 0) {
-        return true;
-      }
+      // Verifica el tiempo de expiración del token; si `expires_in` es 0 o negativo, el token ha expirado.
+      return data.expires_in <= 0;
     } catch (error) {
-      throw new Error(`Failed to validate the access token: ${error.message}`);
-      // Lanza un error si no se puede validar el token de acceso
-      return false;
+      throw new InternalServerErrorException(
+        `Error al validar el token de acceso: ${error.message}`,
+      );
     }
   }
 
+  /**
+   * Revoca un token de acceso de Google para invalidarlo.
+   * @param token - El token de acceso que se desea revocar.
+   * @throws InternalServerErrorException si no se puede revocar el token.
+   */
   async revokeGoogleToken(token: string): Promise<void> {
     try {
-      // Realiza una solicitud GET a la API de Google OAuth 2.0 para revocar el token de acceso
-      await fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`);
+      const response = await fetch(
+        `https://accounts.google.com/o/oauth2/revoke?token=${token}`,
+      );
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new InternalServerErrorException(
+          `Error al revocar el token de acceso: ${errorText}`,
+        );
+      }
     } catch (error) {
-      // Lanza un error si no se puede revocar el token de acceso
-      throw new Error(`Failed to validate the access token: ${error.message}`);
+      throw new InternalServerErrorException(
+        `No se pudo revocar el token de acceso: ${error.message}`,
+      );
     }
   }
 }

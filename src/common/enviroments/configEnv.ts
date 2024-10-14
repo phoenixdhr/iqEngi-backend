@@ -31,6 +31,7 @@ export default registerAs('configEnv', () => {
 
   return {
     environment,
+    dominioURL,
     mongo: {
       dbName,
       user,

@@ -211,9 +211,6 @@ type Calificacion {
 }
 
 type Query {
-  login(loginUserInput: LoginUserInput!): UserJwtOutput!
-  tuki: String!
-
   """Obtiene una lista de usuarios, opcionalmente filtrados por roles."""
   usuarios(
     """Filtrar usuarios por roles específicos."""
@@ -239,17 +236,13 @@ type Query {
   categoria(id: ID!): Categoria!
 }
 
-input LoginUserInput {
-  email: String!
-  password: String!
-}
-
 input RolesInput {
   roles: [RolEnumGql!]
 }
 
 type Mutation {
   signup(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
+  login(loginUserInput: LoginUserInput!): UserRequest!
   sendVerificationEmailAgain: UserJwtOutput!
   createUsuario(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
   updateUsuario(id: ID!, updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
@@ -270,10 +263,7 @@ input CreateUsuarioInput {
   firstName: String!
   lastName: String!
   email: String!
-  email_verified: Boolean = false
-  isGoogleAuth: Boolean = false
   password: String!
-  roles: [RolEnumGql!]! = [ESTUDIANTE]
   picture: String
   perfil: CreatePerfilInput
   notificaciones: Boolean = true
@@ -288,13 +278,15 @@ input CreatePerfilInput {
   intereses: [String!]
 }
 
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
 input UpdateUsuarioInput {
   firstName: String
   lastName: String
   email: String
-  email_verified: Boolean = false
-  isGoogleAuth: Boolean = false
-  roles: [RolEnumGql!] = [ESTUDIANTE]
   picture: String
   perfil: CreatePerfilInput
   notificaciones: Boolean = true

@@ -9,64 +9,97 @@ import {
 import { Request, Response } from 'express';
 import { GoogleAuthService } from './google-auth.service';
 import { GoogleAuthGuard } from './google-auth.guard/google-auth.guard';
-import { UserGoogle } from '../interfaces/google-user.interface';
-import { CheckGoogleTokenExpiryGuard } from './google-auth.guard/check-google-token.guard';
+import { AuthService } from '../auth.service';
+import { UserRequest } from '../entities/user-request.entity';
+import { UserRequestGoogle } from '../interfaces/google-user.interface';
+import { JwtGqlAuthGuard } from '../jwt-auth/jwt-auth.guard/jwt-auth.guard';
 
-@Controller('auth') // Define que esta clase es un controlador y el prefijo de las rutas es 'auth'
+@Controller('auth') // Prefijo de las rutas del controlador: 'auth'
 export class GoogleAuthController {
-  constructor(private googleAuthService: GoogleAuthService) {} // Inyecta el servicio de autenticación
+  constructor(
+    private googleAuthService: GoogleAuthService, // Servicio de autenticación con Google
+    private authService: AuthService, // Servicio de autenticación general
+  ) {}
 
-  @Get('login/google') // Define una ruta GET en 'auth/google'
-  @UseGuards(GoogleAuthGuard) // Aplica el guard de autenticación para Google OAuth
+  /**
+   * Punto de entrada para iniciar la autenticación con Google.
+   * Redirige al usuario a la página de inicio de sesión de Google.
+   * @route GET auth/login/google
+   */
+  @Get('login/google')
+  @UseGuards(GoogleAuthGuard) // Activa el guard para autenticación con Google OAuth
   googleAuth() {
-    // Este manejador redirige al usuario a la página de autenticación de Google
+    // Redirige automáticamente al usuario a Google para la autenticación OAuth
   }
 
-  @Get('login/google/callback') // Define una ruta GET en 'auth/google/callback'
-  @UseGuards(GoogleAuthGuard) // Aplica el guard de autenticación para Google OAuth
-  googleLoginCallback(@Req() req: Request, @Res() res: Response) {
-    // Convertir el usuario autenticado a UserGoogle
-    const user = req.user as UserGoogle;
+  /**
+   * Callback de Google después de la autenticación.
+   * Genera un token JWT para el usuario autenticado y guarda las credenciales en cookies.
+   * @param req - Objeto de solicitud que contiene los datos del usuario autenticado.
+   * @param res - Objeto de respuesta para manejar redirecciones y cookies.
+   * @route GET auth/login/google/callback
+   */
+  @Get('login/google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    // Convierte el usuario autenticado al tipo UserRequest
+    const userRequest = req.user as UserRequest;
 
-    // Obtener los tokens de acceso y de refresco del usuario autenticado
-    const googleToken = user.accessToken || 'no existe token access';
-    const refreshToken = user.refreshToken || 'no existe token refresh';
+    // Convierte el usuario autenticado a UserRequestGoogle y obtiene las credenciales de Google
+    const userGoogle = req.user as UserRequestGoogle;
+    const googleToken = userGoogle.accessToken || null;
+    const googleRefreshToken = userGoogle.refreshToken || null;
 
-    // Configurar cookies para los tokens con la opción httpOnly
-    res.cookie('access_token', googleToken, { httpOnly: true });
-    res.cookie('refresh_token', refreshToken, { httpOnly: true });
+    // Uso de la función compartida para manejar el inicio de sesión y configurar cookies
+    await this.authService.handleLogin(
+      res,
+      userRequest,
+      googleToken,
+      googleRefreshToken,
+    );
 
-    // Redirigir al usuario a la página de perfill
+    // Redirige al usuario a la página de perfil
     res.redirect('http://localhost:3000/auth/profile');
   }
 
-  @UseGuards(CheckGoogleTokenExpiryGuard) // Aplica el guard de autenticación JWT
-  @Get('profile') // Define una ruta GET en 'auth/profile'
+  /**
+   * Muestra el perfil del usuario autenticado.
+   * Protege el acceso usando un guard de autenticación JWT.
+   * @param req - Objeto de solicitud que contiene los datos del usuario autenticado.
+   * @returns Datos del usuario si está autenticado.
+   * @throws UnauthorizedException - Si el usuario no está autenticado.
+   * @route GET auth/profile
+   */
+  @UseGuards(JwtGqlAuthGuard)
+  @Get('profile')
   async profile(@Req() req: Request) {
-    // Obtener el token de acceso desde las cookies
-    const accessToken = req.cookies['access_token'];
+    const user = req.user as UserRequest;
 
-    if (accessToken) {
-      // Si hay un token de acceso, obtener y devolver el perfil del usuario
-      const responsegetProfile =
-        await this.googleAuthService.getProfile(accessToken);
-
-      return responsegetProfile;
+    // Verifica si el usuario está autenticado; si no, lanza una excepción
+    if (!user) {
+      throw new UnauthorizedException('Access token no válido o no encontrado');
     }
 
-    throw new UnauthorizedException('Access token not found');
+    // Retorna el perfil del usuario autenticado
+    return user;
   }
 
-  @Get('logout') // Define una ruta GET en 'auth/logout'
+  /**
+   * Cierra la sesión del usuario.
+   * Elimina las cookies de tokens de acceso y refresco.
+   * Redirige al usuario a la página de inicio después del cierre de sesión.
+   * @param req - Objeto de solicitud (no usado).
+   * @param res - Objeto de respuesta para manejar la redirección y eliminación de cookies.
+   * @route GET auth/logout
+   */
+  @Get('logout')
   logout(@Req() req: Request, @Res() res: Response) {
-    const refreshToken = req.cookies['access_token'];
-    // Eliminar las cookies de los tokens de acceso y de refresco
+    // Limpia las cookies de tokens de acceso, refresco y JWT
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
+    res.clearCookie('jwt_token');
 
-    this.googleAuthService.revokeGoogleToken(refreshToken);
-
-    // Redirigir al usuario a la página de inicio de sesión
+    // Redirige al usuario a la página principal después de cerrar sesión
     res.redirect('http://localhost:3000');
   }
 }

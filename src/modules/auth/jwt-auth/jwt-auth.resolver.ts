@@ -1,31 +1,36 @@
-import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Context } from '@nestjs/graphql';
 import { JwtAuthService } from './jwt-auth.service';
 import { LoginUserInput } from '../dtos/loginUser.input';
 import { UserJwtOutput } from '../entities/user-jwt.output';
 import { CreateUsuarioInput } from 'src/modules/usuario/dtos/usuarios-dtos/create-usuario.input';
 import { UsuarioOutput } from 'src/modules/usuario/dtos/usuarios-dtos/usuario.output';
+import { Response } from 'express';
 
-import { UseGuards } from '@nestjs/common';
+import { Inject, UseGuards } from '@nestjs/common';
 import { JwtGqlAuthGuard } from './jwt-auth.guard/jwt-auth.guard';
-import { RolesGuard } from '../roles-guards/roles.guard';
-import { RolesDec } from '../decorators/roles.decorator';
-import { RolEnum } from 'src/common/enums';
+
 import { IsPublic } from '../decorators/public.decorator';
 import { MailService } from 'src/modules/mail/mail.service';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { UserRequest } from '../entities/user-request.entity';
+import configEnv from 'src/common/enviroments/configEnv';
+import { ConfigType } from '@nestjs/config';
+import { AuthService } from '../auth.service';
 
 @Resolver()
 export class JwtAuthResolver {
   constructor(
-    private readonly jwtAuthService: JwtAuthService,
-    private readonly mailService: MailService,
+    private readonly jwtAuthService: JwtAuthService, // Servicio de autenticación JWT
+    private readonly mailService: MailService, // Servicio de envío de correos
+    private readonly authService: AuthService, // Servicio de autenticación
+    @Inject(configEnv.KEY) readonly configService: ConfigType<typeof configEnv>, // Configuración de variables de entorno
   ) {}
 
   /**
    * Registro de un nuevo usuario.
-   * @param createUsuarioInput - Datos de entrada para crear un nuevo usuario.
-   * @returns El usuario recién creado.
+   * Crea un usuario con los datos proporcionados.
+   * @param createUsuarioInput - Datos para la creación del usuario.
+   * @returns El usuario creado.
    */
   @Mutation(() => UsuarioOutput)
   async signup(
@@ -35,38 +40,31 @@ export class JwtAuthResolver {
   }
 
   /**
-   * Inicio de sesión para un usuario existente.
-   * @param loginUserInput - Datos de entrada para autenticar al usuario (email y contraseña).
-   * @returns Un objeto con los datos del usuario y el token JWT generado.
+   * Inicia sesión de un usuario y genera un token JWT.
+   * @param loginUserInput - Datos de inicio de sesión del usuario (email y contraseña).
+   * @param context - Contexto de GraphQL con acceso a la respuesta HTTP.
+   * @returns Los datos del usuario autenticado.
+   * @throws UnauthorizedException - Si las credenciales no son válidas.
+   * @throws InternalServerErrorException - Si ocurre un error durante el proceso.
    */
-  @Query(() => UserJwtOutput)
+  @Mutation(() => UserRequest)
+  @IsPublic() // Permite el acceso sin autenticación previa
   async login(
     @Args('loginUserInput') loginUserInput: LoginUserInput,
-  ): Promise<UserJwtOutput> {
-    const user = await this.jwtAuthService.validatePassword(loginUserInput);
-    return this.jwtAuthService.login(user);
+    @Context() context: { res: Response },
+  ): Promise<UserRequest> {
+    return await this.jwtAuthService.login(loginUserInput, context.res);
   }
 
   /**
-   * Reenvía un correo de verificación si el usuario aún no ha verificado su email.
-   * Requiere que el usuario esté autenticado.
-   * @param user - Usuario actual obtenido del contexto.
+   * Envía un correo de verificación al usuario.
+   * Solo se permite a usuarios autenticados.
+   * @param user - Datos del usuario actual.
+   * @returns El resultado del envío de correo.
    */
   @Mutation(() => UserJwtOutput)
-  @UseGuards(JwtGqlAuthGuard)
+  @UseGuards(JwtGqlAuthGuard) // Requiere autenticación JWT
   async sendVerificationEmailAgain(@CurrentUser() user: UserRequest) {
     return this.mailService.sendVerificationEmailAgain(user);
-  }
-
-  /**
-   * ELIMINAME TEST CONSOLE.LOG Consulta de prueba para verificar la protección de rutas.
-   * @returns Una cadena de texto si el usuario tiene los permisos adecuados.
-   */
-  @Query(() => String)
-  @UseGuards(JwtGqlAuthGuard, RolesGuard) // Protege la ruta con JWT y validación de roles.
-  @RolesDec(RolEnum.ADMINISTRADOR, RolEnum.EDITOR) // Requiere que el usuario tenga roles específicos.
-  @IsPublic() // Indica que la ruta es pública y no necesita autenticación (en caso de configurarlo así).
-  async tuki(): Promise<string> {
-    return 'Acceso autorizado';
   }
 }

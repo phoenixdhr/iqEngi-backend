@@ -11,10 +11,10 @@ export interface IUsuario extends UserAuth {
   firstName: string;
   lastName: string;
   email: string;
-  email_verified: boolean;
+  email_verified?: boolean;
   hashPassword?: string;
   isGoogleAuth?: boolean;
-  roles: RolEnum[];
+  roles?: RolEnum[];
   picture?: string;
   perfil?: IPerfil; // Reemplaza con IPerfil si está definido
   notificaciones: boolean;

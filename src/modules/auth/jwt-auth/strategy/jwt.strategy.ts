@@ -6,6 +6,7 @@ import configEnv from 'src/common/enviroments/configEnv';
 import { JwtAuthService } from '../jwt-auth.service';
 import { JwtPayload } from '../../interfaces/jwt-requet-payload.interface';
 import { UserRequest } from '../../entities/user-request.entity';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -15,7 +16,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     private readonly jwtAuthService: JwtAuthService, // Servicio para autenticación con JWT.
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // Extrae el token de la cabecera Authorization.
+      // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // Extrae el token de la cabecera Authorization.
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          return request.cookies['jwt_token']; // Nombre de la cookie donde almacenas el JWT
+        },
+      ]),
       ignoreExpiration: false, // No permite el uso de tokens expirados.
       secretOrKey: configService.jwtSecret, // Utiliza la clave secreta para verificar el token.
     });
@@ -31,7 +37,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     // Validación del usuario existente en base al payload del JWT.
     const usuario = await this.jwtAuthService.validatePayload(payload);
 
-    const user: UserRequest = {
+    const userRequest: UserRequest = {
       _id: payload.sub,
       roles: payload.roles,
       iat: payload.iat,
@@ -44,6 +50,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     };
 
     // Devuelve los datos del usuario en el formato esperado para Passport.
-    return user;
+    return userRequest;
   }
 }

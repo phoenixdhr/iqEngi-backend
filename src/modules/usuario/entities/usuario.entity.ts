@@ -34,7 +34,7 @@ export class Usuario extends Document implements IUsuario {
   @Prop({ nullable: true })
   hashPassword?: string;
 
-  @Prop({ required: true })
+  @Prop({ default: false })
   isGoogleAuth?: boolean;
 
   @Field(() => [RolEnum])
@@ -42,6 +42,7 @@ export class Usuario extends Document implements IUsuario {
     type: [String],
     enum: RolEnum,
     required: true,
+    default: [RolEnum.ESTUDIANTE],
   })
   roles: [RolEnum];
 

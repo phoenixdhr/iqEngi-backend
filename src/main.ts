@@ -34,7 +34,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  app.enableCors();
+  app.enableCors({
+    // origin: 'http://localhost:3000', // Ajusta esto al dominio de tu frontend
+    // credentials: true,
+  });
   app.use(cookieParser());
 
   await app.listen(port);

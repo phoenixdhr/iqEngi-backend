@@ -29,6 +29,7 @@ import {
 } from '../dtos/usuarios-dtos/create-usuario.input';
 import configEnv from 'src/common/enviroments/configEnv';
 import { ConfigType } from '@nestjs/config';
+import { RolEnum } from 'src/common/enums';
 
 @Injectable()
 export class UsuarioService {
@@ -110,7 +111,7 @@ export class UsuarioService {
    * @param createUserGoogleAuth Datos para crear el usuario vía OAuth.
    * @returns Usuario creado.
    */
-  async createOAuthUser(
+  async createOAuthUserEstudiante(
     createUserGoogleAuth: CreateUserGoogleAuth,
   ): Promise<UsuarioOutput> {
     const { firstName, lastName, email, picture } = createUserGoogleAuth;
@@ -143,6 +144,8 @@ export class UsuarioService {
       email,
       email_verified: true,
       status: UserStatus.ACTIVE,
+      roles: [RolEnum.ESTUDIANTE],
+      isGoogleAuth: true,
     });
 
     try {

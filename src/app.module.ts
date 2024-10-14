@@ -26,6 +26,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { CalificacionModule } from './modules/calificacion/calificacion.module';
 import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.module';
 import { MailModule } from './modules/mail/mail.module';
+// import * as cookieParser from 'cookie-parser';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MailModule } from './modules/mail/mail.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false, // Deshabilitamos el playground deprecado
+      context: ({ req, res }) => ({ req, res }), // Configura el contexto con req y res
       plugins: [
         ApolloServerPluginLandingPageLocalDefault({ embed: true }), // Usamos el nuevo plugin
       ],
@@ -68,3 +70,9 @@ import { MailModule } from './modules/mail/mail.module';
   providers: [],
 })
 export class AppModule {}
+
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer.apply(cookieParser()).forRoutes('*'); // Configura cookie-parser para todas las rutas
+//   }
+// }

@@ -13,90 +13,90 @@ import { LoginUserInput } from '../dtos/loginUser.input';
 import { UsuarioService } from 'src/modules/usuario/services/usuario.service';
 import { IPayload } from '../interfaces/jwt-requet-payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { UserJwtOutput } from '../entities/user-jwt.output';
 import { UserRequest } from '../entities/user-request.entity';
 import configEnv from 'src/common/enviroments/configEnv';
 import { ConfigType } from '@nestjs/config';
+import { AuthService as AuthService } from '../auth.service';
+import { Response } from 'express';
 
 @Injectable()
 export class JwtAuthService {
   constructor(
     @Inject(forwardRef(() => UsuarioService))
-    private readonly usuarioService: UsuarioService, // Inyección de dependencias de UsuarioService para gestionar usuarios.
-    private readonly jwtService: JwtService, // Inyección de dependencias de JwtService para gestionar JWT.
+    private readonly usuarioService: UsuarioService, // Servicio de usuario para operaciones de manejo de usuarios.
+    private readonly authService: AuthService, // Servicio de autenticación para manejo de JWT.
+    private readonly jwtService: JwtService, // Servicio para firmar y verificar JWT.
     @Inject(configEnv.KEY) readonly configService: ConfigType<typeof configEnv>,
   ) {}
 
   /**
-   * Registro de un nuevo usuario.
-   * @param createUserDto - Datos para la creación del usuario.
-   * @returns Usuario creado.
+   * Registra un nuevo usuario en el sistema.
+   * @param createUserDto - Datos necesarios para crear el usuario, como email y contraseña.
+   * @returns El usuario recién creado.
    */
   async signup(createUserDto: CreateUsuarioInput): Promise<UsuarioOutput> {
     return await this.usuarioService.create(createUserDto);
   }
 
   /**
-   * Inicio de sesión de un usuario.
-   * @param user - Datos del usuario.
-   * @returns Un objeto con el token JWT.
+   * Inicia sesión de usuario y genera un token JWT.
+   * @param user - Información del usuario.
+   * @returns Un objeto que contiene el token JWT y los datos del usuario.
    */
-  async login(user: UserRequest): Promise<UserJwtOutput> {
-    return this.generateJWT(user);
+  async login(
+    loginUserInput: LoginUserInput,
+    res: Response,
+  ): Promise<UserRequest> {
+    // Validación de credenciales del usuario
+
+    const user = await this.validatePassword(loginUserInput);
+
+    const userRequest = this.authService.handleLogin(res, user);
+    return userRequest;
   }
 
   /**
-   * Genera un token JWT para un usuario.
-   * @param user - Datos del usuario.
-   * @returns Un objeto con el token JWT y los datos del usuario.
-   */
-  async generateJWT(user: UserRequest): Promise<UserJwtOutput> {
-    const payload: IPayload = { roles: user.roles, sub: user._id };
-    const token = this.jwtService.sign(payload); // Firma el token con los datos del payload.
-
-    return {
-      user,
-      accessToken: token,
-    };
-  }
-
-  /**
-   * Valida las credenciales del usuario.
-   * Usado en la estrategia Local de Passport para validar el login.
-   * @param userPasswordInput - Datos de email y contraseña del usuario.
-   * @returns Datos del usuario autenticado.
-   * @throws UnauthorizedException - Si el usuario o contraseña no son válidos.
+   * Valida las credenciales del usuario durante el proceso de inicio de sesión.
+   * @param userPasswordInput - Contiene el email y la contraseña del usuario.
+   * @returns Los datos del usuario si las credenciales son correctas.
+   * @throws UnauthorizedException - Si el usuario o la contraseña no son válidos.
    */
   async validatePassword(
     userPasswordInput: LoginUserInput,
   ): Promise<UserRequest> {
     const { email, password } = userPasswordInput;
+
+    // Buscar al usuario por el email.
     const user = await this.usuarioService.findByEmail(email);
 
-    if (!user) {
-      throw new UnauthorizedException('Usuario no existe');
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.hashPassword);
+    // Verificación de que el usuario existe y la contraseña es válida.
+    const isPasswordValid =
+      user && (await bcrypt.compare(password, user.hashPassword));
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Contraseña inválida');
+      // Lanzar un error de autenticación genérico para evitar filtrado de información.
+      throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
 
+    // El usuario está autenticado; retornamos su información.
     return user as unknown as UserRequest;
   }
 
   /**
-   * Valida el payload del JWT.
-   * Usado en la estrategia JWT de Passport para validar el token.
-   * @param payload - Datos del payload del JWT.
-   * @returns Datos del usuario autenticado.
-   * @throws UnauthorizedException - Si el usuario no existe.
+   * Valida el payload recibido en el JWT.
+   * Usado en la estrategia JWT de Passport para verificar autenticidad del token.
+   * @param payload - Payload del token JWT.
+   * @returns Los datos del usuario si el token es válido.
+   * @throws UnauthorizedException - Si el usuario no existe en el sistema.
    */
   async validatePayload(payload: IPayload): Promise<UsuarioOutput> {
+    // Verifica que el usuario con el ID dado en el payload existe.
     const user = await this.usuarioService.findById(payload.sub);
     if (!user) {
-      throw new UnauthorizedException('Usuario no existe');
+      // Si el usuario no existe, lanza una excepción de autenticación.
+      throw new UnauthorizedException('Token inválido o usuario no encontrado');
     }
+
+    // Retorna el usuario autenticado.
     return user;
   }
 }

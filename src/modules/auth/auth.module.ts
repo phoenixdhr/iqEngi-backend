@@ -10,14 +10,16 @@ import { GoogleStrategy } from './google-auth/strategy/google.strategy';
 import { GoogleAuthService } from './google-auth/google-auth.service';
 import { JwtAuthService } from './jwt-auth/jwt-auth.service';
 import { JwtAuthResolver } from './jwt-auth/jwt-auth.resolver';
-import { GoogleAuthResolver } from './google-auth/google-auth.resolver';
 import { MailModule } from '../mail/mail.module';
 import { GoogleAuthController } from './google-auth/google-auth.controller';
+import { HttpModule } from '@nestjs/axios';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
     PassportModule,
     MailModule,
+    HttpModule,
     forwardRef(() => UsuarioModule),
     JwtModule.registerAsync({
       inject: [configEnv.KEY],
@@ -33,7 +35,7 @@ import { GoogleAuthController } from './google-auth/google-auth.controller';
     JwtAuthResolver,
     GoogleStrategy,
     GoogleAuthService,
-    GoogleAuthResolver,
+    AuthService,
   ],
   controllers: [AuthController, GoogleAuthController],
   exports: [JwtAuthService, GoogleAuthService],

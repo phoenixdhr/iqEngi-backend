@@ -5,13 +5,16 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20'; // Importa l
 
 import configEnv from 'src/common/enviroments/configEnv'; // Importa la configuración del entorno
 import { ProfileGoogle } from '../../interfaces/google-perfil.interface';
-import { UserGoogle } from '../../interfaces/google-user.interface';
+import { GoogleAuthService } from '../google-auth.service';
+import { CreateUserGoogleAuth } from 'src/modules/usuario/dtos/usuarios-dtos/create-usuario.input';
+import { UserRequestGoogle } from '../../interfaces/google-user.interface';
 
 @Injectable() // Marca la clase como inyectable para el sistema de dependencias de NestJS
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     @Inject(configEnv.KEY)
     private readonly configService: ConfigType<typeof configEnv>, // Inyecta la configuración del entorno
+    private readonly googleAuthService: GoogleAuthService, // Inyecta el servicio de autenticación de Google
   ) {
     super({
       clientID: configService.googleOauth.googleClientId, // Configura el ID del cliente de Google OAuth 2.0
@@ -36,37 +39,32 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     refreshToken: string, // Token de refresco proporcionado por Google
     profile: ProfileGoogle, // Perfil del usuario devuelto por Google
     done: VerifyCallback, // Callback de verificación de Passport
-  ) {
+  ): Promise<void | UserRequestGoogle> {
     // Verifica si el perfil contiene emails
     if (!profile.emails || profile.emails.length === 0) {
       return done(new Error('No se pudo obtener el email del usuario'), null); // Si no hay emails, devuelve un error
     }
 
     // Crea un objeto de usuario con la información del perfil
-    const user: UserGoogle = {
+    const createUser: CreateUserGoogleAuth = {
       email: profile._json.email, // Email del usuario
       email_verified: profile._json.email_verified, // Indica si el email del usuario ha sido verificado
       firstName: profile._json?.given_name ?? '', // Primer nombre del usuario (opcional)
       lastName: profile._json?.family_name ?? '', // Apellido del usuario (opcional)
       picture: profile._json.picture ?? '', // URL de la foto de perfil del usuario (opcional)
-      accessToken, // Token de acceso
-      refreshToken, // Token de refresco
     };
 
-    // // Aquí, puedes manejar la lógica para encontrar o crear el usuario
-    // const user = await this.authService.validateOAuthLogin(
-    //   email,
-    //   displayName,
-    //   'google',
-    //   id,
-    // );
+    // Crear o encontrar al usuario en la base de datos
+    const user = await this.googleAuthService.findOrCreateUser(createUser);
 
-    // if (!user) {
-    //   return done(new UnauthorizedException(), false);
-    // }
+    const userRequestGoogle: UserRequestGoogle = {
+      ...createUser,
+      accessToken,
+      refreshToken,
+      roles: user.roles,
+      _id: user._id,
+    };
 
-    // done(null, user);
-
-    return user; // Devuelve el objeto de usuario
+    return userRequestGoogle; // Devuelve el objeto de usuario
   }
 }

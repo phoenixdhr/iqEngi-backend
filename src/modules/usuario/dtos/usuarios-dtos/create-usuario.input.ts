@@ -6,13 +6,9 @@ import {
   IsString,
   IsEmail,
   IsOptional,
-  IsEnum,
-  IsArray,
-  ArrayUnique,
   IsBoolean,
   IsUrl,
 } from 'class-validator';
-import { RolEnum } from 'src/common/enums/rol.enum';
 
 import { CreatePerfilInput } from '../perfil-dtos/create-perfil.input';
 import { Type } from 'class-transformer';
@@ -36,25 +32,25 @@ export class CreateUsuarioInput implements IUsuarioInput {
   @IsEmail()
   email: string;
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  email_verified: boolean = false;
+  // @Field({ nullable: true })
+  // @IsOptional()
+  // @IsBoolean()
+  // email_verified: boolean = false;
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsBoolean()
-  isGoogleAuth?: boolean = false;
+  // @Field({ defaultValue: false })
+  // @IsOptional()
+  // @IsBoolean()
+  // isGoogleAuth?: boolean = false;
 
   @Field()
   @IsString()
   password: string;
 
-  @Field(() => [RolEnum])
-  @IsArray()
-  @IsEnum(RolEnum, { each: true })
-  @ArrayUnique()
-  roles: RolEnum[] = [RolEnum.ESTUDIANTE]; // Valor por defecto
+  // @Field(() => [RolEnum])
+  // @IsArray()
+  // @IsEnum(RolEnum, { each: true })
+  // @ArrayUnique()
+  // roles: RolEnum[] = [RolEnum.ESTUDIANTE]; // Valor por defecto
 
   @Field({ nullable: true })
   @IsOptional()
@@ -97,7 +93,7 @@ export class CreateUserGoogleAuth implements UserGoogle {
   @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
-  email_verified: boolean = false;
+  email_verified: boolean = true;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -105,8 +101,8 @@ export class CreateUserGoogleAuth implements UserGoogle {
   @IsUrl()
   picture?: string;
 
-  @Field({ nullable: true })
+  @Field({ defaultValue: true })
   @IsOptional()
   @IsBoolean()
-  isGoogleAuth?: boolean = true;
+  isGoogleAuth?: boolean;
 }
