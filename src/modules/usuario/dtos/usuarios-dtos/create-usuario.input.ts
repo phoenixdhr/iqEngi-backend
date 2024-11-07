@@ -1,5 +1,3 @@
-// usuario/dtos/create-usuario.input.ts
-
 import { InputType, Field } from '@nestjs/graphql';
 import {
   IsNotEmpty,
@@ -8,6 +6,7 @@ import {
   IsOptional,
   IsBoolean,
   IsUrl,
+  MinLength,
 } from 'class-validator';
 
 import { CreatePerfilInput } from '../perfil-dtos/create-perfil.input';
@@ -44,6 +43,7 @@ export class CreateUsuarioInput implements IUsuarioInput {
 
   @Field()
   @IsString()
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres.' })
   password: string;
 
   // @Field(() => [RolEnum])

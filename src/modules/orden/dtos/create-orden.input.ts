@@ -43,7 +43,7 @@ export class CreateOrdenDto implements IOrdenInput {
   // Los campos fechaCreacion y montoTotal pueden ser gestionados automáticamente por el servicio
   @Field(() => EstadoOrden, { nullable: true })
   @IsOptional()
-  estado?: EstadoOrden;
+  estado_orden?: EstadoOrden;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()
@@ -57,7 +57,7 @@ export class CreateOrdenDto implements IOrdenInput {
 
 @InputType()
 export class CreateOrdenInput extends OmitType(CreateOrdenDto, [
-  'estado',
+  'estado_orden',
   'montoTotal',
   'fechaActualizacion',
 ]) {}

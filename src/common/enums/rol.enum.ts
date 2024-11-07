@@ -13,10 +13,18 @@ registerEnumType(RolEnum, {
   description: 'Roles disponibles para los usuarios', // descripción opcional
 });
 
-// @InputType()
-// export class RolesEnumGql {
-//   @Field(() => [RolEnum], { nullable: true })
-//   @IsArray()
-//   @IsOptional()
-//   roles: RolEnum[];
-// }
+export const allRoles = [
+  RolEnum.ADMINISTRADOR,
+  RolEnum.EDITOR,
+  RolEnum.INSTRUCTOR,
+  RolEnum.ESTUDIANTE,
+  RolEnum.SUPERADMIN,
+];
+
+export const editorUp = [
+  RolEnum.EDITOR,
+  RolEnum.ADMINISTRADOR,
+  RolEnum.SUPERADMIN,
+];
+
+export const administradorUp = [RolEnum.ADMINISTRADOR, RolEnum.SUPERADMIN];

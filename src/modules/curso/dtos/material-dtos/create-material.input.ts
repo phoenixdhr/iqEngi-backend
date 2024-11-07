@@ -1,5 +1,3 @@
-// curso/dtos/material-dtos/create-material.input.ts
-
 import { InputType, Field } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsOptional, IsUrl } from 'class-validator';
 import { IMaterialInput } from '../../interfaces/material.interface';

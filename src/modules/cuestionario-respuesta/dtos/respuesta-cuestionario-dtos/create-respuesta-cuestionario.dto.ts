@@ -1,5 +1,3 @@
-// respuesta-cuestionario/dtos/create-respuesta-cuestionario.input.ts
-
 import { InputType, Field, ID, Float } from '@nestjs/graphql';
 import {
   IsNotEmpty,

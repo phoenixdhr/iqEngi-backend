@@ -8,10 +8,15 @@ import { IUsuario } from '../interfaces/usuario.interface';
 import { UserStatus } from 'src/common/enums/estado-usuario.enum';
 import { Coleccion } from 'src/common/enums';
 import { UsuarioOutput } from '../dtos/usuarios-dtos/usuario.output';
+import { CreatedUpdatedDeletedBy } from 'src/common/interfaces/created-updated-deleted-by.interface';
+import { IsOptional } from 'class-validator';
 
 @ObjectType()
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
-export class Usuario extends Document implements IUsuario {
+export class Usuario
+  extends Document
+  implements IUsuario, CreatedUpdatedDeletedBy
+{
   @Field(() => ID)
   _id: Types.ObjectId;
 
@@ -58,15 +63,21 @@ export class Usuario extends Document implements IUsuario {
   @Prop({ default: true })
   notificaciones: boolean;
 
-  // Nuevo campo 'status' para representar el estado del usuario
-  @Field(() => UserStatus)
-  @Prop({
-    type: String,
-    enum: UserStatus,
-    default: UserStatus.ACTIVE,
-    required: true,
-  })
-  status: UserStatus;
+  @Prop({ default: undefined })
+  @IsOptional()
+  resetPasswordToken?: string;
+
+  @Prop({ default: null })
+  @IsOptional()
+  resetPasswordExpires?: Date;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  createdBy?: Types.ObjectId;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  updatedBy?: Types.ObjectId;
 
   // Campo opcional para registrar cuándo fue eliminado
   @Field({ nullable: true })
@@ -77,6 +88,15 @@ export class Usuario extends Document implements IUsuario {
   @Field(() => ID, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: Coleccion.Usuario, default: null })
   deletedBy?: Types.ObjectId;
+
+  // Nuevo campo 'status' para representar el estado del usuario
+  @Field(() => UserStatus)
+  @Prop({
+    type: String,
+    enum: UserStatus,
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);

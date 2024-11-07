@@ -153,4 +153,82 @@ export class MailService {
       }
     }
   }
+
+  //#region  Métodos de recuperación de contraseña
+  /**
+   * Envía un correo de restablecimiento de contraseña al usuario.
+   * @param user - El usuario que solicita el restablecimiento.
+   * @param token - El token de restablecimiento.
+   */
+  async sendPasswordResetEmail(user: Usuario, token: string): Promise<void> {
+    const resetUrl = `${this.configService.email.dominioURL}/reset-password?token=${token}`;
+
+    const mailOptions: SendMailOptions = {
+      from: `IQEngi <${this.configService.email.eUser}>`,
+      to: user.email,
+      subject: 'Solicitud de Restablecimiento de Contraseña - IQEngi',
+      html: this.getPasswordResetEmailTemplate(user.firstName, resetUrl),
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al enviar el correo de restablecimiento de contraseña.',
+        error.message,
+      );
+    }
+  }
+
+  /**
+   * Genera la plantilla HTML para el correo de restablecimiento de contraseña.
+   * @param firstName - El nombre del usuario.
+   * @param url - La URL de restablecimiento.
+   * @returns El contenido HTML del correo.
+   */
+  private getPasswordResetEmailTemplate(
+    firstName: string,
+    url: string,
+  ): string {
+    return `
+      <h1>Hola ${firstName},</h1>
+      <p>Has solicitado restablecer tu contraseña. Por favor, haz clic en el siguiente enlace para hacerlo:</p>
+      <a href="${url}">Restablecer Contraseña</a>
+      <p>Este enlace expirará en 1 hora.</p>
+      <hr />
+      <p>Si no solicitaste este restablecimiento, por favor ignora este correo.</p>
+    `;
+  }
+
+  /**
+   * Envía un correo de confirmación después de restablecer la contraseña.
+   * @param user - El usuario que ha restablecido su contraseña.
+   */
+  async sendPasswordResetConfirmationEmail(user: Usuario): Promise<void> {
+    const mailOptions: SendMailOptions = {
+      from: `IQEngi <${this.configService.email.eUser}>`,
+      to: user.email,
+      subject: 'Contraseña Restablecida Exitosamente - IQEngi',
+      html: this.getPasswordResetConfirmationEmailTemplate(user.firstName),
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      // Opcional: Manejar el error según tus necesidades
+      console.error(
+        'Error al enviar el correo de confirmación de restablecimiento de contraseña:',
+        error,
+      );
+    }
+  }
+
+  private getPasswordResetConfirmationEmailTemplate(firstName: string): string {
+    return `
+      <h1>Hola ${firstName},</h1>
+      <p>Tu contraseña ha sido restablecida exitosamente.</p>
+      <hr />
+      <p>Si no realizaste esta acción, por favor contacta a nuestro soporte de inmediato.</p>
+    `;
+  }
 }

@@ -1,5 +1,3 @@
-// curso/dtos/modulo-dtos/create-modulo.input.ts
-
 import { InputType, Field, Int, ID } from '@nestjs/graphql';
 import {
   IsNotEmpty,

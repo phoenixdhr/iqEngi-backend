@@ -6,11 +6,17 @@ import { Curso } from 'src/modules/curso/entities/curso.entity';
 import { Usuario } from 'src/modules/usuario/entities/usuario.entity';
 import { ICursoComprado } from '../interfaces/curso-comprado.interface';
 import { Document } from 'mongoose';
+import { CreatedUpdatedDeletedBy } from 'src/common/interfaces/created-updated-deleted-by.interface';
+import { Coleccion } from 'src/common/enums';
+import { DocumentStatus } from 'src/common/enums/estado-documento';
 
 // #region CursoComprado
-@Schema()
+@Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
 @ObjectType()
-export class CursoComprado extends Document implements ICursoComprado {
+export class CursoComprado
+  extends Document
+  implements ICursoComprado, CreatedUpdatedDeletedBy
+{
   @Field(() => ID)
   _id: Types.ObjectId;
 
@@ -41,6 +47,30 @@ export class CursoComprado extends Document implements ICursoComprado {
   @Field({ defaultValue: false })
   @Prop({ default: false })
   cursoCompletado: boolean;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  createdBy?: Types.ObjectId;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  updatedBy?: Types.ObjectId;
+
+  @Field({ nullable: true })
+  @Prop({ default: null })
+  deletedAt?: Date;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Coleccion.Usuario, default: null })
+  deletedBy?: Types.ObjectId;
+
+  @Field(() => DocumentStatus)
+  @Prop({
+    type: String,
+    enum: DocumentStatus,
+    default: DocumentStatus.ACTIVE,
+  })
+  status: DocumentStatus;
 }
 
 export const CursoCompradoSchema = SchemaFactory.createForClass(CursoComprado);

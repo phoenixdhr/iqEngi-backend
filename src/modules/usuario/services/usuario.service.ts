@@ -1,12 +1,9 @@
-// usuario.service.ts
-
 import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
   ConflictException,
   Inject,
-  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -16,11 +13,9 @@ import * as jwt from 'jsonwebtoken';
 
 import * as bcrypt from 'bcrypt';
 import { UpdateUsuarioInput } from '../dtos/usuarios-dtos/update-usuario.input';
-import { UpdatePasswordInput } from '../dtos/usuarios-dtos/update-password';
 import { PaginationArgs, RolesInput, SearchArgs } from 'src/common/dtos';
 import { UserStatus } from 'src/common/enums/estado-usuario.enum';
 import { MailService } from 'src/modules/mail/mail.service';
-import { JwtAuthService } from 'src/modules/auth/jwt-auth/jwt-auth.service';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
 import { UsuarioOutput } from '../dtos/usuarios-dtos/usuario.output';
 import {
@@ -35,11 +30,9 @@ import { RolEnum } from 'src/common/enums';
 export class UsuarioService {
   constructor(
     @InjectModel(Usuario.name) private readonly usuarioModel: Model<Usuario>,
-    @Inject(forwardRef(() => JwtAuthService))
-    private readonly jwtAuthService: JwtAuthService,
-    private readonly mailService: MailService,
     @Inject(configEnv.KEY)
     private readonly configService: ConfigType<typeof configEnv>,
+    private readonly mailService: MailService,
   ) {}
 
   /**
@@ -226,12 +219,17 @@ export class UsuarioService {
   async update(
     id: string,
     updateUsuarioInput: UpdateUsuarioInput,
+    updatedBy: string,
   ): Promise<Usuario> {
     const updatedUsuario = await this.usuarioModel
-      .findByIdAndUpdate(id, updateUsuarioInput, {
-        new: true,
-        runValidators: true,
-      })
+      .findByIdAndUpdate(
+        id,
+        { ...updateUsuarioInput, updatedBy },
+        {
+          new: true,
+          runValidators: true,
+        },
+      )
       .exec();
 
     if (!updatedUsuario) {
@@ -241,60 +239,60 @@ export class UsuarioService {
     return updatedUsuario;
   }
 
+  // /**
+  //  * Actualiza la contraseña de un usuario.
+  //  * @param id ID del usuario.
+  //  * @param updatePasswordInput Datos para actualizar la contraseña.
+  //  * @returns El usuario con la contraseña actualizada.
+  //  * @throws NotFoundException si el usuario no existe.
+  //  */
+  // async updatePassword(
+  //   id: string,
+  //   updatePasswordInput: UpdatePasswordInput,
+  // ): Promise<Usuario> {
+  //   const { oldPassword, newPassword } = updatePasswordInput;
+
+  //   const usuario = await this.usuarioModel.findById(id).exec();
+  //   if (!usuario) {
+  //     throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+  //   }
+
+  //   if (usuario.isGoogleAuth) {
+  //     throw new ConflictException(
+  //       'No puedes cambiar la contraseña de un usuario de Google, inicia sesión con tu cuenta de Google',
+  //     );
+  //   }
+
+  //   // Verificar si la contraseña antigua es correcta
+  //   const isOldPasswordValid = await bcrypt.compare(
+  //     oldPassword,
+  //     usuario.hashPassword,
+  //   );
+  //   if (!isOldPasswordValid) {
+  //     throw new ConflictException('La contraseña antigua es incorrecta');
+  //   }
+
+  //   // Encriptar la nueva contraseña
+  //   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+  //   // Actualizar la contraseña
+  //   usuario.hashPassword = hashedNewPassword;
+  //   await usuario.save();
+
+  //   return usuario;
+  // }
+
   /**
-   * Actualiza la contraseña de un usuario.
-   * @param id ID del usuario.
-   * @param updatePasswordInput Datos para actualizar la contraseña.
-   * @returns El usuario con la contraseña actualizada.
-   * @throws NotFoundException si el usuario no existe.
-   */
-  async updatePassword(
-    id: string,
-    updatePasswordInput: UpdatePasswordInput,
-  ): Promise<Usuario> {
-    const { oldPassword, newPassword } = updatePasswordInput;
-
-    const usuario = await this.usuarioModel.findById(id).exec();
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-
-    if (usuario.isGoogleAuth) {
-      throw new ConflictException(
-        'No puedes cambiar la contraseña de un usuario de Google, inicia sesión con tu cuenta de Google',
-      );
-    }
-
-    // Verificar si la contraseña antigua es correcta
-    const isOldPasswordValid = await bcrypt.compare(
-      oldPassword,
-      usuario.hashPassword,
-    );
-    if (!isOldPasswordValid) {
-      throw new ConflictException('La contraseña antigua es incorrecta');
-    }
-
-    // Encriptar la nueva contraseña
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-    // Actualizar la contraseña
-    usuario.hashPassword = hashedNewPassword;
-    await usuario.save();
-
-    return usuario;
-  }
-
-  /**
-   * Elimina (desactiva) un usuario por su ID.
-   * @param idRemove ID del usuario a eliminar.
+   * Elimina (desactiva) un usuario por su ID (soft delete).
+   * @param idDelete ID del usuario a eliminar.
    * @returns El usuario eliminado.
    * @throws NotFoundException si el usuario no existe.
    */
-  async remove(idRemove: string, idThanos: string): Promise<Usuario> {
+  async softDelete(idDelete: string, idThanos: string): Promise<Usuario> {
     // Marcar el usuario como DELETED en lugar de eliminarlo físicamente
     const deletedUsuario = await this.usuarioModel
       .findByIdAndUpdate(
-        idRemove,
+        idDelete,
         {
           status: UserStatus.DELETED,
           deletedAt: new Date(),
@@ -305,17 +303,57 @@ export class UsuarioService {
       .exec();
 
     if (!deletedUsuario) {
-      throw new NotFoundException(`Usuario con ID ${idRemove} no encontrado`);
+      throw new NotFoundException(`Usuario con ID ${idDelete} no encontrado`);
     }
 
     return deletedUsuario;
   }
 
   /**
+   * Elimina un usuario de forma permanente por su ID (hard delete).
+   * @param id ID del usuario a eliminar.
+   * @returns El usuario eliminado.
+   * @throws NotFoundException si el usuario no existe.
+   */
+  async hardDelete(id: string): Promise<Usuario> {
+    const usuario = await this.usuarioModel.findById(id).exec();
+    if (!usuario) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+
+    if (usuario.status !== UserStatus.DELETED) {
+      throw new ConflictException(
+        'El usuario debe estar marcado como DELETED para eliminarlo permanentemente',
+      );
+    }
+
+    const deletedUsuario = await this.usuarioModel.findByIdAndDelete(id).exec();
+    return deletedUsuario;
+  }
+
+  /**
+   * Elimina todos los usuarios marcados como DELETED.
+   * @returns El número de usuarios eliminados.
+   */
+  async hardDeleteAllDeletedUsers(): Promise<number> {
+    try {
+      const result = await this.usuarioModel.deleteMany({
+        status: UserStatus.DELETED,
+      });
+      return result.deletedCount || 0;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al eliminar usuarios eliminados',
+        error.message,
+      );
+    }
+  }
+
+  /**
    * Obtiene todos los usuarios marcados como DELETED.
    * @returns Un array de usuarios eliminados.
    */
-  async findDeletedUsers(pagination?: PaginationArgs): Promise<Usuario[]> {
+  async findSoftDeletedUsers(pagination?: PaginationArgs): Promise<Usuario[]> {
     const { limit = 10, offset = 0 } = pagination || {};
 
     try {
@@ -333,5 +371,24 @@ export class UsuarioService {
         error.message,
       );
     }
+  }
+
+  /**
+   * Busca un usuario por su token de restablecimiento de contraseña.
+   * @param hashedToken - El token hasheado.
+   * @returns El usuario encontrado o null.
+   */
+  async findOneByResetToken(hashedToken: string): Promise<Usuario | null> {
+    const user = await this.usuarioModel
+      .findOne({
+        resetPasswordToken: hashedToken,
+        resetPasswordExpires: { $gt: new Date() },
+      })
+      .exec();
+
+    if (!user) {
+      return null;
+    }
+    return user;
   }
 }

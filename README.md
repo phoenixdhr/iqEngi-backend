@@ -35,6 +35,17 @@
   progreso-cursos
   x usuarios
 
+
+En todos los Resolver **Mutation** se debe almacenar el usuario que hace cambios, crea, actualiza, elimina.
+
+Para implementar el codigo  de "me olvide la contraseña" primero se debe usar la funcion **requestPasswordResetInput**, luego crear una ruta que capture el token y la nueva contraseña ambos argumentos necesarios para usar  la funcion **resetPasswordInput**
+
+En todos los metodos crear las funciones create, en las cuales almacena al usuario que esta creando ese doccumento.
+
+En todos los metodos update se debe agregar el usuario que esta creando el documento
+
+En todos los metodos delete se debe agregar el usuario que esta eliminando el documento
+
   _______________________
   
 Categoria

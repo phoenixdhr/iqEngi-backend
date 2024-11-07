@@ -1,5 +1,3 @@
-// curso/dtos/curso-dtos/update-curso.input.ts
-
 import { InputType, PartialType } from '@nestjs/graphql';
 import { CreateCursoInput } from './create-curso.input';
 

@@ -1,5 +1,3 @@
-// categoria/dtos/update-categoria.input.ts
-
 import { InputType, PartialType } from '@nestjs/graphql';
 import { CreateCategoriaInput } from './create-categoria.input';
 

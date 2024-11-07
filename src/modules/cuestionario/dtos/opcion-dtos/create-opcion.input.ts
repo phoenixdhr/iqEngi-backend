@@ -1,5 +1,3 @@
-// cuestionario/dtos/opcion-dtos/create-opcion.input.ts
-
 import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsNotEmpty,

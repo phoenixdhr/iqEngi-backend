@@ -12,13 +12,16 @@ import {
 } from './respuesta-pregunta.entity';
 import { EstadoCuestionario } from 'src/common/enums/estado-cuestionario.enum';
 import { IRespuestaCuestionario } from '../interfaces/respuesta-cuestionario.interface';
+import { CreatedUpdatedDeletedBy } from 'src/common/interfaces/created-updated-deleted-by.interface';
+import { Coleccion } from 'src/common/enums';
+import { DocumentStatus } from 'src/common/enums/estado-documento';
 
 // 'RespuestaUsuario' captura las respuestas dadas por un usuario a un cuestionario específico.
-@Schema()
+@Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
 @ObjectType()
 export class RespuestaCuestionario
   extends Document
-  implements IRespuestaCuestionario
+  implements IRespuestaCuestionario, CreatedUpdatedDeletedBy
 {
   @Field(() => ID)
   _id: Types.ObjectId;
@@ -50,6 +53,30 @@ export class RespuestaCuestionario
   @Field()
   @Prop({ enum: EstadoCuestionario, required: true })
   estado: EstadoCuestionario;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  createdBy?: Types.ObjectId;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  updatedBy?: Types.ObjectId;
+
+  @Field({ nullable: true })
+  @Prop({ default: null })
+  deletedAt?: Date;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Coleccion.Usuario, default: null })
+  deletedBy?: Types.ObjectId;
+
+  @Field(() => DocumentStatus)
+  @Prop({
+    type: String,
+    enum: DocumentStatus,
+    default: DocumentStatus.ACTIVE,
+  })
+  status: DocumentStatus;
 }
 
 export const RespuestaCuestionarioSchema = SchemaFactory.createForClass(
@@ -60,3 +87,5 @@ RespuestaCuestionarioSchema.index(
   { usuarioId: 1, cursoId: 1, cuestionarioId: 1 },
   { unique: true },
 );
+
+RespuestaCuestionarioSchema.index({ status: 1 });

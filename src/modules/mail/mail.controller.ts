@@ -1,4 +1,3 @@
-// }
 import { Controller, Get, Query, Redirect } from '@nestjs/common';
 import { MailService } from './mail.service';
 

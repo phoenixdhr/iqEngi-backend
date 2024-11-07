@@ -1,5 +1,3 @@
-// curso-comprado/dtos/create-curso-comprado.input.ts
-
 import { InputType, Field, ID, OmitType, Float } from '@nestjs/graphql';
 import {
   IsNotEmpty,

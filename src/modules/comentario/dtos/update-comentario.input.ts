@@ -1,5 +1,3 @@
-// comentario/dtos/update-comentario.input.ts
-
 import { InputType, PartialType } from '@nestjs/graphql';
 import { CreateComentarioInput } from './create-comentario.input';
 

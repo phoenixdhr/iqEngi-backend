@@ -1,5 +1,3 @@
-// categoria/dtos/create-categoria.input.ts
-
 import { InputType, Field } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { ICategoriaInput } from '../interfaces/categoria.interface';

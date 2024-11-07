@@ -1,5 +1,3 @@
-// cuestionario/dtos/cuestionario-dtos/create-cuestionario.input.ts
-
 import { InputType, Field, ID, Int } from '@nestjs/graphql';
 import {
   IsNotEmpty,

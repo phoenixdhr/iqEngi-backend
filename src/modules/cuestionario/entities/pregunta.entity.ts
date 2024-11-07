@@ -7,11 +7,18 @@ import { Modulo } from 'src/modules/curso/entities/modulo.entity';
 import { Unidad } from 'src/modules/curso/entities/unidad.entity';
 import { IPregunta } from '../interfaces/pregunta.interface';
 import { Document } from 'mongoose';
+import { CreatedUpdatedDeletedBy } from 'src/common/interfaces/created-updated-deleted-by.interface';
+import { Usuario } from 'src/modules/usuario/entities/usuario.entity';
+import { Coleccion } from 'src/common/enums';
+import { DocumentStatus } from 'src/common/enums/estado-documento';
 
 // #region Pregunta
 @ObjectType()
-@Schema()
-export class Pregunta extends Document implements IPregunta {
+@Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
+export class Pregunta
+  extends Document
+  implements IPregunta, CreatedUpdatedDeletedBy
+{
   @Field(() => ID)
   _id: Types.ObjectId;
 
@@ -34,6 +41,32 @@ export class Pregunta extends Document implements IPregunta {
   @Field(() => Unidad, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: Unidad.name })
   unidadId?: Types.ObjectId;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  createdBy?: Types.ObjectId;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Usuario.name })
+  updatedBy?: Types.ObjectId;
+
+  @Field({ nullable: true })
+  @Prop({ default: null })
+  deletedAt?: Date;
+
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: Coleccion.Usuario, default: null })
+  deletedBy?: Types.ObjectId;
+
+  @Field(() => DocumentStatus)
+  @Prop({
+    type: String,
+    enum: DocumentStatus,
+    default: DocumentStatus.ACTIVE,
+  })
+  status: DocumentStatus;
 }
 
 export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);
+
+PreguntaSchema.index({ status: 1 });

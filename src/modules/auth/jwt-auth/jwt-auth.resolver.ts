@@ -16,6 +16,9 @@ import { UserRequest } from '../entities/user-request.entity';
 import configEnv from 'src/common/enviroments/configEnv';
 import { ConfigType } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import { UpdatePasswordInput } from 'src/modules/usuario/dtos/usuarios-dtos/update-password';
+import { RequestPasswordResetInput } from '../dtos/request-password-reset';
+import { ResetPasswordInput } from '../dtos/request-password-input';
 
 @Resolver()
 export class JwtAuthResolver {
@@ -33,6 +36,7 @@ export class JwtAuthResolver {
    * @returns El usuario creado.
    */
   @Mutation(() => UsuarioOutput)
+  @IsPublic()
   async signup(
     @Args('createUsuarioInput') createUsuarioInput: CreateUsuarioInput,
   ): Promise<UsuarioOutput> {
@@ -66,5 +70,56 @@ export class JwtAuthResolver {
   @UseGuards(JwtGqlAuthGuard) // Requiere autenticación JWT
   async sendVerificationEmailAgain(@CurrentUser() user: UserRequest) {
     return this.mailService.sendVerificationEmailAgain(user);
+  }
+
+  /**
+   * Actualiza la contraseña del usuario autenticado.
+   *
+   * @param updatePasswordInput Datos para actualizar la contraseña.
+   * @param user Usuario autenticado que realiza la actualización.
+   * @returns El usuario.
+   * @throws NotFoundException si el usuario no existe.
+   * @throws ConflictException si la contraseña antigua es incorrecta.
+   */
+  @Mutation(() => UsuarioOutput)
+  @UseGuards(JwtGqlAuthGuard) // Requiere autenticación JWT
+  async updatePassword(
+    @Args('updatePasswordInput') updatePasswordInput: UpdatePasswordInput,
+    @CurrentUser() user: UserRequest,
+  ): Promise<UsuarioOutput> {
+    const id = user._id;
+    return this.jwtAuthService.updatePassword(id, updatePasswordInput);
+  }
+
+  /**
+   * Inicia el proceso de restablecimiento de contraseña enviando un correo.
+   * @param requestPasswordResetInput - Contiene el correo electrónico del usuario.
+   * @returns Un mensaje de éxito.
+   */
+  @Mutation(() => String)
+  @IsPublic()
+  async requestPasswordReset(
+    @Args('requestPasswordResetInput')
+    requestPasswordResetInput: RequestPasswordResetInput,
+  ): Promise<string> {
+    return await this.jwtAuthService.requestPasswordReset(
+      requestPasswordResetInput.email,
+    );
+  }
+
+  /**
+   * Restablece la contraseña del usuario utilizando el token.
+   * @param resetPasswordInput - Contiene el token y la nueva contraseña.
+   * @returns Un mensaje de éxito.
+   */
+  @Mutation(() => String)
+  @IsPublic()
+  async resetPassword(
+    @Args('resetPasswordInput') resetPasswordInput: ResetPasswordInput,
+  ): Promise<string> {
+    return await this.jwtAuthService.resetPassword(
+      resetPasswordInput.token,
+      resetPasswordInput.newPassword,
+    );
   }
 }

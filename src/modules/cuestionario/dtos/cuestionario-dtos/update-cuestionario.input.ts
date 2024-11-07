@@ -1,5 +1,3 @@
-// cuestionario/dtos/cuestionario-dtos/update-cuestionario.input.ts
-
 import { InputType, PartialType } from '@nestjs/graphql';
 import { CreateCuestionarioInput } from './create-cuestionario.input';
 

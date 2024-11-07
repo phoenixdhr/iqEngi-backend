@@ -15,7 +15,7 @@ export interface IOrden {
   fechaCreacion: Date;
   fechaActualizacion?: Date;
   montoTotal?: number;
-  estado?: EstadoOrden;
+  estado_orden?: EstadoOrden;
 }
 
 export type IOrdenInput = Omit<IOrden, '_id' | 'fechaCreacion'>;

@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
 @InputType()
 export class LoginUserInput {
@@ -9,5 +9,6 @@ export class LoginUserInput {
 
   @Field()
   @IsString()
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres.' })
   readonly password: string;
 }

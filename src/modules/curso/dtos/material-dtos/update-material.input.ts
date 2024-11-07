@@ -1,5 +1,3 @@
-// curso/dtos/material-dtos/update-material.input.ts
-
 import { InputType, PartialType } from '@nestjs/graphql';
 import { CreateMaterialInput } from './create-material.input';
 

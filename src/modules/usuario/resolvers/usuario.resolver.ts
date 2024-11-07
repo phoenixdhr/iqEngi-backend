@@ -9,14 +9,21 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UsuarioService } from '../services/usuario.service';
 import { CreateUsuarioInput } from '../dtos/usuarios-dtos/create-usuario.input';
 import { UpdateUsuarioInput } from '../dtos/usuarios-dtos/update-usuario.input';
-import { UpdatePasswordInput } from '../dtos/usuarios-dtos/update-password';
 import { PaginationArgs, RolesInput, SearchArgs } from 'src/common/dtos';
-import { RolEnum } from 'src/common/enums/rol.enum';
+import { administradorUp } from 'src/common/enums/rol.enum';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
+import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
+import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
+import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
+import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
 
 /**
  * Resolver para manejar las operaciones de Usuario.
+ * Incluye operaciones como creación, actualización, eliminación y consultas de usuarios.
+ * @Guard : JwtGqlAuthGuard, RolesGuard
  */
+@UseGuards(JwtGqlAuthGuard, RolesGuard)
 @Resolver(() => UsuarioOutput)
 export class UsuarioResolver {
   constructor(private readonly usuarioService: UsuarioService) {}
@@ -25,12 +32,9 @@ export class UsuarioResolver {
    * Crea un nuevo usuario.
    * @param createUsuarioInput Datos para crear el usuario.
    * @returns El usuario creado.
-   *
-   * @Guard: JwtGqlAuthGuard
-   * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Mutation(() => UsuarioOutput)
-  // @UseGuards(JwtGqlAuthGuard) // Descomenta esta línea cuando implementes los guards
+  @IsPublic()
   async createUsuario(
     @Args('createUsuarioInput') createUsuarioInput: CreateUsuarioInput,
   ): Promise<UsuarioOutput> {
@@ -45,15 +49,15 @@ export class UsuarioResolver {
    * @param search Opcional. Opciones de búsqueda.
    * @returns Un array de usuarios.
    *
-   * @Guard: JwtGqlAuthGuard
-   * @Roles: ADMINISTRADOR, SUPERADMIN, EDITOR, INSTRUCTOR
+   * @Roles: ADMINISTRADOR, SUPERADMIN
    */
+
   @Query(() => [UsuarioOutput], {
     name: 'usuarios',
     description:
       'Obtiene una lista de usuarios, opcionalmente filtrados por roles.',
   })
-  // @UseGuards(JwtGqlAuthGuard) // Descomenta esta línea cuando implementes los guards
+  @RolesDec(...administradorUp)
   async findAll(
     @Args('roles', {
       type: () => RolesInput,
@@ -78,15 +82,32 @@ export class UsuarioResolver {
    * @returns El usuario encontrado.
    * @throws NotFoundException si el usuario no existe.
    *
-   * @Guard: JwtGqlAuthGuard
-   * @Roles: ADMINISTRADOR, SUPERADMIN, EDITOR, INSTRUCTOR, EL MISMO USUARIO
+   * @Roles: ADMINISTRADOR, SUPERADMIN
    */
+
   @Query(() => UsuarioOutput, { name: 'usuario' })
-  // @UseGuards(JwtGqlAuthGuard) // Descomenta esta línea cuando implementes los guards
+  @RolesDec(...administradorUp)
   async findOne(
     @Args('id', { type: () => ID }, IdPipe) id: string, // Aplica el Pipe aquí
   ): Promise<UsuarioOutput> {
     return this.usuarioService.findById(id);
+  }
+
+  /**
+   * Actualiza los datos de un usuario autenticado (excluyendo la contraseña).
+   *
+   * @param updateUsuarioInput Datos para actualizar el usuario.
+   * @param user Usuario autenticado que realiza la actualización.
+   * @returns El usuario actualizado.
+   * @throws NotFoundException si el usuario no existe.
+   */
+  @Mutation(() => UsuarioOutput)
+  async updateUsuario(
+    @Args('updateUsuarioInput') updateUsuarioInput: UpdateUsuarioInput,
+    @CurrentUser() user: UserRequest,
+  ): Promise<UsuarioOutput> {
+    const id = user._id;
+    return this.usuarioService.update(id, updateUsuarioInput, id);
   }
 
   /**
@@ -95,75 +116,73 @@ export class UsuarioResolver {
    * @param updateUsuarioInput Datos para actualizar el usuario.
    * @returns El usuario actualizado.
    * @throws NotFoundException si el usuario no existe.
-   *
-   * @Guard: JwtGqlAuthGuard
-   * @Roles: ADMINISTRADOR, SUPERADMIN, EL MISMO USUARIO
    */
   @Mutation(() => UsuarioOutput)
-  // @UseGuards(JwtGqlAuthGuard) // Descomenta esta línea cuando implementes los guards
-  async updateUsuario(
-    @Args('id', { type: () => ID }, IdPipe) id: string, // Aplica el Pipe aquí
+  @RolesDec(...administradorUp)
+  async updateUsuariofromAdmin(
+    @Args('id', { type: () => ID }, IdPipe) id: string,
     @Args('updateUsuarioInput') updateUsuarioInput: UpdateUsuarioInput,
+    @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
-    return this.usuarioService.update(id, updateUsuarioInput);
+    const idUpdatedBy = user._id;
+    return this.usuarioService.update(id, updateUsuarioInput, idUpdatedBy);
   }
 
+  // /**
+  //  * Actualiza la contraseña del usuario autenticado.
+  //  *
+  //  * @param updatePasswordInput Datos para actualizar la contraseña.
+  //  * @param user Usuario autenticado que realiza la actualización.
+  //  * @returns El usuario.
+  //  * @throws NotFoundException si el usuario no existe.
+  //  * @throws ConflictException si la contraseña antigua es incorrecta.
+  //  */
+  // @Mutation(() => UsuarioOutput)
+  // async updatePassword(
+  //   @Args('updatePasswordInput') updatePasswordInput: UpdatePasswordInput,
+  //   @CurrentUser() user: UserRequest,
+  // ): Promise<UsuarioOutput> {
+  //   const id = user._id;
+  //   return this.usuarioService.updatePassword(id, updatePasswordInput);
+  // }
+
   /**
-   * Actualiza la contraseña de un usuario.
-   * @param id ID del usuario.
-   * @param updatePasswordInput Datos para actualizar la contraseña.
-   * @returns El usuario con la contraseña actualizada.
-   * @throws NotFoundException si el usuario no existe.
-   * @throws ConflictException si la contraseña antigua es incorrecta.
+   * Elimina (desactiva) un usuario específico por su ID.
+   * Solo los usuarios con rol ADMINISTRADOR pueden realizar esta operación.
    *
-   * @Guard: JwtGqlAuthGuard
-   * @Roles: ADMINISTRADOR, SUPERADMIN, EL MISMO USUARIO
-   */
-  @Mutation(() => UsuarioOutput)
-  // @UseGuards(JwtGqlAuthGuard) // Descomenta esta línea cuando implementes los guards
-  async updatePassword(
-    @Args('id', { type: () => ID }, IdPipe) id: string, // Aplica el Pipe aquí
-    @Args('updatePasswordInput') updatePasswordInput: UpdatePasswordInput,
-  ): Promise<UsuarioOutput> {
-    return this.usuarioService.updatePassword(id, updatePasswordInput);
-  }
-
-  /**
-   * Elimina (desactiva) un usuario por su ID.
    * @param idRemove ID del usuario a eliminar.
-   * @param idThanos ID del usuario que realiza la eliminación.
+   * @param user Usuario autenticado que realiza la eliminación.
    * @returns El usuario eliminado.
    * @throws NotFoundException si el usuario no existe.
    *
-   * @Guard: JwtGqlAuthGuard
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Mutation(() => UsuarioOutput)
-  // @UseGuards(JwtGqlAuthGuard) // Descomenta esta línea cuando implementes los guards
+  @RolesDec(...administradorUp)
   async removeUsuario(
     @Args('idRemove', { type: () => ID }, IdPipe) idRemove: string, // Aplica el Pipe aquí
-    @Args('idThanos', { type: () => ID }, IdPipe) idThanos: string, // Aplica el Pipe aquí
+    @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
-    return this.usuarioService.remove(idRemove, idThanos);
+    const idThanos = user._id;
+    return this.usuarioService.softDelete(idRemove, idThanos);
   }
 
   /**
-   * Obtiene todos los usuarios marcados como DELETED.
-   * @param pagination Opciones de paginación.
+   * Obtiene una lista de usuarios que han sido marcados como eliminados.
+   * @param pagination Opcional. Opciones de paginación.
    * @returns Un array de usuarios eliminados.
    *
-   * @Guard: JwtGqlAuthGuard
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => [UsuarioOutput], {
     name: 'usuariosEliminados',
     description: 'Obtiene una lista de usuarios eliminados.',
   })
-  // @UseGuards(JwtGqlAuthGuard) // Descomenta esta línea cuando implementes los guards
+  @RolesDec(...administradorUp)
   async findDeletedUsers(
     @Args({ type: () => PaginationArgs, nullable: true })
     pagination?: PaginationArgs,
   ): Promise<UsuarioOutput[]> {
-    return this.usuarioService.findDeletedUsers(pagination);
+    return this.usuarioService.findSoftDeletedUsers(pagination);
   }
 }
