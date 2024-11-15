@@ -50,6 +50,8 @@ export class AuthService {
     const payload = { sub: user._id, roles: user.roles };
     const jwtToken = this.jwtService.sign(payload);
 
+    console.log('jwtToken', jwtToken);
+
     // Configurar el token JWT en la cookie
     res.cookie('jwt_token', jwtToken, {
       httpOnly: true,

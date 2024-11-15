@@ -183,6 +183,6 @@ export class UsuarioResolver {
     @Args({ type: () => PaginationArgs, nullable: true })
     pagination?: PaginationArgs,
   ): Promise<UsuarioOutput[]> {
-    return this.usuarioService.findSoftDeletedUsers(pagination);
+    return this.usuarioService.findSoftDeleted(pagination);
   }
 }

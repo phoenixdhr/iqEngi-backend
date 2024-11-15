@@ -1,18 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 import { Usuario } from '../../usuario/entities/usuario.entity';
 import { Curso } from '../../curso/entities/curso.entity';
 import { EstadoOrden } from '../../../common/enums/estado-orden.enum';
 import { IOrden } from '../interfaces/orden.interface';
-import { CreatedUpdatedDeletedBy } from 'src/common/interfaces/created-updated-deleted-by.interface';
-import { Coleccion } from 'src/common/enums';
-import { DocumentStatus } from 'src/common/enums/estado-documento';
+
+import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
+import { AuditFields } from 'src/common/clases/audit-fields.class';
 
 @ObjectType()
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
-export class Orden extends Document implements IOrden, CreatedUpdatedDeletedBy {
+export class Orden extends AuditFields implements IOrden {
   @Field(() => ID)
   _id: Types.ObjectId;
 
@@ -47,30 +47,6 @@ export class Orden extends Document implements IOrden, CreatedUpdatedDeletedBy {
   @Field(() => EstadoOrden)
   @Prop({ enum: EstadoOrden, default: EstadoOrden.Pendiente })
   estado_orden: EstadoOrden;
-
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
-  createdBy?: Types.ObjectId;
-
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
-  updatedBy?: Types.ObjectId;
-
-  @Field({ nullable: true })
-  @Prop({ default: null })
-  deletedAt?: Date;
-
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Coleccion.Usuario, default: null })
-  deletedBy?: Types.ObjectId;
-
-  @Field(() => DocumentStatus)
-  @Prop({
-    type: String,
-    enum: DocumentStatus,
-    default: DocumentStatus.ACTIVE,
-  })
-  status: DocumentStatus;
 }
 
 export const OrdenSchema = SchemaFactory.createForClass(Orden);
@@ -82,3 +58,7 @@ OrdenSchema.pre('save', function (next) {
 });
 
 OrdenSchema.index({ usuarioId: 1 });
+OrdenSchema.index({ deleted: 1 });
+OrdenSchema.index({ 'cursos.cursoId': 1 });
+
+addSoftDeleteMiddleware<Orden, Orden>(OrdenSchema);

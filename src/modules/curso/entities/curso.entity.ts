@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 import { Categoria } from '../../categoria/entities/categoria.entity';
 import { Instructor } from '../../instructor/entities/instructor.entity';
@@ -8,15 +8,14 @@ import { Field, Float, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Modulo } from './modulo.entity';
 import { Cuestionario } from 'src/modules/cuestionario/entities/cuestionario.entity';
 import { Nivel } from 'src/common/enums/nivel.enum';
-import { CreatedUpdatedDeletedBy } from 'src/common/interfaces/created-updated-deleted-by.interface';
-import { Usuario } from 'src/modules/usuario/entities/usuario.entity';
-import { Coleccion } from 'src/common/enums';
-import { DocumentStatus } from 'src/common/enums/estado-documento';
+
+import { AuditFields } from 'src/common/clases/audit-fields.class';
+import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
 
 // #region Curso
 @ObjectType()
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
-export class Curso extends Document implements ICurso, CreatedUpdatedDeletedBy {
+export class Curso extends AuditFields implements ICurso {
   @Field(() => ID)
   _id: Types.ObjectId;
 
@@ -91,30 +90,6 @@ export class Curso extends Document implements ICurso, CreatedUpdatedDeletedBy {
   @Field(() => Cuestionario, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: Cuestionario.name })
   cuestionarioId?: Types.ObjectId;
-
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
-  createdBy?: Types.ObjectId;
-
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
-  updatedBy?: Types.ObjectId;
-
-  @Field({ nullable: true })
-  @Prop({ default: null })
-  deletedAt?: Date;
-
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Coleccion.Usuario, default: null })
-  deletedBy?: Types.ObjectId;
-
-  @Field(() => DocumentStatus)
-  @Prop({
-    type: String,
-    enum: DocumentStatus,
-    default: DocumentStatus.ACTIVE,
-  })
-  status: DocumentStatus;
 }
 
 export const CursoSchema = SchemaFactory.createForClass(Curso);
@@ -125,4 +100,6 @@ CursoSchema.index({ titulo: 'text' });
 CursoSchema.index({ categorias: 1 });
 CursoSchema.index({ instructor: 1 });
 CursoSchema.index({ cuestionarioId: 1 });
-CursoSchema.index({ status: 1 });
+CursoSchema.index({ deleted: 1 });
+
+addSoftDeleteMiddleware<Curso, Curso>(CursoSchema);

@@ -6,7 +6,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { Usuario } from '../entities/usuario.entity';
 import * as jwt from 'jsonwebtoken';
@@ -25,15 +25,22 @@ import {
 import configEnv from 'src/common/enviroments/configEnv';
 import { ConfigType } from '@nestjs/config';
 import { RolEnum } from 'src/common/enums';
+import { BaseService } from 'src/common/services/base.service';
 
 @Injectable()
-export class UsuarioService {
+export class UsuarioService extends BaseService<
+  Usuario,
+  UpdateUsuarioInput,
+  CreateUsuarioInput
+> {
   constructor(
     @InjectModel(Usuario.name) private readonly usuarioModel: Model<Usuario>,
     @Inject(configEnv.KEY)
     private readonly configService: ConfigType<typeof configEnv>,
     private readonly mailService: MailService,
-  ) {}
+  ) {
+    super(usuarioModel);
+  }
 
   /**
    * Crea un nuevo usuario en la base de datos.
@@ -160,7 +167,7 @@ export class UsuarioService {
   async findAll(
     pagination?: PaginationArgs,
     searchInput?: SearchArgs,
-  ): Promise<Usuario[]> {
+  ): Promise<UsuarioOutput[]> {
     const { limit = 10, offset = 0 } = pagination || {};
     const { search } = searchInput || {};
 
@@ -176,24 +183,24 @@ export class UsuarioService {
    * @param rolesInput Objeto que contiene los roles a filtrar.
    * @returns Un array de usuarios que tienen alguno de los roles especificados.
    */
-  async findByRol(rolesInput: RolesInput): Promise<Usuario[]> {
+  async findByRol(rolesInput: RolesInput): Promise<UsuarioOutput[]> {
     // Asegúrate de que 'roles' es el campo correcto en tu esquema de Usuario
     return this.usuarioModel.find({ roles: { $in: rolesInput.roles } }).exec();
   }
 
-  /**
-   * Obtiene un usuario por su ID.
-   * @param id ID del usuario.
-   * @returns El usuario encontrado.
-   * @throws NotFoundException si el usuario no existe.
-   */
-  async findById(id: string): Promise<Usuario> {
-    const usuario = await this.usuarioModel.findById(id).exec();
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-    return usuario;
-  }
+  // /**
+  //  * Obtiene un usuario por su ID.
+  //  * @param id ID del usuario.
+  //  * @returns El usuario encontrado.
+  //  * @throws NotFoundException si el usuario no existe.
+  //  */
+  // async findById(id: string): Promise<Usuario> {
+  //   const usuario = await this.usuarioModel.findById(id).exec();
+  //   if (!usuario) {
+  //     throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+  //   }
+  //   return usuario;
+  // }
 
   /**
    * Obtiene un usuario por su email.
@@ -209,170 +216,37 @@ export class UsuarioService {
     return usuario;
   }
 
-  /**
-   * Actualiza los datos de un usuario por su ID (excluyendo la contraseña).
-   * @param id ID del usuario a actualizar.
-   * @param updateUsuarioInput Datos para actualizar el usuario.
-   * @returns El usuario actualizado.
-   * @throws NotFoundException si el usuario no existe.
-   */
-  async update(
-    id: string,
-    updateUsuarioInput: UpdateUsuarioInput,
-    updatedBy: string,
-  ): Promise<Usuario> {
-    const updatedUsuario = await this.usuarioModel
-      .findByIdAndUpdate(
-        id,
-        { ...updateUsuarioInput, updatedBy },
-        {
-          new: true,
-          runValidators: true,
-        },
-      )
-      .exec();
-
-    if (!updatedUsuario) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-
-    return updatedUsuario;
-  }
-
   // /**
-  //  * Actualiza la contraseña de un usuario.
-  //  * @param id ID del usuario.
-  //  * @param updatePasswordInput Datos para actualizar la contraseña.
-  //  * @returns El usuario con la contraseña actualizada.
+  //  * Actualiza los datos de un usuario por su ID (excluyendo la contraseña).
+  //  * @param id ID del usuario a actualizar.
+  //  * @param updateUsuarioInput Datos para actualizar el usuario.
+  //  * @returns El usuario actualizado.
   //  * @throws NotFoundException si el usuario no existe.
   //  */
-  // async updatePassword(
+  // async update(
   //   id: string,
-  //   updatePasswordInput: UpdatePasswordInput,
-  // ): Promise<Usuario> {
-  //   const { oldPassword, newPassword } = updatePasswordInput;
+  //   updateUsuarioInput: UpdateUsuarioInput,
+  //   idUpdatedBy: string,
+  // ): Promise<UsuarioOutput> {
+  //   const updatedUsuario = await this.usuarioModel
+  //     .findByIdAndUpdate(
+  //       id,
+  //       { ...updateUsuarioInput, updatedBy: idUpdatedBy },
+  //       {
+  //         new: true,
+  //         runValidators: true,
+  //       },
+  //     )
+  //     .exec();
 
-  //   const usuario = await this.usuarioModel.findById(id).exec();
-  //   if (!usuario) {
+  //   if (!updatedUsuario) {
   //     throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
   //   }
 
-  //   if (usuario.isGoogleAuth) {
-  //     throw new ConflictException(
-  //       'No puedes cambiar la contraseña de un usuario de Google, inicia sesión con tu cuenta de Google',
-  //     );
-  //   }
-
-  //   // Verificar si la contraseña antigua es correcta
-  //   const isOldPasswordValid = await bcrypt.compare(
-  //     oldPassword,
-  //     usuario.hashPassword,
-  //   );
-  //   if (!isOldPasswordValid) {
-  //     throw new ConflictException('La contraseña antigua es incorrecta');
-  //   }
-
-  //   // Encriptar la nueva contraseña
-  //   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-  //   // Actualizar la contraseña
-  //   usuario.hashPassword = hashedNewPassword;
-  //   await usuario.save();
-
-  //   return usuario;
+  //   return updatedUsuario;
   // }
 
-  /**
-   * Elimina (desactiva) un usuario por su ID (soft delete).
-   * @param idDelete ID del usuario a eliminar.
-   * @returns El usuario eliminado.
-   * @throws NotFoundException si el usuario no existe.
-   */
-  async softDelete(idDelete: string, idThanos: string): Promise<Usuario> {
-    // Marcar el usuario como DELETED en lugar de eliminarlo físicamente
-    const deletedUsuario = await this.usuarioModel
-      .findByIdAndUpdate(
-        idDelete,
-        {
-          status: UserStatus.DELETED,
-          deletedAt: new Date(),
-          deletedBy: idThanos,
-        },
-        { new: true, runValidators: true },
-      )
-      .exec();
-
-    if (!deletedUsuario) {
-      throw new NotFoundException(`Usuario con ID ${idDelete} no encontrado`);
-    }
-
-    return deletedUsuario;
-  }
-
-  /**
-   * Elimina un usuario de forma permanente por su ID (hard delete).
-   * @param id ID del usuario a eliminar.
-   * @returns El usuario eliminado.
-   * @throws NotFoundException si el usuario no existe.
-   */
-  async hardDelete(id: string): Promise<Usuario> {
-    const usuario = await this.usuarioModel.findById(id).exec();
-    if (!usuario) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-    }
-
-    if (usuario.status !== UserStatus.DELETED) {
-      throw new ConflictException(
-        'El usuario debe estar marcado como DELETED para eliminarlo permanentemente',
-      );
-    }
-
-    const deletedUsuario = await this.usuarioModel.findByIdAndDelete(id).exec();
-    return deletedUsuario;
-  }
-
-  /**
-   * Elimina todos los usuarios marcados como DELETED.
-   * @returns El número de usuarios eliminados.
-   */
-  async hardDeleteAllDeletedUsers(): Promise<number> {
-    try {
-      const result = await this.usuarioModel.deleteMany({
-        status: UserStatus.DELETED,
-      });
-      return result.deletedCount || 0;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al eliminar usuarios eliminados',
-        error.message,
-      );
-    }
-  }
-
-  /**
-   * Obtiene todos los usuarios marcados como DELETED.
-   * @returns Un array de usuarios eliminados.
-   */
-  async findSoftDeletedUsers(pagination?: PaginationArgs): Promise<Usuario[]> {
-    const { limit = 10, offset = 0 } = pagination || {};
-
-    try {
-      return await this.usuarioModel
-        .aggregate([
-          { $match: { status: UserStatus.DELETED } },
-          // Puedes agregar más etapas si necesitas
-        ])
-        .skip(offset)
-        .limit(limit)
-        .exec();
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener usuarios eliminados',
-        error.message,
-      );
-    }
-  }
-
+  // #region Métodos de autenticación
   /**
    * Busca un usuario por su token de restablecimiento de contraseña.
    * @param hashedToken - El token hasheado.
@@ -391,4 +265,123 @@ export class UsuarioService {
     }
     return user;
   }
+
+  // #region Manejo de eliminaciones
+  /**
+   * Elimina (desactiva) un usuario por su ID (soft delete).
+   * @param idDelete ID del usuario a eliminar.
+   * @param idThanos ID del usuario que realiza la eliminación.
+   * @returns El usuario eliminado.
+   * @throws NotFoundException si el usuario no existe.
+   */
+  async softDelete(idDelete: string, idThanos: string): Promise<UsuarioOutput> {
+    // Marcar el usuario como DELETED y "deleted: true" en lugar de eliminarlo físicamente
+    const deletedUsuario = await this.usuarioModel
+      .findByIdAndUpdate(
+        idDelete,
+        {
+          status: UserStatus.DELETED,
+          deleted: true,
+          deletedAt: new Date(),
+          deletedBy: new Types.ObjectId(idThanos),
+        },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!deletedUsuario) {
+      throw new NotFoundException(`Usuario con ID ${idDelete} no encontrado`);
+    }
+
+    return deletedUsuario;
+  }
+
+  /**
+   * Restaura un usuario eliminado.
+   * @param id ID del usuario a restaurar.
+   * @param userUpdatedId ID del usuario que realiza la restauración.
+   * @returns El usuario restaurado.
+   * @throws NotFoundException si el usuario no existe.
+   */
+
+  async restore(id: string, userUpdatedId): Promise<UsuarioOutput> {
+    const restoredUsuario = await this.usuarioModel
+      .findByIdAndUpdate(
+        id,
+        {
+          status: UserStatus.ACTIVE,
+          deleted: false,
+          updatedBy: userUpdatedId,
+        },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!restoredUsuario) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+
+    return restoredUsuario;
+  }
+
+  // /**
+  //  * Elimina un usuario de forma permanente por su ID (hard delete).
+  //  * @param id ID del usuario a eliminar.
+  //  * @returns El usuario eliminado.
+  //  * @throws NotFoundException si el usuario no existe.
+  //  */
+  // async hardDelete(id: string): Promise<UsuarioOutput> {
+  //   const usuario = await this.usuarioModel.findById(id).exec();
+  //   if (!usuario) {
+  //     throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+  //   }
+
+  //   if (usuario.deleted !== true) {
+  //     throw new ConflictException(
+  //       'El usuario debe estar marcado con "status:DELETED" y "deleted:true" para eliminarlo permanentemente',
+  //     );
+  //   }
+
+  //   const deletedUsuario = await this.usuarioModel.findByIdAndDelete(id).exec();
+  //   return deletedUsuario;
+  // }
+
+  // /**
+  //  * Elimina todos los usuarios marcados como "deleted: true".
+  //  * @returns El número de usuarios eliminados.
+  //  */
+  // async hardDeleteAllSoftDeleted(): Promise<{ deletedCount: number }> {
+  //   try {
+  //     const result = await this.usuarioModel.deleteMany({
+  //       deleted: true,
+  //     });
+  //     return { deletedCount: result.deletedCount };
+  //   } catch (error) {
+  //     throw new InternalServerErrorException(
+  //       'Error al eliminar usuarios permanentemente',
+  //       error.message,
+  //     );
+  //   }
+  // }
+
+  // /**
+  //  * Obtiene todos los usuarios marcados como "deleted: true".
+  //  * @returns Un array de usuarios eliminados.
+  //  */
+  // async findSoftDeleted(pagination?: PaginationArgs): Promise<UsuarioOutput[]> {
+  //   const { limit = 10, offset = 0 } = pagination || {};
+
+  //   try {
+  //     return await this.usuarioModel
+  //       .find({ deleted: true })
+  //       .skip(offset)
+  //       .limit(limit)
+  //       .exec();
+  //   } catch (error) {
+  //     throw new InternalServerErrorException(
+  //       'Error al obtener usuarios eliminados',
+  //       error.message,
+  //     );
+  //   }
+  // }
 }

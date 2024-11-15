@@ -2,69 +2,10 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Perfil {
-  bio: String
-  ubicacion: String
-  celular: String
-  fechaNacimiento: DateTime
-  contacto: String
-  intereses: [String!]
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-type Usuario {
-  _id: ID!
-  firstName: String!
-  lastName: String!
-  email: String!
-  email_verified: Boolean!
-  roles: [RolEnumGql!]!
-  picture: String
-  perfil: Perfil
-  notificaciones: Boolean!
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: UserStatus!
-}
-
-"""Roles disponibles para los usuarios"""
-enum RolEnumGql {
-  ESTUDIANTE
-  INSTRUCTOR
-  EDITOR
-  ADMINISTRADOR
-  SUPERADMIN
-}
-
-"""Estados de un usuario"""
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  DELETED
-  SUSPENDED
-}
-
 type Categoria {
   _id: ID!
   nombre: String!
   descripcion: String
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
-}
-
-"""Estado del documento"""
-enum DocumentStatus {
-  ACTIVE
-  DELETED
 }
 
 type Instructor {
@@ -75,11 +16,6 @@ type Instructor {
   especializacion: [String!]!
   calificacionPromedio: Float!
   pais: String
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 type Material {
@@ -87,11 +23,6 @@ type Material {
   titulo: String!
   descripcion: String
   url: String!
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 type Unidad {
@@ -102,11 +33,6 @@ type Unidad {
   descripcion: String
   urlVideo: String
   materiales: [Material!]
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 type Modulo {
@@ -116,11 +42,6 @@ type Modulo {
   titulo: String!
   descripcion: String
   unidades: [Unidad!]
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 type Opcion {
@@ -128,11 +49,6 @@ type Opcion {
   textOpcion: String!
   esCorrecta: Boolean!
   orden: Int
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 type Pregunta {
@@ -142,11 +58,6 @@ type Pregunta {
   opciones: [Opcion!]
   moduloId: Modulo
   unidadId: Unidad
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 """Tipos de preguntas"""
@@ -166,12 +77,12 @@ type Cuestionario {
   preguntas: [Pregunta!]!
   numeroPreguntasPresentar: Int
   fechaCreacion: DateTime!
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Curso {
   _id: ID!
@@ -193,11 +104,6 @@ type Curso {
   fechaLanzamiento: DateTime
   categorias: [Categoria!]!
   cuestionarioId: Cuestionario
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 """Niveles de un curso"""
@@ -207,16 +113,50 @@ enum Nivel {
   Avanzado
 }
 
+type Perfil {
+  bio: String
+  ubicacion: String
+  celular: String
+  fechaNacimiento: DateTime
+  contacto: String
+  intereses: [String!]
+}
+
+type Usuario {
+  _id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  email_verified: Boolean!
+  roles: [RolEnumGql!]!
+  picture: String
+  perfil: Perfil
+  notificaciones: Boolean!
+  status: UserStatus!
+}
+
+"""Roles disponibles para los usuarios"""
+enum RolEnumGql {
+  ESTUDIANTE
+  INSTRUCTOR
+  EDITOR
+  ADMINISTRADOR
+  SUPERADMIN
+}
+
+"""Estados de un usuario"""
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  DELETED
+  SUSPENDED
+}
+
 type RespuestaPregunta {
   _id: ID!
   preguntaId: Pregunta!
   opcionIds: [Opcion!]
   respuestaAbierta: String
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 type UsuarioOutput {
@@ -229,10 +169,6 @@ type UsuarioOutput {
   picture: String
   perfil: Perfil
   notificaciones: Boolean!
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
   status: UserStatus!
 }
 
@@ -254,11 +190,6 @@ type Comentario {
   cursoId: Curso!
   comentario: String!
   fecha: DateTime!
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 type UserJwtOutput {
@@ -273,11 +204,6 @@ type Calificacion {
   valor: Int!
   comentario: String
   fecha: DateTime!
-  createdBy: ID
-  updatedBy: ID
-  deletedAt: DateTime
-  deletedBy: ID
-  status: DocumentStatus!
 }
 
 type Query {

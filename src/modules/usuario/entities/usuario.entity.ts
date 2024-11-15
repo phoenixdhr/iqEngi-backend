@@ -1,22 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { CallbackError, Document, Query, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Perfil, PerfilSchema } from './perfil.entity';
 import { RolEnum } from 'src/common/enums/rol.enum';
 import { IUsuario } from '../interfaces/usuario.interface';
 import { UserStatus } from 'src/common/enums/estado-usuario.enum';
-import { Coleccion } from 'src/common/enums';
 import { UsuarioOutput } from '../dtos/usuarios-dtos/usuario.output';
-import { CreatedUpdatedDeletedBy } from 'src/common/interfaces/created-updated-deleted-by.interface';
 import { IsOptional } from 'class-validator';
+import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
+import { AuditFields } from 'src/common/clases/audit-fields.class';
 
 @ObjectType()
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
-export class Usuario
-  extends Document
-  implements IUsuario, CreatedUpdatedDeletedBy
-{
+export class Usuario extends AuditFields implements IUsuario {
   @Field(() => ID)
   _id: Types.ObjectId;
 
@@ -29,7 +26,7 @@ export class Usuario
   lastName: string;
 
   @Field()
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true, unique: true, lowercase: true })
   email: string;
 
   @Field()
@@ -71,25 +68,6 @@ export class Usuario
   @IsOptional()
   resetPasswordExpires?: Date;
 
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
-  createdBy?: Types.ObjectId;
-
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Usuario.name })
-  updatedBy?: Types.ObjectId;
-
-  // Campo opcional para registrar cuándo fue eliminado
-  @Field({ nullable: true })
-  @Prop({ default: null })
-  deletedAt?: Date;
-
-  // Opcional: quién eliminó al usuario
-  @Field(() => ID, { nullable: true })
-  @Prop({ type: Types.ObjectId, ref: Coleccion.Usuario, default: null })
-  deletedBy?: Types.ObjectId;
-
-  // Nuevo campo 'status' para representar el estado del usuario
   @Field(() => UserStatus)
   @Prop({
     type: String,
@@ -103,20 +81,20 @@ export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
 
 // Índice para asegurar unicidad en email
 UsuarioSchema.index({ email: 1 }, { unique: true });
-
-// Índice para optimizar consultas que filtran por status
 UsuarioSchema.index({ status: 1 });
+UsuarioSchema.index({ deleted: 1 });
 
 // #region Middleware
-// Middleware para excluir usuarios eliminados en consultas de búsqueda
-UsuarioSchema.pre(
-  /^find/,
-  function (
-    this: Query<UsuarioOutput | UsuarioOutput[], Usuario>,
-    next: (err?: CallbackError) => void,
-  ) {
-    // 'this' hace referencia a la consulta
-    this.where({ status: { $ne: UserStatus.DELETED } });
-    next();
-  },
-);
+addSoftDeleteMiddleware<UsuarioOutput, Usuario>(UsuarioSchema);
+// // Middleware para excluir usuarios eliminados en consultas de búsqueda
+// UsuarioSchema.pre(
+//   /^find/,
+//   function (
+//     this: Query<UsuarioOutput | UsuarioOutput[], Usuario>,
+//     next: (err?: CallbackError) => void,
+//   ) {
+//     // 'this' hace referencia a la consulta
+//     this.where({ deleted: { $ne: true } });
+//     next();
+//   },
+// );
