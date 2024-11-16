@@ -13,7 +13,7 @@ import * as jwt from 'jsonwebtoken';
 
 import * as bcrypt from 'bcrypt';
 import { UpdateUsuarioInput } from '../dtos/usuarios-dtos/update-usuario.input';
-import { PaginationArgs, RolesInput, SearchArgs } from 'src/common/dtos';
+import { PaginationArgs, RolesInput, SearchTextArgs } from 'src/common/dtos';
 import { UserStatus } from 'src/common/enums/estado-usuario.enum';
 import { MailService } from 'src/modules/mail/mail.service';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
@@ -168,7 +168,7 @@ export class UsuarioService extends BaseService<
    */
   async findAll(
     pagination?: PaginationArgs,
-    searchInput?: SearchArgs,
+    searchInput?: SearchTextArgs,
   ): Promise<UsuarioOutput[]> {
     const { limit = 10, offset = 0 } = pagination || {};
     const { search } = searchInput || {};
@@ -180,9 +180,17 @@ export class UsuarioService extends BaseService<
     return this.usuarioModel.find(query).skip(offset).limit(limit).exec();
   }
 
+  /**
+   * Obtiene todos los usuarios que coinsidan un un texto, funcion contiene opciones de paginación.
+   * @param searchArgs Objeto que contiene un campo "serch" (texto que se usará para realizar busquedas).
+   * @param pagination Opciones de paginación.
+   * @returns Un array de usuarios.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
   async findAllByFirstname(
-    searchArgs: SearchArgs,
-    pagination: PaginationArgs,
+    searchArgs: SearchTextArgs,
+    pagination?: PaginationArgs,
   ): Promise<UsuarioOutput[]> {
     const searchField: SearchField<UsuarioOutput> = new SearchField();
     searchField.field = 'firstName';

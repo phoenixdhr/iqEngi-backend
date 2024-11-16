@@ -8,7 +8,7 @@ import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-au
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UsuarioService } from '../services/usuario.service';
 import { UpdateUsuarioInput } from '../dtos/usuarios-dtos/update-usuario.input';
-import { PaginationArgs, RolesInput, SearchArgs } from 'src/common/dtos';
+import { PaginationArgs, RolesInput, SearchTextArgs } from 'src/common/dtos';
 import { administradorUp, RolEnum } from 'src/common/enums/rol.enum';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
@@ -18,7 +18,7 @@ import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator'
 import { deletedCountOutput } from '../dtos/usuarios-dtos/deleted-count.output';
 import { CreateUsuarioInput } from '../dtos/usuarios-dtos/create-usuario.input';
 import SearchField from 'src/common/clases/search-field.class';
-import SearchFieldArgs from 'src/common/dtos/search-fielf.ttt';
+import SearchFieldArgs from 'src/common/dtos/search-field.args';
 
 /**
  * Resolver para manejar las operaciones de Usuario.
@@ -69,8 +69,8 @@ export class UsuarioResolver {
     roles?: RolesInput,
     @Args({ type: () => PaginationArgs, nullable: true })
     pagination?: PaginationArgs,
-    @Args({ type: () => SearchArgs, nullable: true })
-    search?: SearchArgs,
+    @Args({ type: () => SearchTextArgs, nullable: true })
+    search?: SearchTextArgs,
   ): Promise<UsuarioOutput[]> {
     if (!roles || !roles.roles) {
       return this.usuarioService.findAll(pagination, search);
@@ -89,7 +89,7 @@ export class UsuarioResolver {
   @Query(() => [UsuarioOutput], { name: 'usuarios_findAllByFirstname' })
   @RolesDec(...administradorUp)
   async findAllByFirstname(
-    @Args() searchArgs: SearchArgs,
+    @Args() searchArgs: SearchTextArgs,
     @Args() pagination?: PaginationArgs,
   ): Promise<UsuarioOutput[]> {
     return this.usuarioService.findAllByFirstname(searchArgs, pagination);
@@ -107,7 +107,7 @@ export class UsuarioResolver {
   @Query(() => [UsuarioOutput], { name: 'usuarios_findAllBy' })
   @RolesDec(...administradorUp)
   async findAllBy(
-    @Args() searchArgs: SearchArgs,
+    @Args() searchArgs: SearchTextArgs,
     @Args() searchField?: SearchFieldArgs,
     @Args() pagination?: PaginationArgs,
   ): Promise<UsuarioOutput[]> {

@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreatedUpdatedDeletedBy } from '../interfaces/created-updated-deleted-by.interface';
-import { PaginationArgs, SearchArgs } from '../dtos';
+import { PaginationArgs, SearchTextArgs } from '../dtos';
 import { deletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { ReturnDocument } from 'mongodb';
 import SearchField from '../clases/search-field.class';
@@ -45,7 +45,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
   }
 
   async findAllBy(
-    searchInput: SearchArgs,
+    searchInput: SearchTextArgs,
     searchField: SearchField<T>,
     pagination?: PaginationArgs,
   ): Promise<T[]> {
