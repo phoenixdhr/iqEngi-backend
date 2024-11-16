@@ -133,6 +133,7 @@ type Usuario {
   perfil: Perfil
   notificaciones: Boolean!
   status: UserStatus!
+  deleted: Boolean!
 }
 
 """Roles disponibles para los usuarios"""
@@ -170,6 +171,7 @@ type UsuarioOutput {
   perfil: Perfil
   notificaciones: Boolean!
   status: UserStatus!
+  deleted: Boolean!
 }
 
 type UserRequest {
@@ -182,6 +184,10 @@ type UserRequest {
   firstName: String!
   lastName: String!
   picture: String
+}
+
+type deletedCountOutput {
+  deletedCount: Float!
 }
 
 type Comentario {
@@ -215,10 +221,16 @@ type Query {
     limit: Int = 10
     search: String
   ): [UsuarioOutput!]!
+  usuarios_findAllByFirstname(search: String, offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
+  usuarios_findAllBy(search: String, field: String, offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
   usuario(id: ID!): UsuarioOutput!
 
+  """Obtiene una lista de usuarios filtrados por roles específicos."""
+  usuarios_findByRol(objetoRoles: RolesInput!): [UsuarioOutput!]!
+  usuario_findByEmail(email: String!): UsuarioOutput!
+
   """Obtiene una lista de usuarios eliminados."""
-  usuariosEliminados(offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
+  usuarios_findSoftDeleted(offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
   comentarios: [Comentario!]!
   comentario(id: ID!): Comentario!
   comentariosPorCurso(cursoId: ID!): [Comentario!]!
@@ -243,10 +255,13 @@ type Mutation {
   updatePassword(updatePasswordInput: UpdatePasswordInput!): UsuarioOutput!
   requestPasswordReset(requestPasswordResetInput: RequestPasswordResetInput!): String!
   resetPassword(resetPasswordInput: ResetPasswordInput!): String!
-  createUsuario(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
-  updateUsuario(updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
-  updateUsuariofromAdmin(id: ID!, updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
-  removeUsuario(idRemove: ID!): UsuarioOutput!
+  usuario_create(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
+  usuario_update(updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
+  usuario_updateFromAdmin(id: ID!, updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
+  usuario_softDelete(idRemove: ID!): UsuarioOutput!
+  usuario_restore(idRestore: ID!): UsuarioOutput!
+  usuario_hardDelete(id: ID!): UsuarioOutput!
+  usuarios_hardDeleteAllSoftDeleted: deletedCountOutput!
   createComentario(createComentarioInput: CreateComentarioInput!): Comentario!
   updateComentario(id: ID!, updateComentarioInput: UpdateComentarioInput!): Comentario!
   removeComentario(id: ID!): Comentario!

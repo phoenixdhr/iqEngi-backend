@@ -1,13 +1,16 @@
 // src/common/services/base.service.ts
 
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import {
   ConflictException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreatedUpdatedDeletedBy } from '../interfaces/created-updated-deleted-by.interface';
-import { PaginationArgs } from '../dtos';
+import { PaginationArgs, SearchArgs } from '../dtos';
+import { deletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
+import { ReturnDocument } from 'mongodb';
+import SearchField from '../clases/search-field.class';
 
 export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
   constructor(protected readonly model: Model<T>) {}
@@ -30,15 +33,43 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
     return created;
   }
 
-  //#region find
+  // #region find
   /**
    * Recupera todos los documentos con opciones de paginación.
    * @param pagination - Opciones de paginación, incluyendo el límite de documentos y el desplazamiento.
    * @returns Una lista de documentos paginados.
    */
   async findAll(pagination?: PaginationArgs): Promise<T[]> {
-    const { limit = 10, offset = 0 } = pagination || {};
+    const { limit, offset } = pagination;
     return this.model.find().skip(offset).limit(limit).exec();
+  }
+
+  async findAllBy(
+    searchInput: SearchArgs,
+    searchField: SearchField<T>,
+    pagination?: PaginationArgs,
+  ): Promise<T[]> {
+    const { limit = 10, offset = 0 } = pagination || {};
+    const { search } = searchInput;
+    const { field } = searchField;
+
+    const schemaKeys = Object.keys(this.model.schema.paths) as Array<keyof T>;
+    const key = schemaKeys.find((key) => key === field);
+
+    if (!key) {
+      throw new InternalServerErrorException(
+        `El campo de búsqueda "${String(key)}" no existe en el esquema de ${this.model.collection.name}`,
+      );
+    }
+    const query = search ? { [key]: { $regex: search, $options: 'i' } } : {};
+
+    const documents = await this.model
+      .find(query as FilterQuery<T>)
+      .skip(offset)
+      .limit(limit)
+      .exec();
+
+    return documents as unknown as T[];
   }
 
   /**
@@ -52,7 +83,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
     if (!document) {
       throw new NotFoundException(
-        `Documento ${document.baseModelName} con ID "${id}" no encontrado`,
+        `Documento ${this.model.collection.name} con ID "${id}" no encontrado`,
       );
     }
 
@@ -84,7 +115,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
     if (!document) {
       throw new NotFoundException(
-        `Documento ${document.baseModelName} con ID "${id}" no encontrado`,
+        `Documento ${this.model.collection.name}con ID "${id}" no encontrado`,
       );
     }
 
@@ -112,7 +143,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
     if (!documentSoftDeleted) {
       throw new NotFoundException(
-        `Documento ${documentSoftDeleted.baseModelName} con ID "${idDelete}" no encontrado`,
+        `Documento ${documentSoftDeleted.baseModelName} con ID "${idDelete}" no encontrado, o tal vez haya sido eliminado`,
       );
     }
 
@@ -125,36 +156,43 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @returns El documento eliminado.
    * @throws NotFoundException si el documento no existe.
    */
-  async hardDelete(id: string): Promise<T> {
-    const document = await this.model.findById(id).exec();
+  async hardDelete(idHardDelete: string): Promise<T> {
+    const id = new Types.ObjectId(idHardDelete);
+
+    const document = await this.model.collection.findOne({
+      _id: id,
+    });
 
     if (!document) {
       throw new NotFoundException(
-        `Documento ${document.baseModelName} con ID "${id}" no encontrado`,
+        `Documento ${this.model.collection.name} con ID "${id}" no encontrado`,
       );
     }
 
     if (document.deleted !== true) {
       throw new ConflictException(
-        `El Documento ${document.baseModelName} debe estar marcado como "deleted:true" para eliminarlo permanentemente`,
+        `El Documento ${this.model.collection.name} debe estar marcado como "deleted:true" para eliminarlo permanentemente`,
       );
     }
 
-    const deletedDocument = await this.model.findByIdAndDelete(id).exec();
-    return deletedDocument;
+    const deletedDocument = await this.model.collection.findOneAndDelete({
+      _id: id,
+    });
+
+    return deletedDocument as unknown as T;
   }
 
   /**
    * Elimina todos los documentos marcados como "deleted: true".
    * @returns un objeto con el numero de documentos eliminados.
    */
-  async hardDeleteAllSoftDeleted(): Promise<{ deletedCount: number }> {
+  async hardDeleteAllSoftDeleted(): Promise<deletedCountOutput> {
     try {
       const result = await this.model.deleteMany({ deleted: true });
       return { deletedCount: result.deletedCount };
     } catch (error) {
       throw new InternalServerErrorException(
-        `Error al eliminar los documentos permanentemente`,
+        `Error al eliminar los documentos ${this.model.collection.name} permanentemente`,
         error.message,
       );
     }
@@ -165,16 +203,16 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @returns Un array de documentos eliminados.
    */
   async findSoftDeleted(pagination?: PaginationArgs): Promise<T[]> {
-    const { limit = 10, offset = 0 } = pagination || {};
+    const { limit, offset } = pagination || {};
     try {
       return this.model
-        .find({ deleted: true })
+        .aggregate([{ $match: { deleted: true } }])
         .skip(offset)
         .limit(limit)
         .exec();
     } catch (error) {
       throw new InternalServerErrorException(
-        'Error al buscar documentos eliminados',
+        `Error al buscar documentos ${this.model.collection.name} eliminados`,
         error.message,
       );
     }
@@ -187,22 +225,49 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @returns El documento restaurado.
    * @throws NotFoundException si el documento no existe.
    */
-  async restore(id: string, userId: string): Promise<T> {
-    const document = await this.model.findByIdAndUpdate(
-      id,
-      {
-        deleted: false,
-        updatedBy: new Types.ObjectId(userId),
-      },
-      { new: true },
-    );
+  async restore(id: string, userUpdatedId: string): Promise<T> {
+    // Convertir el id a ObjectId si es necesario
+    const idRestore = new Types.ObjectId(id);
+    const updatedBy = new Types.ObjectId(userUpdatedId);
 
-    if (!document) {
-      throw new NotFoundException(
-        `Documento ${document.baseModelName} ID "${id}" no encontrado`,
+    try {
+      const document = await this.model.collection.findOne({ _id: idRestore });
+
+      if (!document) {
+        throw new NotFoundException(
+          `Documento ${this.model.baseModelName} ID "${id}" no encontrado, tal vez ya esta eliminado`,
+        );
+      }
+
+      if (!document.deleted) {
+        throw new ConflictException(
+          `El documento ${this.model.baseModelName} con ID "${id}" no está marcado como eliminado, no es necesario restaurarlo`,
+        );
+      }
+
+      const updatedDocument = await this.model.collection.findOneAndUpdate(
+        { _id: idRestore, deleted: true }, // Incluye `deleted: true` en la condición
+        {
+          $set: {
+            deleted: false,
+            updatedBy: updatedBy,
+          },
+        },
+        { returnDocument: ReturnDocument.AFTER }, // Para versiones antiguas de Mongoose, usa `{ returnOriginal: false }`
+      );
+
+      const restoredDocument = updatedDocument as unknown as T;
+
+      return restoredDocument;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        `Error al restaurar el documento ${this.model.collection.name}`,
+        error.message,
       );
     }
-
-    return document;
   }
 }

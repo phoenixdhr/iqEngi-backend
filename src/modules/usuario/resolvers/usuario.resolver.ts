@@ -7,16 +7,18 @@ import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-au
 // Importaciones de GraphQL
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UsuarioService } from '../services/usuario.service';
-import { CreateUsuarioInput } from '../dtos/usuarios-dtos/create-usuario.input';
 import { UpdateUsuarioInput } from '../dtos/usuarios-dtos/update-usuario.input';
 import { PaginationArgs, RolesInput, SearchArgs } from 'src/common/dtos';
-import { administradorUp } from 'src/common/enums/rol.enum';
+import { administradorUp, RolEnum } from 'src/common/enums/rol.enum';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
-import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
+import { deletedCountOutput } from '../dtos/usuarios-dtos/deleted-count.output';
+import { CreateUsuarioInput } from '../dtos/usuarios-dtos/create-usuario.input';
+import SearchField from 'src/common/clases/search-field.class';
+import SearchFieldArgs from 'src/common/dtos/search-fielf.ttt';
 
 /**
  * Resolver para manejar las operaciones de Usuario.
@@ -33,9 +35,9 @@ export class UsuarioResolver {
    * @param createUsuarioInput Datos para crear el usuario.
    * @returns El usuario creado.
    */
-  @Mutation(() => UsuarioOutput)
-  @IsPublic()
-  async createUsuario(
+  @Mutation(() => UsuarioOutput, { name: 'usuario_create' })
+  @RolesDec(...administradorUp)
+  async create(
     @Args('createUsuarioInput') createUsuarioInput: CreateUsuarioInput,
   ): Promise<UsuarioOutput> {
     return this.usuarioService.create(createUsuarioInput);
@@ -77,20 +79,94 @@ export class UsuarioResolver {
   }
 
   /**
-   * Obtiene un usuario por su ID.
-   * @param id ID del usuario.
-   * @returns El usuario encontrado.
-   * @throws NotFoundException si el usuario no existe.
+   * Obtiene todos los usuarios con opciones de paginación y búsqueda.
+   * @param searchArgs Objeto que contiene un campo "serch" (texto que se usara para realizar busquedas).
+   * @param pagination Opciones de paginación.
+   * @returns Un array de usuarios.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
+  @Query(() => [UsuarioOutput], { name: 'usuarios_findAllByFirstname' })
+  @RolesDec(...administradorUp)
+  async findAllByFirstname(
+    @Args() searchArgs: SearchArgs,
+    @Args() pagination?: PaginationArgs,
+  ): Promise<UsuarioOutput[]> {
+    return this.usuarioService.findAllByFirstname(searchArgs, pagination);
+  }
 
+  /**
+   * Obtiene todos los usuarios con opciones de paginación y búsqueda.
+   * @param searchArgs Objeto que contiene un campo "serch" (texto que se usara para realizar busquedas).
+   * @param searchField Objeto que contiene un campo de búsqueda, debe ser una Key del documento por ejemplo "lastName".
+   * @param pagination Opciones de paginación.
+   * @returns Un array de usuarios.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Query(() => [UsuarioOutput], { name: 'usuarios_findAllBy' })
+  @RolesDec(...administradorUp)
+  async findAllBy(
+    @Args() searchArgs: SearchArgs,
+    @Args() searchField?: SearchFieldArgs,
+    @Args() pagination?: PaginationArgs,
+  ): Promise<UsuarioOutput[]> {
+    if (!searchField.field) {
+      return this.usuarioService.findAllByFirstname(searchArgs, pagination);
+    }
+
+    const searchField2 = {
+      field: searchField.field,
+    } as unknown as SearchField<UsuarioOutput>;
+
+    return this.usuarioService.findAllBy(searchArgs, searchField2, pagination);
+  }
+
+  /**
+   * Obtiene un usuario por su ID.
+   * @param id ID del usuario.
+   * @returns El usuario encontrado.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
   @Query(() => UsuarioOutput, { name: 'usuario' })
   @RolesDec(...administradorUp)
-  async findOne(
+  async findById(
     @Args('id', { type: () => ID }, IdPipe) id: string, // Aplica el Pipe aquí
   ): Promise<UsuarioOutput> {
     return this.usuarioService.findById(id);
+  }
+
+  /**
+   * Obtiene una lista de usuarios filtrados por roles específicos.
+   * @param roles Objeto que contiene los roles a filtrar en un array.
+   * @returns Un array de usuarios que tienen alguno de los roles especificados.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Query(() => [UsuarioOutput], {
+    name: 'usuarios_findByRol',
+    description:
+      'Obtiene una lista de usuarios filtrados por roles específicos.',
+  })
+  @RolesDec(...administradorUp)
+  async findByRol(
+    @Args('objetoRoles', { type: () => RolesInput }) roles: RolesInput,
+  ): Promise<UsuarioOutput[]> {
+    return this.usuarioService.findByRol(roles);
+  }
+
+  /**
+   * Obtiene un usuario por su email.
+   * @param email Email del usuario.
+   * @returns El usuario encontrado.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Query(() => UsuarioOutput, { name: 'usuario_findByEmail' })
+  @RolesDec(...administradorUp)
+  async findByEmail(@Args('email') email: string): Promise<UsuarioOutput> {
+    return this.usuarioService.findByEmail(email);
   }
 
   /**
@@ -99,10 +175,9 @@ export class UsuarioResolver {
    * @param updateUsuarioInput Datos para actualizar el usuario.
    * @param user Usuario autenticado que realiza la actualización.
    * @returns El usuario actualizado.
-   * @throws NotFoundException si el usuario no existe.
    */
-  @Mutation(() => UsuarioOutput)
-  async updateUsuario(
+  @Mutation(() => UsuarioOutput, { name: 'usuario_update' })
+  async update(
     @Args('updateUsuarioInput') updateUsuarioInput: UpdateUsuarioInput,
     @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
@@ -117,7 +192,7 @@ export class UsuarioResolver {
    * @returns El usuario actualizado.
    * @throws NotFoundException si el usuario no existe.
    */
-  @Mutation(() => UsuarioOutput)
+  @Mutation(() => UsuarioOutput, { name: 'usuario_updateFromAdmin' })
   @RolesDec(...administradorUp)
   async updateUsuariofromAdmin(
     @Args('id', { type: () => ID }, IdPipe) id: string,
@@ -127,24 +202,6 @@ export class UsuarioResolver {
     const idUpdatedBy = user._id;
     return this.usuarioService.update(id, updateUsuarioInput, idUpdatedBy);
   }
-
-  // /**
-  //  * Actualiza la contraseña del usuario autenticado.
-  //  *
-  //  * @param updatePasswordInput Datos para actualizar la contraseña.
-  //  * @param user Usuario autenticado que realiza la actualización.
-  //  * @returns El usuario.
-  //  * @throws NotFoundException si el usuario no existe.
-  //  * @throws ConflictException si la contraseña antigua es incorrecta.
-  //  */
-  // @Mutation(() => UsuarioOutput)
-  // async updatePassword(
-  //   @Args('updatePasswordInput') updatePasswordInput: UpdatePasswordInput,
-  //   @CurrentUser() user: UserRequest,
-  // ): Promise<UsuarioOutput> {
-  //   const id = user._id;
-  //   return this.usuarioService.updatePassword(id, updatePasswordInput);
-  // }
 
   /**
    * Elimina (desactiva) un usuario específico por su ID.
@@ -157,9 +214,9 @@ export class UsuarioResolver {
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => UsuarioOutput)
+  @Mutation(() => UsuarioOutput, { name: 'usuario_softDelete' })
   @RolesDec(...administradorUp)
-  async removeUsuario(
+  async softDelete(
     @Args('idRemove', { type: () => ID }, IdPipe) idRemove: string, // Aplica el Pipe aquí
     @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
@@ -175,14 +232,62 @@ export class UsuarioResolver {
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => [UsuarioOutput], {
-    name: 'usuariosEliminados',
+    name: 'usuarios_findSoftDeleted',
     description: 'Obtiene una lista de usuarios eliminados.',
   })
   @RolesDec(...administradorUp)
-  async findDeletedUsers(
+  async findSoftDeleted(
     @Args({ type: () => PaginationArgs, nullable: true })
     pagination?: PaginationArgs,
   ): Promise<UsuarioOutput[]> {
     return this.usuarioService.findSoftDeleted(pagination);
+  }
+
+  /**
+   * Restaura un usuario eliminado.
+   * @param idRestore ID del usuario a restaurar.
+   * @param user Usuario autenticado que realiza la restauración.
+   * @returns El usuario restaurado.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Mutation(() => UsuarioOutput, { name: 'usuario_restore' })
+  @RolesDec(...administradorUp)
+  async restore(
+    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: string, // Aplica el Pipe aquí
+    @CurrentUser() user: UserRequest,
+  ): Promise<UsuarioOutput> {
+    const userId = user._id;
+    return this.usuarioService.restore(idRestore, userId);
+  }
+
+  /**
+   * Elimina permanentemente un usuario por su ID.
+   * @param id ID del usuario a eliminar.
+   * @returns El usuario eliminado.
+   * @throws NotFoundException si el usuario no existe.
+   *
+   * @Roles: SUPER
+   */
+  @Mutation(() => UsuarioOutput, { name: 'usuario_hardDelete' })
+  @RolesDec(RolEnum.SUPERADMIN)
+  async hardDelete(
+    @Args('id', { type: () => ID }, IdPipe) id: string,
+  ): Promise<UsuarioOutput> {
+    return this.usuarioService.hardDelete(id);
+  }
+
+  /**
+   * Elimina permanentemente todos los usuarios marcados como eliminados.
+   * @returns Un objeto con el número de usuarios eliminados.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Mutation(() => deletedCountOutput, {
+    name: 'usuarios_hardDeleteAllSoftDeleted',
+  })
+  @RolesDec(RolEnum.SUPERADMIN)
+  async hardDeleteAllSoftDeleted(): Promise<deletedCountOutput> {
+    return this.usuarioService.hardDeleteAllSoftDeleted();
   }
 }

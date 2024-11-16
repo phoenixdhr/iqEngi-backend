@@ -197,7 +197,7 @@ export class JwtAuthService {
   async resetPassword(token: string, newPassword: string): Promise<string> {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    const user = await this.usuarioService.findOneByResetToken(hashedToken);
+    const user = await this.usuarioService._findOneByResetToken(hashedToken);
     if (!user) {
       throw new BadRequestException(
         'Token de restablecimiento de contraseña inválido o expirado.',

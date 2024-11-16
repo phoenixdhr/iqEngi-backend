@@ -29,6 +29,11 @@ import { CreateCategoriaInput } from '../dtos/create-categoria.input';
 import { UpdateCategoriaInput } from '../dtos/update-categoria.input';
 import { CategoriaService } from '../services/categoria.service';
 
+import { UseGuards } from '@nestjs/common';
+import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
+import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
+
+@UseGuards(JwtGqlAuthGuard, RolesGuard)
 @Resolver(() => Categoria)
 export class CategoriaResolver {
   constructor(private readonly categoriaService: CategoriaService) {}
@@ -94,4 +99,15 @@ export class CategoriaResolver {
   ): Promise<Categoria> {
     return this.categoriaService.remove(id);
   }
+
+  // @Query(() => [Categoria], { name: 'categorias_findAllBy' })
+  // @RolesDec(...administradorUp)
+  // async findAllBy(
+  //   @Args({ type: () => SearchArgs }) searchArgs: SearchArgs,
+  //   @Args({ type: () => SearchField<T> }) searchField: SearchField<T>,
+  //   @Args({ type: () => PaginationArgs, nullable: true })
+  //   pagination?: PaginationArgs,
+  // ): Promise<Categoria[]> {
+  //   return this.categoriaService.findAllBy(searchArgs, searchField, pagination);
+  // }
 }

@@ -8,13 +8,20 @@ import { Model } from 'mongoose';
 import { Categoria } from '../entities/categoria.entity';
 import { CreateCategoriaInput } from 'src/modules/categoria/dtos/create-categoria.input';
 import { UpdateCategoriaInput } from 'src/modules/categoria/dtos/update-categoria.input';
+import { BaseService } from 'src/common/services/base.service';
 
 @Injectable()
-export class CategoriaService {
+export class CategoriaService extends BaseService<
+  Categoria,
+  Categoria,
+  Categoria
+> {
   constructor(
     @InjectModel(Categoria.name)
     private readonly categoriaModel: Model<Categoria>,
-  ) {}
+  ) {
+    super(categoriaModel);
+  }
 
   /**
    * Crea una nueva categoría.

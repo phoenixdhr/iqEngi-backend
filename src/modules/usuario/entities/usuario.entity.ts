@@ -75,6 +75,10 @@ export class Usuario extends AuditFields implements IUsuario {
     default: UserStatus.ACTIVE,
   })
   status: UserStatus;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
