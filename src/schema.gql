@@ -214,13 +214,7 @@ type Calificacion {
 
 type Query {
   """Obtiene una lista de usuarios, opcionalmente filtrados por roles."""
-  usuarios(
-    """Filtrar usuarios por roles específicos."""
-    roles: RolesInput
-    offset: Int = 0
-    limit: Int = 10
-    search: String
-  ): [UsuarioOutput!]!
+  usuarios(offset: Int = 0, limit: Int = 10, search: String): [UsuarioOutput!]!
   usuarios_findAllByFirstname(search: String, offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
   usuarios_findAllBy(search: String, field: String, offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
   usuario(id: ID!): UsuarioOutput!

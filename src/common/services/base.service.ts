@@ -12,6 +12,12 @@ import { deletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/delet
 import { ReturnDocument } from 'mongodb';
 import SearchField from '../clases/search-field.class';
 
+/**
+ * Clase base para los servicios de los módulos.
+ * @param T - Tipo de la entidad - entidad que va  devolver la funcion.
+ * @param W - Tipo del DTO de actualización.
+ * @param U - Tipo del DTO de creación.
+ */
 export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
   constructor(protected readonly model: Model<T>) {}
 
@@ -22,10 +28,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @param userId - (Opcional) ID del usuario que realiza la creación.
    * @returns El documento creado como una instancia del modelo.
    */
-  async create(
-    createDto: Partial<U> | Partial<T>,
-    userId?: string,
-  ): Promise<T> {
+  async create(createDto: Partial<U> | Partial<T>, userId: string): Promise<T> {
     const created = await this.model.create({
       ...createDto,
       createdBy: new Types.ObjectId(userId),
@@ -44,6 +47,13 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
     return this.model.find().skip(offset).limit(limit).exec();
   }
 
+  /**
+   * Recupera todos los documentos con un texto de busqueda y con un campo especifico (Field) con opciones de paginación.
+   * @param searchInput - Texto de búsqueda.
+   * @param searchField - Campo de búsqueda.
+   * @param pagination - Opciones de paginación, incluyendo el límite de documentos y el desplazamiento.
+   * @returns Una lista de documentos paginados.
+   */
   async findAllBy(
     searchInput: SearchTextArgs,
     searchField: SearchField<T>,

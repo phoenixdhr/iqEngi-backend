@@ -19,6 +19,7 @@ import { deletedCountOutput } from '../dtos/usuarios-dtos/deleted-count.output';
 import { CreateUsuarioInput } from '../dtos/usuarios-dtos/create-usuario.input';
 import SearchField from 'src/common/clases/search-field.class';
 import SearchFieldArgs from 'src/common/dtos/search-field.args';
+import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
 
 /**
  * Resolver para manejar las operaciones de Usuario.
@@ -27,7 +28,10 @@ import SearchFieldArgs from 'src/common/dtos/search-field.args';
  */
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 @Resolver(() => UsuarioOutput)
-export class UsuarioResolver {
+export class UsuarioResolver
+  implements
+    IBaseResolver<UsuarioOutput, CreateUsuarioInput, UpdateUsuarioInput>
+{
   constructor(private readonly usuarioService: UsuarioService) {}
 
   /**
@@ -45,15 +49,12 @@ export class UsuarioResolver {
 
   /**
    * Obtiene todos los usuarios con opciones de paginación y búsqueda.
-   * Opcionalmente, puede filtrar por roles específicos.
-   * @param roles Opcional. Roles para filtrar los usuarios.
    * @param pagination Opcional. Opciones de paginación.
    * @param search Opcional. Opciones de búsqueda.
    * @returns Un array de usuarios.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-
   @Query(() => [UsuarioOutput], {
     name: 'usuarios',
     description:
@@ -61,21 +62,12 @@ export class UsuarioResolver {
   })
   @RolesDec(...administradorUp)
   async findAll(
-    @Args('roles', {
-      type: () => RolesInput,
-      nullable: true,
-      description: 'Filtrar usuarios por roles específicos.',
-    })
-    roles?: RolesInput,
     @Args({ type: () => PaginationArgs, nullable: true })
     pagination?: PaginationArgs,
     @Args({ type: () => SearchTextArgs, nullable: true })
     search?: SearchTextArgs,
   ): Promise<UsuarioOutput[]> {
-    if (!roles || !roles.roles) {
-      return this.usuarioService.findAll(pagination, search);
-    }
-    return this.usuarioService.findByRol(roles);
+    return this.usuarioService.findAll(pagination, search);
   }
 
   /**

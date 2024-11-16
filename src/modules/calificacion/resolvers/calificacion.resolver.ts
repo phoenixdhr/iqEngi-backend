@@ -5,9 +5,19 @@ import { Calificacion } from '../entities/calificacion.entity';
 import { CalificacionService } from '../services/calificacion.service';
 import { CreateCalificacionInput } from '../dtos/create-calificacion.input';
 import { UpdateCalificacionInput } from '../dtos/update-calificacion.input';
+import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
+import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
+import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
 
 @Resolver(() => Calificacion)
-export class CalificacionResolver {
+export class CalificacionResolver
+  // implements
+  //   IBaseResolver<
+  //     Calificacion,
+  //     CreateCalificacionInput,
+  //     UpdateCalificacionInput
+  //   >
+{
   constructor(private readonly calificacionService: CalificacionService) {}
 
   /**
@@ -19,8 +29,10 @@ export class CalificacionResolver {
   async createCalificacion(
     @Args('createCalificacionInput')
     createCalificacionInput: CreateCalificacionInput,
+    @CurrentUser() user: UserRequest,
   ): Promise<Calificacion> {
-    return this.calificacionService.create(createCalificacionInput);
+    const userId = user._id;
+    return this.calificacionService.create(createCalificacionInput, userId);
   }
 
   /**
@@ -41,7 +53,7 @@ export class CalificacionResolver {
   async findOne(
     @Args('id', { type: () => ID }) id: string,
   ): Promise<Calificacion> {
-    return this.calificacionService.findOneById(id);
+    return this.calificacionService.findById(id);
   }
 
   /**
@@ -79,8 +91,15 @@ export class CalificacionResolver {
     @Args('id', { type: () => ID }) id: string,
     @Args('updateCalificacionInput')
     updateCalificacionInput: UpdateCalificacionInput,
+    @CurrentUser() user: UserRequest,
   ): Promise<Calificacion> {
-    return this.calificacionService.update(id, updateCalificacionInput);
+    const idUpdatedBy = user._id;
+
+    return this.calificacionService.update(
+      id,
+      updateCalificacionInput,
+      idUpdatedBy,
+    );
   }
 
   /**
@@ -91,8 +110,10 @@ export class CalificacionResolver {
   @Mutation(() => Calificacion)
   async removeCalificacion(
     @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: UserRequest,
   ): Promise<Calificacion> {
-    return this.calificacionService.remove(id);
+    const idThanos = user._id;
+    return this.calificacionService.softDelete(id, idThanos);
   }
 
   /**
