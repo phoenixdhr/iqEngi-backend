@@ -35,6 +35,10 @@ export class Pregunta extends AuditFields implements IPregunta {
   @Field(() => Unidad, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: Unidad.name })
   unidadId?: Types.ObjectId;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);

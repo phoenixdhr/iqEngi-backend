@@ -6,6 +6,7 @@ type Categoria {
   _id: ID!
   nombre: String!
   descripcion: String
+  deleted: Boolean!
 }
 
 type Instructor {
@@ -16,6 +17,7 @@ type Instructor {
   especializacion: [String!]!
   calificacionPromedio: Float!
   pais: String
+  deleted: Boolean!
 }
 
 type Material {
@@ -33,6 +35,7 @@ type Unidad {
   descripcion: String
   urlVideo: String
   materiales: [Material!]
+  deleted: Boolean!
 }
 
 type Modulo {
@@ -42,6 +45,7 @@ type Modulo {
   titulo: String!
   descripcion: String
   unidades: [Unidad!]
+  deleted: Boolean!
 }
 
 type Opcion {
@@ -49,6 +53,7 @@ type Opcion {
   textOpcion: String!
   esCorrecta: Boolean!
   orden: Int
+  deleted: Boolean!
 }
 
 type Pregunta {
@@ -58,6 +63,7 @@ type Pregunta {
   opciones: [Opcion!]
   moduloId: Modulo
   unidadId: Unidad
+  deleted: Boolean!
 }
 
 """Tipos de preguntas"""
@@ -77,6 +83,7 @@ type Cuestionario {
   preguntas: [Pregunta!]!
   numeroPreguntasPresentar: Int
   fechaCreacion: DateTime!
+  deleted: Boolean!
 }
 
 """
@@ -93,7 +100,8 @@ type Curso {
   instructor: Instructor
   duracionHoras: Float
   imagenURL: String
-  precio: Float!
+  precio: Float
+  currency: String
   descuento: Float
   calificacionPromedio: Float!
   numeroCalificaciones: Int!
@@ -104,6 +112,7 @@ type Curso {
   fechaLanzamiento: DateTime
   categorias: [Categoria!]!
   cuestionarioId: Cuestionario
+  deleted: Boolean!
 }
 
 """Niveles de un curso"""
@@ -111,6 +120,31 @@ enum Nivel {
   Principiante
   Intermedio
   Avanzado
+}
+
+type UserRequest {
+  _id: ID!
+  roles: [RolEnumGql!]!
+  iat: Int
+  exp: Int
+  email: String!
+  email_verified: Boolean!
+  firstName: String!
+  lastName: String!
+  picture: String
+}
+
+"""Roles disponibles para los usuarios"""
+enum RolEnumGql {
+  ESTUDIANTE
+  INSTRUCTOR
+  EDITOR
+  ADMINISTRADOR
+  SUPERADMIN
+}
+
+type deletedCountOutput {
+  deletedCount: Float!
 }
 
 type Perfil {
@@ -132,17 +166,9 @@ type Usuario {
   picture: String
   perfil: Perfil
   notificaciones: Boolean!
+  cursosFavoritos: [Curso!]
   status: UserStatus!
   deleted: Boolean!
-}
-
-"""Roles disponibles para los usuarios"""
-enum RolEnumGql {
-  ESTUDIANTE
-  INSTRUCTOR
-  EDITOR
-  ADMINISTRADOR
-  SUPERADMIN
 }
 
 """Estados de un usuario"""
@@ -158,6 +184,7 @@ type RespuestaPregunta {
   preguntaId: Pregunta!
   opcionIds: [Opcion!]
   respuestaAbierta: String
+  deleted: Boolean!
 }
 
 type UsuarioOutput {
@@ -170,24 +197,9 @@ type UsuarioOutput {
   picture: String
   perfil: Perfil
   notificaciones: Boolean!
+  cursosFavoritos: [Curso!]
   status: UserStatus!
   deleted: Boolean!
-}
-
-type UserRequest {
-  _id: ID!
-  roles: [RolEnumGql!]!
-  iat: Int
-  exp: Int
-  email: String!
-  email_verified: Boolean!
-  firstName: String!
-  lastName: String!
-  picture: String
-}
-
-type deletedCountOutput {
-  deletedCount: Float!
 }
 
 type Comentario {
@@ -196,6 +208,7 @@ type Comentario {
   cursoId: Curso!
   comentario: String!
   fecha: DateTime!
+  deleted: Boolean!
 }
 
 type UserJwtOutput {
@@ -205,15 +218,15 @@ type UserJwtOutput {
 
 type Calificacion {
   _id: ID!
-  usuarioId: Usuario!
-  cursoId: Curso!
+  usuarioId: ID!
+  cursoId: ID!
   valor: Int!
   comentario: String
   fecha: DateTime!
+  deleted: Boolean!
 }
 
 type Query {
-  """Obtiene una lista de usuarios, opcionalmente filtrados por roles."""
   usuarios(offset: Int = 0, limit: Int = 10, search: String): [UsuarioOutput!]!
   usuarios_findAllByFirstname(search: String, offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
   usuarios_findAllBy(search: String, field: String, offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
@@ -229,11 +242,16 @@ type Query {
   comentario(id: ID!): Comentario!
   comentariosPorCurso(cursoId: ID!): [Comentario!]!
   comentariosPorUsuario(usuarioId: ID!): [Comentario!]!
-  calificaciones: [Calificacion!]!
-  calificacion(id: ID!): Calificacion!
-  calificacionesPorCurso(cursoId: ID!): [Calificacion!]!
-  calificacionesPorUsuario(usuarioId: ID!): [Calificacion!]!
-  promedioCalificaciones(cursoId: ID!): Float!
+  Cursos(offset: Int = 0, limit: Int = 10): [Curso!]!
+  Curso_findAllByTitle(search: String, offset: Int = 0, limit: Int = 10): [Curso!]!
+  Curso(id: ID!): Curso!
+  Curso_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Curso!]!
+  Calificaciones(offset: Int = 0, limit: Int = 10): [Calificacion!]!
+  Calificacion(id: ID!): Calificacion!
+  Calificacion_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Calificacion!]!
+  Calificacion_promedioCalificaciones(cursoId: ID!): Float!
+  Calificaciones_PorCurso(cursoId: ID!): [Calificacion!]!
+  Calificaciones_PorUsuario(usuarioId: ID!): [Calificacion!]!
   categorias: [Categoria!]!
   categoria(id: ID!): Categoria!
 }
@@ -250,8 +268,8 @@ type Mutation {
   requestPasswordReset(requestPasswordResetInput: RequestPasswordResetInput!): String!
   resetPassword(resetPasswordInput: ResetPasswordInput!): String!
   usuario_create(createUsuarioInput: CreateUsuarioInput!): UsuarioOutput!
-  usuario_update(updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
-  usuario_updateFromAdmin(id: ID!, updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
+  usuario_update_onlyUser(updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
+  usuario_update_onlyAdmin(id: ID!, updateUsuarioInput: UpdateUsuarioInput!): UsuarioOutput!
   usuario_softDelete(idRemove: ID!): UsuarioOutput!
   usuario_restore(idRestore: ID!): UsuarioOutput!
   usuario_hardDelete(id: ID!): UsuarioOutput!
@@ -259,9 +277,18 @@ type Mutation {
   createComentario(createComentarioInput: CreateComentarioInput!): Comentario!
   updateComentario(id: ID!, updateComentarioInput: UpdateComentarioInput!): Comentario!
   removeComentario(id: ID!): Comentario!
-  createCalificacion(createCalificacionInput: CreateCalificacionInput!): Calificacion!
-  updateCalificacion(id: ID!, updateCalificacionInput: UpdateCalificacionInput!): Calificacion!
-  removeCalificacion(id: ID!): Calificacion!
+  Curso_create(createCursoInput: CreateCursoInput!): Curso!
+  Curso_update(id: ID!, updateCursoInput: UpdateCursoInput!): Curso!
+  Curso_softDelete(idRemove: ID!): Curso!
+  Curso_hardDelete(id: ID!): Curso!
+  Curso_hardDeleteAllSoftDeleted: deletedCountOutput!
+  Curso_restore(idRestore: ID!): Curso!
+  Calificacion_create(createCalificacionInput: CreateCalificacionUserInput!): Calificacion!
+  Calificacion_update(id: ID!, updateCalificacionInput: UpdateCalificacionInput!): Calificacion!
+  Calificacion_softDelete(idRemove: ID!): Calificacion!
+  Calificacion_hardDelete(id: ID!): Calificacion!
+  Calificacion_hardDeleteAllSoftDeleted: deletedCountOutput!
+  Calificacion_restore(idRestore: ID!): Calificacion!
   createCategoria(createCategoriaInput: CreateCategoriaInput!): Categoria!
   updateCategoria(id: ID!, updateCategoriaInput: UpdateCategoriaInput!): Categoria!
   removeCategoria(id: ID!): Categoria!
@@ -311,6 +338,7 @@ input UpdateUsuarioInput {
   picture: String
   perfil: CreatePerfilInput
   notificaciones: Boolean = true
+  cursosFavoritos: [ID!]
 }
 
 input CreateComentarioInput {
@@ -325,8 +353,47 @@ input UpdateComentarioInput {
   comentario: String
 }
 
-input CreateCalificacionInput {
-  usuarioId: ID!
+input CreateCursoInput {
+  titulo: String!
+  descripcionCorta: String!
+  descripcionLarga: String
+  nivel: Nivel
+  instructor: ID
+  duracionHoras: Float
+  imagenURL: String
+  precio: Float
+  currency: String
+  descuento: Float
+  aprenderas: [String!]
+  objetivos: [String!]
+  dirigidoA: [String!]
+  modulos: [ID!]
+  fechaLanzamiento: DateTime
+  categorias: [ID!]
+  cuestionarioId: ID
+}
+
+input UpdateCursoInput {
+  titulo: String
+  descripcionCorta: String
+  descripcionLarga: String
+  nivel: Nivel
+  instructor: ID
+  duracionHoras: Float
+  imagenURL: String
+  precio: Float
+  currency: String
+  descuento: Float
+  aprenderas: [String!]
+  objetivos: [String!]
+  dirigidoA: [String!]
+  modulos: [ID!]
+  fechaLanzamiento: DateTime
+  categorias: [ID!]
+  cuestionarioId: ID
+}
+
+input CreateCalificacionUserInput {
   cursoId: ID!
   valor: Int!
   comentario: String

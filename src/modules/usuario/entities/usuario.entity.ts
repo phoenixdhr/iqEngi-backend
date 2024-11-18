@@ -10,6 +10,7 @@ import { UsuarioOutput } from '../dtos/usuarios-dtos/usuario.output';
 import { IsOptional } from 'class-validator';
 import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
 import { AuditFields } from 'src/common/clases/audit-fields.class';
+import { Curso } from 'src/modules/curso/entities/curso.entity';
 
 @ObjectType()
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
@@ -60,13 +61,12 @@ export class Usuario extends AuditFields implements IUsuario {
   @Prop({ default: true })
   notificaciones: boolean;
 
-  @Prop({ default: undefined })
-  @IsOptional()
-  resetPasswordToken?: string;
-
-  @Prop({ default: null })
-  @IsOptional()
-  resetPasswordExpires?: Date;
+  @Field(() => [Curso], { nullable: true })
+  @Prop({
+    type: [{ type: Types.ObjectId, ref: Curso.name }],
+    default: [],
+  })
+  cursosFavoritos?: Types.ObjectId[];
 
   @Field(() => UserStatus)
   @Prop({
@@ -79,6 +79,14 @@ export class Usuario extends AuditFields implements IUsuario {
   @Field()
   @Prop({ default: false })
   deleted: boolean;
+
+  @Prop({ default: undefined })
+  @IsOptional()
+  resetPasswordToken?: string;
+
+  @Prop({ default: null })
+  @IsOptional()
+  resetPasswordExpires?: Date;
 }
 
 export const UsuarioSchema = SchemaFactory.createForClass(Usuario);
@@ -90,15 +98,3 @@ UsuarioSchema.index({ deleted: 1 });
 
 // #region Middleware
 addSoftDeleteMiddleware<UsuarioOutput, Usuario>(UsuarioSchema);
-// // Middleware para excluir usuarios eliminados en consultas de búsqueda
-// UsuarioSchema.pre(
-//   /^find/,
-//   function (
-//     this: Query<UsuarioOutput | UsuarioOutput[], Usuario>,
-//     next: (err?: CallbackError) => void,
-//   ) {
-//     // 'this' hace referencia a la consulta
-//     this.where({ deleted: { $ne: true } });
-//     next();
-//   },
-// );

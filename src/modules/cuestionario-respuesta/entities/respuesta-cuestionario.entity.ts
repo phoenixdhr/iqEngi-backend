@@ -53,6 +53,10 @@ export class RespuestaCuestionario
   @Field()
   @Prop({ enum: EstadoCuestionario, required: true })
   estado: EstadoCuestionario;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const RespuestaCuestionarioSchema = SchemaFactory.createForClass(

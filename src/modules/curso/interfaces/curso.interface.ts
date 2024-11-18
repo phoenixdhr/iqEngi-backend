@@ -12,6 +12,7 @@ export interface ICurso {
   duracionHoras?: number;
   imagenURL?: string;
   precio?: number;
+  currency?: string;
   descuentos?: number;
   aprenderas?: string[];
   objetivos?: string[];

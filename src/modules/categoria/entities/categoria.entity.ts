@@ -19,6 +19,10 @@ export class Categoria extends AuditFields implements ICategoria {
   @Field({ nullable: true })
   @Prop()
   descripcion?: string;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const CategoriaSchema = SchemaFactory.createForClass(Categoria);

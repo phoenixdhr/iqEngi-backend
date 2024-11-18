@@ -39,6 +39,10 @@ export class Unidad extends AuditFields implements IUnidad {
   @Field(() => [Material], { nullable: true })
   @Prop({ type: [MaterialSchema], default: [] })
   materiales?: Material[];
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const UnidadSchema = SchemaFactory.createForClass(Unidad);

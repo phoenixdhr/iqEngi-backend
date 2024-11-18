@@ -19,19 +19,18 @@ import { deletedCountOutput } from '../dtos/usuarios-dtos/deleted-count.output';
 import { CreateUsuarioInput } from '../dtos/usuarios-dtos/create-usuario.input';
 import SearchField from 'src/common/clases/search-field.class';
 import SearchFieldArgs from 'src/common/dtos/search-field.args';
-import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
 
 /**
  * Resolver para manejar las operaciones de Usuario.
  * Incluye operaciones como creación, actualización, eliminación y consultas de usuarios.
+ *
  * @Guard : JwtGqlAuthGuard, RolesGuard
  */
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 @Resolver(() => UsuarioOutput)
-export class UsuarioResolver
-  implements
-    IBaseResolver<UsuarioOutput, CreateUsuarioInput, UpdateUsuarioInput>
-{
+// implements
+//   IBaseResolver<UsuarioOutput, CreateUsuarioInput, UpdateUsuarioInput>
+export class UsuarioResolver {
   constructor(private readonly usuarioService: UsuarioService) {}
 
   /**
@@ -57,8 +56,6 @@ export class UsuarioResolver
    */
   @Query(() => [UsuarioOutput], {
     name: 'usuarios',
-    description:
-      'Obtiene una lista de usuarios, opcionalmente filtrados por roles.',
   })
   @RolesDec(...administradorUp)
   async findAll(
@@ -168,7 +165,7 @@ export class UsuarioResolver
    * @param user Usuario autenticado que realiza la actualización.
    * @returns El usuario actualizado.
    */
-  @Mutation(() => UsuarioOutput, { name: 'usuario_update' })
+  @Mutation(() => UsuarioOutput, { name: 'usuario_update_onlyUser' })
   async update(
     @Args('updateUsuarioInput') updateUsuarioInput: UpdateUsuarioInput,
     @CurrentUser() user: UserRequest,
@@ -184,7 +181,7 @@ export class UsuarioResolver
    * @returns El usuario actualizado.
    * @throws NotFoundException si el usuario no existe.
    */
-  @Mutation(() => UsuarioOutput, { name: 'usuario_updateFromAdmin' })
+  @Mutation(() => UsuarioOutput, { name: 'usuario_update_onlyAdmin' })
   @RolesDec(...administradorUp)
   async updateUsuariofromAdmin(
     @Args('id', { type: () => ID }, IdPipe) id: string,

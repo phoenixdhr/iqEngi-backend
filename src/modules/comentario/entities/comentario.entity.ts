@@ -28,6 +28,10 @@ export class Comentario extends AuditFields implements IComentario {
   @Field()
   @Prop({ default: Date.now })
   fecha: Date;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const ComentarioSchema = SchemaFactory.createForClass(Comentario);

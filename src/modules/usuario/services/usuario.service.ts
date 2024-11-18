@@ -190,7 +190,7 @@ export class UsuarioService extends BaseService<
    */
   async findAllByFirstname(
     searchArgs: SearchTextArgs,
-    pagination?: PaginationArgs,
+    pagination: PaginationArgs,
   ): Promise<UsuarioOutput[]> {
     const searchField: SearchField<UsuarioOutput> = new SearchField();
     searchField.field = 'firstName';

@@ -17,6 +17,7 @@ export interface IUsuario extends UserAuth {
   picture?: string;
   perfil?: IPerfil; // Reemplaza con IPerfil si está definido
   notificaciones: boolean;
+  cursosFavoritos?: Types.ObjectId[];
 }
 
 export type IUsuarioInput = Omit<IUsuario, '_id'>;

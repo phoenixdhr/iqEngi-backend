@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Calificacion } from '../entities/calificacion.entity';
 import { CreateCalificacionInput } from '../dtos/create-calificacion.input';
 import { UpdateCalificacionInput } from '../dtos/update-calificacion.input';
@@ -18,48 +18,38 @@ export class CalificacionService extends BaseService<
   ) {
     super(calificacionModel);
   }
+  //#region Métodos Generales IBaseResolver modificados
+  /**
+   * Crea una nueva calificación.
+   * @param createCalificacionInput Datos para crear la calificación.
+   * @returns La calificación creada.
+   */
+  async create(
+    createCalificacionInput: CreateCalificacionInput,
+    userid: string,
+  ): Promise<Calificacion> {
+    const idCurso = String(createCalificacionInput.cursoId);
+    // const idUsuario = String(createCalificacionInput.usuarioId);
 
-  // /**
-  //  * Crea una nueva calificación.
-  //  * @param createCalificacionInput Datos para crear la calificación.
-  //  * @returns La calificación creada.
-  //  */
-  // async create(
-  //   createCalificacionInput: CreateCalificacionInput,
-  // ): Promise<Calificacion> {
-  //   const newCalificacion = new this.calificacionModel(createCalificacionInput);
-  //   try {
-  //     return await newCalificacion.save();
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Error al crear la calificación',
-  //       error.message,
-  //     );
-  //   }
-  // }
+    const curso = await this.findByCursoId(idCurso);
 
-  // /**
-  //  * Obtiene todas las calificaciones.
-  //  * @returns Un array de calificaciones.
-  //  */
-  // async findAll(): Promise<Calificacion[]> {
-  //   return this.calificacionModel.find().exec();
-  // }
+    if (!curso) {
+      throw new NotFoundException('El curso no existe');
+    }
+    // const usuario = await this.findByUsuarioId(idUsuario);
 
-  // /**
-  //  * Obtiene una calificación por su ID.
-  //  * @param id ID de la calificación.
-  //  * @returns La calificación encontrada.
-  //  * @throws NotFoundException si la calificación no existe.
-  //  */
-  // async findOneById(id: string): Promise<Calificacion> {
-  //   const calificacion = await this.calificacionModel.findById(id).exec();
-  //   if (!calificacion) {
-  //     throw new NotFoundException(`Calificación con ID ${id} no encontrada`);
-  //   }
-  //   return calificacion;
-  // }
+    // if (!usuario) {
+    //   throw new NotFoundException('El usuario no existe');
+    // }
 
+    return super.create(
+      // createCalificacionInput,
+      { ...createCalificacionInput, cursoId: new Types.ObjectId(idCurso) },
+      userid,
+    );
+  }
+
+  //#region Métodos Personales
   /**
    * Obtiene calificaciones por curso ID.
    * @param cursoId ID del curso.
@@ -77,47 +67,6 @@ export class CalificacionService extends BaseService<
   async findByUsuarioId(usuarioId: string): Promise<Calificacion[]> {
     return this.calificacionModel.find({ usuarioId }).exec();
   }
-
-  // /**
-  //  * Actualiza una calificación por su ID.
-  //  * @param id ID de la calificación a actualizar.
-  //  * @param updateCalificacionInput Datos para actualizar la calificación.
-  //  * @returns La calificación actualizada.
-  //  * @throws NotFoundException si la calificación no existe.
-  //  */
-  // async update(
-  //   id: string,
-  //   updateCalificacionInput: UpdateCalificacionInput,
-  // ): Promise<Calificacion> {
-  //   const updatedCalificacion = await this.calificacionModel
-  //     .findByIdAndUpdate(id, updateCalificacionInput, {
-  //       new: true,
-  //       runValidators: true,
-  //     })
-  //     .exec();
-
-  //   if (!updatedCalificacion) {
-  //     throw new NotFoundException(`Calificación con ID ${id} no encontrada`);
-  //   }
-
-  //   return updatedCalificacion;
-  // }
-
-  // /**
-  //  * Elimina una calificación por su ID.
-  //  * @param id ID de la calificación a eliminar.
-  //  * @returns La calificación eliminada.
-  //  * @throws NotFoundException si la calificación no existe.
-  //  */
-  // async remove(id: string): Promise<Calificacion> {
-  //   const deletedCalificacion = await this.calificacionModel
-  //     .findByIdAndDelete(id)
-  //     .exec();
-  //   if (!deletedCalificacion) {
-  //     throw new NotFoundException(`Calificación con ID ${id} no encontrada`);
-  //   }
-  //   return deletedCalificacion;
-  // }
 
   /**
    * Calcula el promedio de calificaciones de un curso.

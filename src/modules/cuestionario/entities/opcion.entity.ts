@@ -23,6 +23,10 @@ export class Opcion extends AuditFields implements IOpcion {
   @Field(() => Int, { nullable: true })
   @Prop()
   orden?: number;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const OpcionSchema = SchemaFactory.createForClass(Opcion);

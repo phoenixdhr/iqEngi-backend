@@ -11,6 +11,7 @@ import {
   IsUrl,
   Max,
   IsDate,
+  IsCurrency,
 } from 'class-validator';
 import { Nivel } from 'src/common/enums/nivel.enum'; // Enum para niveles
 import { ICursoInput } from '../../interfaces/curso.interface';
@@ -56,11 +57,16 @@ export class CreateCursoInput implements ICursoInput {
   imagenURL?: string;
 
   @Field(() => Float, { nullable: true })
-  @IsNotEmpty()
-  @IsOptional()
   @IsNumber()
   @Min(0)
+  @IsOptional()
   precio?: number;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsCurrency()
+  @IsOptional()
+  currency?: string;
 
   @Field(() => Float, { nullable: true })
   @IsOptional()

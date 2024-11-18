@@ -43,6 +43,10 @@ export class CursoComprado extends AuditFields implements ICursoComprado {
   @Field({ defaultValue: false })
   @Prop({ default: false })
   cursoCompletado: boolean;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const CursoCompradoSchema = SchemaFactory.createForClass(CursoComprado);

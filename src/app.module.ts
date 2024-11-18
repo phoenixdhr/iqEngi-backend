@@ -26,6 +26,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { CalificacionModule } from './modules/calificacion/calificacion.module';
 import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.module';
 import { MailModule } from './modules/mail/mail.module';
+import mongoose from 'mongoose';
 // import * as cookieParser from 'cookie-parser';
 
 @Module({
@@ -69,7 +70,13 @@ import { MailModule } from './modules/mail/mail.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    // Configuración global para Mongoose
+    mongoose.set('strictQuery', true); // Rechaza consultas con campos no definidos
+    mongoose.set('strict', true); // Activa el tipado estricto globalmente
+  }
+}
 
 // export class AppModule implements NestModule {
 //   configure(consumer: MiddlewareConsumer) {

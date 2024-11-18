@@ -36,6 +36,10 @@ export class Instructor extends AuditFields implements IInstructor {
   @Field({ nullable: true })
   @Prop()
   pais?: string;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const InstructorSchema = SchemaFactory.createForClass(Instructor);

@@ -29,6 +29,10 @@ export class RespuestaPregunta
   @Field({ nullable: true })
   @Prop()
   respuestaAbierta?: string;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const RespuestaPreguntaUsuarioSchema =

@@ -153,7 +153,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
     if (!documentSoftDeleted) {
       throw new NotFoundException(
-        `Documento ${documentSoftDeleted.baseModelName} con ID "${idDelete}" no encontrado, o tal vez haya sido eliminado`,
+        `Documento ${this.model.collection.name} con ID "${idDelete}" no encontrado, o tal vez haya sido eliminado`,
       );
     }
 
@@ -245,13 +245,13 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
       if (!document) {
         throw new NotFoundException(
-          `Documento ${this.model.baseModelName} ID "${id}" no encontrado, tal vez ya esta eliminado`,
+          `Documento ${this.model.collection.name} ID "${id}" no encontrado, tal vez ya esta eliminado`,
         );
       }
 
       if (!document.deleted) {
         throw new ConflictException(
-          `El documento ${this.model.baseModelName} con ID "${id}" no está marcado como eliminado, no es necesario restaurarlo`,
+          `El documento ${this.model.collection.name} con ID "${id}" no está marcado como eliminado, no es necesario restaurarlo`,
         );
       }
 

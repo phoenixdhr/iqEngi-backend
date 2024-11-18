@@ -35,6 +35,10 @@ export class Modulo extends AuditFields implements IModulo {
   @Field(() => [Unidad], { nullable: true })
   @Prop({ type: [Types.ObjectId], ref: Coleccion.Unidad, default: [] })
   unidades?: Types.ObjectId[];
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const ModuloSchema = SchemaFactory.createForClass(Modulo);

@@ -47,9 +47,13 @@ export class Curso extends AuditFields implements ICurso {
   @Prop()
   imagenURL?: string;
 
-  @Field(() => Float)
-  @Prop({ required: true })
+  @Field(() => Float, { nullable: true })
+  @Prop()
   precio?: number;
+
+  @Field({ nullable: true })
+  @Prop()
+  currency?: string;
 
   @Field(() => Float, { nullable: true })
   @Prop({ default: 0 })
@@ -90,12 +94,16 @@ export class Curso extends AuditFields implements ICurso {
   @Field(() => Cuestionario, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: Cuestionario.name })
   cuestionarioId?: Types.ObjectId;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const CursoSchema = SchemaFactory.createForClass(Curso);
 
 // permite realizar busquedas por titulo
-CursoSchema.index({ titulo: 'text' });
+CursoSchema.index({ titulo: 'text' }, { unique: true });
 
 CursoSchema.index({ categorias: 1 });
 CursoSchema.index({ instructor: 1 });

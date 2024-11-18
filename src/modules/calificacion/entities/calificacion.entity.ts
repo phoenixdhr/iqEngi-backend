@@ -14,12 +14,12 @@ export class Calificacion extends AuditFields implements ICalificacion {
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Field(() => Usuario)
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Usuario.name, required: true })
   usuarioId: Types.ObjectId;
 
-  @Field(() => Curso)
-  @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
+  @Field(() => ID)
+  @Prop({ type: Types.ObjectId, ref: Curso.name })
   cursoId: Types.ObjectId;
 
   @Field(() => Int)
@@ -33,6 +33,10 @@ export class Calificacion extends AuditFields implements ICalificacion {
   @Field()
   @Prop({ default: Date.now })
   fecha: Date;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const CalificacionSchema = SchemaFactory.createForClass(Calificacion);

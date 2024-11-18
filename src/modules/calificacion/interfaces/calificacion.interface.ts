@@ -9,6 +9,10 @@ export interface ICalificacion {
   valor: number;
   comentario?: string;
   fecha: Date;
+  deleted: boolean;
 }
 
-export type ICalificacionInput = Omit<ICalificacion, 'fecha' | '_id'>;
+export type ICalificacionInput = Omit<
+  ICalificacion,
+  'fecha' | '_id' | 'deleted'
+>;

@@ -18,7 +18,10 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
    * @param userId ID del usuario que realiza la creación.
    * @returns La entidad creada.
    */
-  create(createInput: CreateInput, userId: string): Promise<OutputDocument>;
+  create(
+    createInput: CreateInput,
+    userId: UserRequest,
+  ): Promise<OutputDocument>;
 
   /**
    * Obtiene todas las entidades con opciones de paginación.
@@ -34,7 +37,7 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
    * @param pagination Opciones de paginación.
    * @returns Un array de entidades filtradas.
    */
-  findAllBy(
+  findAllBy?(
     searchInput: SearchTextArgs,
     searchField: SearchField<OutputDocument>,
     pagination?: PaginationArgs,
@@ -49,29 +52,31 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
 
   /**
    * Actualiza una entidad existente.
+   * @param id del documento para actualizar.
    * @param updateInput Datos para actualizar la entidad.
-   * @param userId ID del usuario que realiza la actualización.
+   * @param user  usuario que realiza la actualización.
    * @returns La entidad actualizada.
    */
   update(
+    id: string,
     updateInput: UpdateInput,
-    userId: UserRequest,
+    user: UserRequest,
   ): Promise<OutputDocument>;
 
   /**
    * Elimina (desactiva) una entidad por su ID.
-   * @param id ID de la entidad a eliminar.
-   * @param userId ID del usuario que realiza la eliminación.
+   * @param idRemove ID de la entidad a eliminar.
+   * @param user ID del usuario que realiza la eliminación.
    * @returns La entidad eliminada.
    */
-  softDelete(id: string, userId: UserRequest): Promise<OutputDocument>;
+  softDelete(idRemove: string, user: UserRequest): Promise<OutputDocument>;
 
   /**
    * Elimina permanentemente una entidad por su ID.
-   * @param id ID de la entidad a eliminar.
+   * @param idRemove ID de la entidad a eliminar.
    * @returns La entidad eliminada.
    */
-  hardDelete(id: string): Promise<OutputDocument>;
+  hardDelete(idRemove: string): Promise<OutputDocument>;
 
   /**
    * Elimina permanentemente todas las entidades que están marcadas como eliminadas.
@@ -88,9 +93,9 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
 
   /**
    * Restaura una entidad que ha sido eliminada.
-   * @param id ID de la entidad a restaurar.
-   * @param userUpdatedId ID del usuario que realiza la restauración.
+   * @param idRestore ID de la entidad a restaurar.
+   * @param user ID del usuario que realiza la restauración.
    * @returns La entidad restaurada.
    */
-  restore(id: string, userUpdatedId: UserRequest): Promise<OutputDocument>;
+  restore(idRestore: string, user: UserRequest): Promise<OutputDocument>;
 }

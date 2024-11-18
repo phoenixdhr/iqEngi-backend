@@ -47,6 +47,10 @@ export class Orden extends AuditFields implements IOrden {
   @Field(() => EstadoOrden)
   @Prop({ enum: EstadoOrden, default: EstadoOrden.Pendiente })
   estado_orden: EstadoOrden;
+
+  @Field()
+  @Prop({ default: false })
+  deleted: boolean;
 }
 
 export const OrdenSchema = SchemaFactory.createForClass(Orden);
