@@ -14,6 +14,7 @@ import { PreguntaService } from './services/pregunta.service';
 import { OpcionService } from './services/opcion.service';
 import { OpcionResolver } from './resolvers/opcion.resolver';
 import { PreguntaResolver } from './resolvers/pregunta.resolver';
+import { CursoModule } from '../curso/curso.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PreguntaResolver } from './resolvers/pregunta.resolver';
       { name: Pregunta.name, schema: PreguntaSchema },
       { name: Opcion.name, schema: OpcionSchema },
     ]),
+    CursoModule, // Agrega CursoModule aquí
   ],
   providers: [
     CuestionarioService,

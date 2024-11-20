@@ -1,11 +1,11 @@
 // calificacion/dtos/update-calificacion.input.ts
 
 import { InputType, PartialType } from '@nestjs/graphql';
-import { CreateCalificacionInput } from './create-calificacion.input';
+import { CreateCalificacion_userInput } from './create-calificacion-user.input';
 
 @InputType()
 export class UpdateCalificacionInput extends PartialType(
-  CreateCalificacionInput,
+  CreateCalificacion_userInput,
 ) {
   // @Field(() => ID)
   // @IsNotEmpty()

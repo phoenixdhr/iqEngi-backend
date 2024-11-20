@@ -28,11 +28,11 @@ export class Pregunta extends AuditFields implements IPregunta {
   @Prop({ type: [OpcionSchema], default: [] })
   opciones?: Opcion[];
 
-  @Field(() => Modulo, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: Modulo.name })
   moduloId?: Types.ObjectId;
 
-  @Field(() => Unidad, { nullable: true })
+  @Field(() => ID, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: Unidad.name })
   unidadId?: Types.ObjectId;
 

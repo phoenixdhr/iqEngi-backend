@@ -31,26 +31,10 @@ export class CreateUsuarioInput implements IUsuarioInput {
   @IsEmail()
   email: string;
 
-  // @Field({ nullable: true })
-  // @IsOptional()
-  // @IsBoolean()
-  // email_verified: boolean = false;
-
-  // @Field({ defaultValue: false })
-  // @IsOptional()
-  // @IsBoolean()
-  // isGoogleAuth?: boolean = false;
-
   @Field()
   @IsString()
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres.' })
   password: string;
-
-  // @Field(() => [RolEnum])
-  // @IsArray()
-  // @IsEnum(RolEnum, { each: true })
-  // @ArrayUnique()
-  // roles: RolEnum[] = [RolEnum.ESTUDIANTE]; // Valor por defecto
 
   @Field({ nullable: true })
   @IsOptional()
@@ -67,11 +51,6 @@ export class CreateUsuarioInput implements IUsuarioInput {
   @IsNotEmpty()
   @IsBoolean()
   notificaciones: boolean = true;
-
-  // @Field(() => UserStatus, { nullable: true })
-  // @IsEnum(UserStatus)
-  // @IsOptional()
-  // status: UserStatus = UserStatus.ACTIVE;
 }
 
 export class CreateUserGoogleAuth implements UserGoogle {

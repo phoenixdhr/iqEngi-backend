@@ -1,113 +1,207 @@
-// import { Mutation, Resolver, Query, Args } from '@nestjs/graphql';
-// import { CategoriaService } from '../services/categoria.service';
-// import { CreateCategoriaInput } from '../dtos/create-categoria.input';
-// import { Categoria } from '../entities/categoria.entity';
-
-// @Resolver()
-// export class CategoriaResolver {
-//   constructor(private readonly categoriaService: CategoriaService) {}
-
-//   @Mutation(() => Categoria)
-//   async createCategoria(
-//     @Args('createCategoriaInput') createCategoriaInput: CreateCategoriaInput,
-//   ): Promise<Categoria> {
-//     return this.categoriaService.create(createCategoriaInput);
-//   }
-
-//   @Query(() => [Categoria])
-//   async categorias(): Promise<Categoria[]> {
-//     return this.categoriaService.findAll();
-//   }
-// }
-
-// categoria.resolver.ts
-
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-
+import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Categoria } from '../entities/categoria.entity';
-import { CreateCategoriaInput } from '../dtos/create-categoria.input';
-import { UpdateCategoriaInput } from '../dtos/update-categoria.input';
 import { CategoriaService } from '../services/categoria.service';
 
 import { UseGuards } from '@nestjs/common';
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
+import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
+import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
+import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
+import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
+import { PaginationArgs, SearchTextArgs } from 'src/common/dtos';
+import { administradorUp, RolEnum } from 'src/common/enums/rol.enum';
+import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
+import { Types } from 'mongoose';
+import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
+import { UpdateCategoriaInput } from '../dtos/update-categoria.input';
+import { CreateCategoriaInput } from '../dtos/create-categoria.input';
 
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 @Resolver(() => Categoria)
-export class CategoriaResolver {
+export class CategoriaResolver
+  implements
+    IBaseResolver<Categoria, CreateCategoriaInput, UpdateCategoriaInput>
+{
   constructor(private readonly categoriaService: CategoriaService) {}
 
   /**
    * Crea una nueva categoría.
-   * @param createCategoriaInput Datos para crear la categoría.
+   *
+   * @param createCategoriaInput Datos necesarios para crear la categoría.
+   * @param user Usuario autenticado que realiza la creación.
    * @returns La categoría creada.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Categoria)
-  async createCategoria(
+  @Mutation(() => Categoria, { name: 'Categorias_create' })
+  @RolesDec(...administradorUp)
+  async create(
     @Args('createCategoriaInput') createCategoriaInput: CreateCategoriaInput,
+    @CurrentUser() user: UserRequest,
   ): Promise<Categoria> {
-    return this.categoriaService.create(createCategoriaInput);
+    const userId = new Types.ObjectId(new Types.ObjectId(user._id));
+    return this.categoriaService.create(createCategoriaInput, userId);
   }
 
   /**
-   * Obtiene todas las categorías.
+   * Obtiene todas las categorías con opciones de paginación.
+   *
+   * @param pagination Opcional. Opciones de paginación.
    * @returns Un array de categorías.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Query(() => [Categoria], { name: 'categorias' })
-  async findAll(): Promise<Categoria[]> {
-    return this.categoriaService.findAll();
+  @Query(() => [Categoria], { name: 'Categorias' })
+  @RolesDec(...administradorUp)
+  async findAll(@Args() pagination?: PaginationArgs): Promise<Categoria[]> {
+    return this.categoriaService.findAll(pagination);
   }
 
   /**
-   * Obtiene una categoría por su ID.
-   * @param id ID de la categoría.
+   * Obtiene todas las categorías con opciones de paginación y búsqueda.
+   *
+   * @param searchArgs Objeto que contiene un campo "search" (texto que se usará para realizar búsquedas).
+   * @param pagination Opcional. Opciones de paginación.
+   * @returns Un array de categorías.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Query(() => [Categoria], { name: 'Categorias_findAllByNombre' })
+  @RolesDec(...administradorUp)
+  async findAllByNombre(
+    @Args() searchArgs: SearchTextArgs,
+    @Args() pagination?: PaginationArgs,
+  ): Promise<Categoria[]> {
+    return this.categoriaService.findAllByNombre(searchArgs, pagination);
+  }
+
+  /**
+   * Obtiene una categoría específica por su ID.
+   *
+   * @param id ID único de la categoría.
    * @returns La categoría encontrada.
-   * @throws NotFoundException si la categoría no existe.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Query(() => Categoria, { name: 'categoria' })
-  async findOne(
-    @Args('id', { type: () => ID }) id: string,
+  @Query(() => Categoria, { name: 'Categoria' })
+  @RolesDec(...administradorUp)
+  async findById(
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<Categoria> {
-    return this.categoriaService.findOneById(id);
+    return this.categoriaService.findById(id);
   }
 
   /**
-   * Actualiza una categoría por su ID.
+   * Actualiza una categoría existente por su ID.
+   *
    * @param id ID de la categoría a actualizar.
    * @param updateCategoriaInput Datos para actualizar la categoría.
+   * @param user Usuario autenticado que realiza la actualización.
    * @returns La categoría actualizada.
-   * @throws NotFoundException si la categoría no existe.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Categoria)
-  async updateCategoria(
-    @Args('id', { type: () => ID }) id: string,
+  @Mutation(() => Categoria, { name: 'Categorias_update' })
+  @RolesDec(...administradorUp)
+  async update(
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
     @Args('updateCategoriaInput') updateCategoriaInput: UpdateCategoriaInput,
+    @CurrentUser() user: UserRequest,
   ): Promise<Categoria> {
-    return this.categoriaService.update(id, updateCategoriaInput);
+    const idUpdatedBy = new Types.ObjectId(user._id);
+    return this.categoriaService.update(id, updateCategoriaInput, idUpdatedBy);
   }
 
   /**
-   * Elimina una categoría por su ID.
-   * @param id ID de la categoría a eliminar.
-   * @returns La categoría eliminada.
-   * @throws NotFoundException si la categoría no existe.
+   * Elimina lógicamente una categoría por su ID.
+   *
+   * @param idRemove ID de la categoría a eliminar.
+   * @param user Usuario autenticado que realiza la eliminación.
+   * @returns La categoría eliminada lógicamente.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Categoria)
-  async removeCategoria(
-    @Args('id', { type: () => ID }) id: string,
+  @Mutation(() => Categoria, { name: 'Categorias_softDelete' })
+  @RolesDec(...administradorUp)
+  async softDelete(
+    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: Types.ObjectId,
+    @CurrentUser() user: UserRequest,
   ): Promise<Categoria> {
-    return this.categoriaService.remove(id);
+    const idThanos = new Types.ObjectId(user._id);
+    return this.categoriaService.softDelete(idRemove, idThanos);
   }
 
-  // @Query(() => [Categoria], { name: 'categorias_findAllBy' })
-  // @RolesDec(...administradorUp)
-  // async findAllBy(
-  //   @Args({ type: () => SearchArgs }) searchArgs: SearchArgs,
-  //   @Args({ type: () => SearchField<T> }) searchField: SearchField<T>,
-  //   @Args({ type: () => PaginationArgs, nullable: true })
-  //   pagination?: PaginationArgs,
-  // ): Promise<Categoria[]> {
-  //   return this.categoriaService.findAllBy(searchArgs, searchField, pagination);
-  // }
+  /**
+   * Elimina permanentemente una categoría por su ID.
+   *
+   * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
+   *
+   * @param id ID de la categoría a eliminar permanentemente.
+   * @returns La categoría eliminada definitivamente.
+   *
+   * @Roles: SUPERADMIN
+   */
+  @Mutation(() => Categoria, { name: 'Categorias_hardDelete' })
+  @RolesDec(RolEnum.SUPERADMIN)
+  async hardDelete(
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
+  ): Promise<Categoria> {
+    return this.categoriaService.hardDelete(id);
+  }
+
+  /**
+   * Elimina permanentemente todas las categorías que han sido eliminadas lógicamente.
+   *
+   * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
+   *
+   * @returns Un objeto que contiene el conteo de categorías eliminadas.
+   *
+   * @Roles: SUPERADMIN
+   */
+  @Mutation(() => DeletedCountOutput, {
+    name: 'Categorias_hardDeleteAllSoftDeleted',
+  })
+  @RolesDec(RolEnum.SUPERADMIN)
+  async hardDeleteAllSoftDeleted(): Promise<DeletedCountOutput> {
+    return this.categoriaService.hardDeleteAllSoftDeleted();
+  }
+
+  /**
+   * Obtiene todas las categorías que han sido eliminadas lógicamente.
+   *
+   * @param pagination Opcional. Opciones de paginación.
+   * @returns Un array de categorías eliminadas lógicamente.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Query(() => [Categoria], {
+    name: 'Categorias_findSoftDeleted',
+  })
+  @RolesDec(...administradorUp)
+  async findSoftDeleted(
+    @Args({ type: () => PaginationArgs, nullable: true })
+    pagination?: PaginationArgs,
+  ): Promise<Categoria[]> {
+    return this.categoriaService.findSoftDeleted(pagination);
+  }
+
+  /**
+   * Restaura una categoría que ha sido eliminada lógicamente.
+   *
+   * @param idRestore ID de la categoría a restaurar.
+   * @param user Usuario autenticado que realiza la restauración.
+   * @returns La categoría restaurada.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Mutation(() => Categoria, { name: 'Categorias_restore' })
+  @RolesDec(...administradorUp)
+  async restore(
+    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
+    @CurrentUser() user: UserRequest,
+  ): Promise<Categoria> {
+    const userId = new Types.ObjectId(user._id);
+    return this.categoriaService.restore(idRestore, userId);
+  }
 }

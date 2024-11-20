@@ -13,11 +13,11 @@ export class Comentario extends AuditFields implements IComentario {
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Field(() => Usuario)
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Usuario.name, required: true })
   usuarioId: Types.ObjectId;
 
-  @Field(() => Curso)
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
   cursoId: Types.ObjectId;
 

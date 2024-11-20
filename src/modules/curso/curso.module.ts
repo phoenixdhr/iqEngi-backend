@@ -16,6 +16,10 @@ import { MaterialResolver } from './resolvers/material.resolver';
 import { MaterialService } from './services/material.service';
 import { UnidadService } from './services/unidad.service';
 import { ModuloService } from './services/modulo.service';
+import {
+  CursoComprado,
+  CursoCompradoSchema,
+} from '../curso-comprado/entities/curso-comprado.entity';
 
 @Module({
   imports: [
@@ -24,6 +28,7 @@ import { ModuloService } from './services/modulo.service';
       { name: Modulo.name, schema: ModuloSchema },
       { name: Unidad.name, schema: UnidadSchema },
       { name: Material.name, schema: MaterialSchema },
+      { name: CursoComprado.name, schema: CursoCompradoSchema },
     ]),
     // forwardRef(() => OrdenModule),
     // forwardRef(() => CategoriaModule),

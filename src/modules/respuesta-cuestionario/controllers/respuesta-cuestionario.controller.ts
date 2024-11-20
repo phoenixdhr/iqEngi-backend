@@ -3,4 +3,4 @@ import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('cuestionario-respuesta-usuario')
 @Controller('cuestionario-respuesta-usuario')
-export class CuestionarioRespuestaController {}
+export class RespuestaCuestionarioController {}

@@ -1,12 +1,15 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IPerfil } from '../interfaces/perfil.interface';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 // #region Perfil
 @ObjectType()
 @Schema()
 export class Perfil extends Document implements IPerfil {
+  @Field(() => ID)
+  _id: Types.ObjectId;
+
   @Field({ nullable: true })
   @Prop()
   bio?: string;

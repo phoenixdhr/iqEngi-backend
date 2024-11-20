@@ -4,7 +4,7 @@ import { CreateCursoInput } from '../dtos/curso-dtos/create-curso.input';
 import { BaseService } from 'src/common/services/base.service';
 import { UpdateCursoInput } from '../dtos/curso-dtos/update-curso.input';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { PaginationArgs, SearchTextArgs } from 'src/common/dtos';
 import SearchField from 'src/common/clases/search-field.class';
 
@@ -32,9 +32,9 @@ export class CursoService extends BaseService<
    */
   async create(
     createCursoInput: CreateCursoInput,
-    userid: string,
+    userid: Types.ObjectId,
   ): Promise<Curso> {
-    const titulo = String(createCursoInput.titulo);
+    const titulo = createCursoInput.titulo;
 
     if (titulo) {
       const curso = await this.cursoModel.findOne({ titulo: titulo }).exec();

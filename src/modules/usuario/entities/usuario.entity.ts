@@ -11,6 +11,7 @@ import { IsOptional } from 'class-validator';
 import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
 import { AuditFields } from 'src/common/clases/audit-fields.class';
 import { Curso } from 'src/modules/curso/entities/curso.entity';
+import { Coleccion } from 'src/common/enums';
 
 @ObjectType()
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
@@ -63,7 +64,7 @@ export class Usuario extends AuditFields implements IUsuario {
 
   @Field(() => [Curso], { nullable: true })
   @Prop({
-    type: [{ type: Types.ObjectId, ref: Curso.name }],
+    type: [{ type: Types.ObjectId, ref: Coleccion.Curso }],
     default: [],
   })
   cursosFavoritos?: Types.ObjectId[];

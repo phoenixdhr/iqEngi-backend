@@ -3,8 +3,9 @@
 import { Types } from 'mongoose';
 import { IPregunta } from './pregunta.interface';
 import { CreatePreguntaInput } from '../dtos/pregunta-dtos/create-pregunta.input';
+import { IdInterface } from 'src/common/interfaces/id.interface';
 
-export interface ICuestionario {
+export interface ICuestionario extends IdInterface {
   _id: Types.ObjectId;
   cursoId: Types.ObjectId;
   titulo: string;

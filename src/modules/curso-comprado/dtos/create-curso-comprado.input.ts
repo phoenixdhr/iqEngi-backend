@@ -1,4 +1,4 @@
-import { InputType, Field, ID, OmitType, Float } from '@nestjs/graphql';
+import { InputType, Field, ID, Float } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsMongoId,
@@ -12,7 +12,7 @@ import { Types } from 'mongoose';
 import { EstadoAccesoCurso } from 'src/common/enums/estado-acceso-curso.enum';
 
 @InputType()
-export class CreateCursoCompradoDto implements ICursoCompradoInput {
+export class CreateCursoCompradoInput implements ICursoCompradoInput {
   @Field(() => ID)
   @IsNotEmpty()
   @IsMongoId()
@@ -43,11 +43,9 @@ export class CreateCursoCompradoDto implements ICursoCompradoInput {
   @IsOptional()
   @IsBoolean()
   cursoCompletado?: boolean;
-}
 
-export class CreateCursoCompradoInput extends OmitType(CreateCursoCompradoDto, [
-  'fechaExpiracion',
-  'estadoAcceso',
-  'progreso',
-  'cursoCompletado',
-]) {}
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  ultimaNota?: number;
+}

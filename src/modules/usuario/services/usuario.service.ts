@@ -182,22 +182,24 @@ export class UsuarioService extends BaseService<
 
   /**
    * Obtiene todos los usuarios que coinsidan un un texto, funcion contiene opciones de paginación.
-   * @param searchArgs Objeto que contiene un campo "serch" (texto que se usará para realizar busquedas).
-   * @param pagination Opciones de paginación.
+   * @param searchtextArgs Objeto que contiene un campo "serch" (texto que se usará para realizar busquedas).
+   * @param paginationArgs Opciones de paginación.
    * @returns Un array de usuarios.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   async findAllByFirstname(
-    searchArgs: SearchTextArgs,
-    pagination: PaginationArgs,
+    searchtextArgs: SearchTextArgs,
+    paginationArgs: PaginationArgs,
   ): Promise<UsuarioOutput[]> {
     const searchField: SearchField<UsuarioOutput> = new SearchField();
     searchField.field = 'firstName';
 
-    return super.findAllBy(searchArgs, searchField, pagination) as Promise<
-      UsuarioOutput[]
-    >;
+    return super.findAllBy(
+      searchtextArgs,
+      searchField,
+      paginationArgs,
+    ) as Promise<UsuarioOutput[]>;
   }
 
   /**
@@ -232,7 +234,10 @@ export class UsuarioService extends BaseService<
    * @returns El usuario eliminado.
    * @throws NotFoundException si el usuario no existe.
    */
-  async softDelete(idDelete: string, idThanos: string): Promise<UsuarioOutput> {
+  async softDelete(
+    idDelete: Types.ObjectId,
+    idThanos: Types.ObjectId,
+  ): Promise<UsuarioOutput> {
     // Marcar el usuario como DELETED y "deleted: true" en lugar de eliminarlo físicamente
     const deletedUsuario = await this.usuarioModel
       .findByIdAndUpdate(
@@ -241,7 +246,7 @@ export class UsuarioService extends BaseService<
           status: UserStatus.DELETED,
           deleted: true,
           deletedAt: new Date(),
-          deletedBy: new Types.ObjectId(idThanos),
+          deletedBy: idThanos,
         },
         { new: true, runValidators: true },
       )
@@ -264,10 +269,11 @@ export class UsuarioService extends BaseService<
    * @throws NotFoundException si el usuario no existe.
    */
 
-  async restore(id: string, userUpdatedId: string): Promise<UsuarioOutput> {
+  async restore(
+    idRestore: Types.ObjectId,
+    updatedBy: Types.ObjectId,
+  ): Promise<UsuarioOutput> {
     // Convertir el id a ObjectId si es necesario
-    const idRestore = new Types.ObjectId(id);
-    const updatedBy = new Types.ObjectId(userUpdatedId);
 
     try {
       // Usar collection.findOneAndUpdate para bypassar el middleware de Mongoose
@@ -276,12 +282,14 @@ export class UsuarioService extends BaseService<
       });
 
       if (!usuario) {
-        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+        throw new NotFoundException(
+          `Usuario con ID ${idRestore} no encontrado`,
+        );
       }
 
       if (!usuario.deleted) {
         throw new NotFoundException(
-          `Usuario con ID ${id} no está eliminado, no es necesario restaurarlo`,
+          `Usuario con ID ${idRestore} no está eliminado, no es necesario restaurarlo`,
         );
       }
 

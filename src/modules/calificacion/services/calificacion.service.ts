@@ -26,9 +26,9 @@ export class CalificacionService extends BaseService<
    */
   async create(
     createCalificacionInput: CreateCalificacionInput,
-    userid: string,
+    userid: Types.ObjectId,
   ): Promise<Calificacion> {
-    const idCurso = String(createCalificacionInput.cursoId);
+    const idCurso = new Types.ObjectId(createCalificacionInput.cursoId);
     // const idUsuario = String(createCalificacionInput.usuarioId);
 
     const curso = await this.findByCursoId(idCurso);
@@ -44,7 +44,7 @@ export class CalificacionService extends BaseService<
 
     return super.create(
       // createCalificacionInput,
-      { ...createCalificacionInput, cursoId: new Types.ObjectId(idCurso) },
+      { ...createCalificacionInput, cursoId: idCurso },
       userid,
     );
   }
@@ -55,7 +55,7 @@ export class CalificacionService extends BaseService<
    * @param cursoId ID del curso.
    * @returns Un array de calificaciones del curso.
    */
-  async findByCursoId(cursoId: string): Promise<Calificacion[]> {
+  async findByCursoId(cursoId: Types.ObjectId): Promise<Calificacion[]> {
     return this.calificacionModel.find({ cursoId }).exec();
   }
 
@@ -64,7 +64,7 @@ export class CalificacionService extends BaseService<
    * @param usuarioId ID del usuario.
    * @returns Un array de calificaciones del usuario.
    */
-  async findByUsuarioId(usuarioId: string): Promise<Calificacion[]> {
+  async findByUsuarioId(usuarioId: Types.ObjectId): Promise<Calificacion[]> {
     return this.calificacionModel.find({ usuarioId }).exec();
   }
 
@@ -73,7 +73,7 @@ export class CalificacionService extends BaseService<
    * @param cursoId ID del curso.
    * @returns El promedio de calificaciones.
    */
-  async calculatePromedio(cursoId: string): Promise<number> {
+  async calculatePromedio(cursoId: Types.ObjectId): Promise<number> {
     const calificaciones = await this.findByCursoId(cursoId);
     if (calificaciones.length === 0) {
       return 0;

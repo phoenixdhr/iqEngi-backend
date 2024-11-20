@@ -1,6 +1,8 @@
 // usuario/interfaces/perfil.interface.ts
 
-export interface IPerfil {
+import { IdInterface } from 'src/common/interfaces/id.interface';
+
+export interface IPerfil extends IdInterface {
   bio?: string;
   ubicacion?: string;
   celular?: string;
@@ -8,3 +10,5 @@ export interface IPerfil {
   contacto?: string;
   intereses?: string[];
 }
+
+export type IPerfilInput = Omit<IPerfil, '_id'>;

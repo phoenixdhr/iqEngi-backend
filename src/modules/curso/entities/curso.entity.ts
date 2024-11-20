@@ -11,6 +11,9 @@ import { Nivel } from 'src/common/enums/nivel.enum';
 
 import { AuditFields } from 'src/common/clases/audit-fields.class';
 import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
+import { CursoComprado } from 'src/modules/curso-comprado/entities/curso-comprado.entity';
+import { postUpdate_updateIn_relatedModel_Middleware } from 'src/common/middlewares/post-update-campo.middleware';
+import { Coleccion } from 'src/common/enums';
 
 // #region Curso
 @ObjectType()
@@ -102,6 +105,7 @@ export class Curso extends AuditFields implements ICurso {
 
 export const CursoSchema = SchemaFactory.createForClass(Curso);
 
+//#region indexaciones
 // permite realizar busquedas por titulo
 CursoSchema.index({ titulo: 'text' }, { unique: true });
 
@@ -110,4 +114,14 @@ CursoSchema.index({ instructor: 1 });
 CursoSchema.index({ cuestionarioId: 1 });
 CursoSchema.index({ deleted: 1 });
 
+//#region Middelwares
 addSoftDeleteMiddleware<Curso, Curso>(CursoSchema);
+
+postUpdate_updateIn_relatedModel_Middleware<Curso, CursoComprado>(
+  CursoSchema,
+  Coleccion.CursoComprado,
+  'courseTitle',
+  (doc: Curso) => ({
+    tituloCurso: doc.titulo,
+  }),
+);

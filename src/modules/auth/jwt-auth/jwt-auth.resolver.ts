@@ -15,17 +15,17 @@ import { CurrentUser } from '../decorators/current-user.decorator';
 import { UserRequest } from '../entities/user-request.entity';
 import configEnv from 'src/common/enviroments/configEnv';
 import { ConfigType } from '@nestjs/config';
-import { AuthService } from '../auth.service';
 import { UpdatePasswordInput } from 'src/modules/usuario/dtos/usuarios-dtos/update-password';
 import { RequestPasswordResetInput } from '../dtos/request-password-reset';
 import { ResetPasswordInput } from '../dtos/request-password-input';
+import { Types } from 'mongoose';
 
 @Resolver()
 export class JwtAuthResolver {
   constructor(
     private readonly jwtAuthService: JwtAuthService, // Servicio de autenticación JWT
     private readonly mailService: MailService, // Servicio de envío de correos
-    private readonly authService: AuthService, // Servicio de autenticación
+    // private readonly authService: AuthService, // Servicio de autenticación
     @Inject(configEnv.KEY) readonly configService: ConfigType<typeof configEnv>, // Configuración de variables de entorno
   ) {}
 
@@ -87,7 +87,7 @@ export class JwtAuthResolver {
     @Args('updatePasswordInput') updatePasswordInput: UpdatePasswordInput,
     @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
-    const id = user._id;
+    const id = new Types.ObjectId(user._id);
     return this.jwtAuthService.updatePassword(id, updatePasswordInput);
   }
 

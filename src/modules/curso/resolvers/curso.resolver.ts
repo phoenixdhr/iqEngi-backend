@@ -10,10 +10,11 @@ import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
 import { PaginationArgs, SearchTextArgs } from 'src/common/dtos';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
-import { deletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
+import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { UseGuards } from '@nestjs/common';
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
+import { Types } from 'mongoose';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
@@ -37,7 +38,7 @@ export class CursoResolver
     @Args('createCursoInput') createCursoInput: CreateCursoInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Curso> {
-    const userId = user._id;
+    const userId = new Types.ObjectId(user._id);
     return this.cursoService.create(createCursoInput, userId);
   }
 
@@ -83,7 +84,7 @@ export class CursoResolver
   @Query(() => Curso, { name: 'Curso' })
   @RolesDec(...administradorUp)
   async findById(
-    @Args('id', { type: () => ID }, IdPipe) id: string,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<Curso> {
     return this.cursoService.findById(id);
   }
@@ -101,11 +102,11 @@ export class CursoResolver
   @Mutation(() => Curso, { name: 'Curso_update' })
   @RolesDec(...administradorUp)
   async update(
-    @Args('id', { type: () => ID }, IdPipe) id: string,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
     @Args('updateCursoInput') updateCursoInput: UpdateCursoInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Curso> {
-    const idUpdatedBy = user._id;
+    const idUpdatedBy = new Types.ObjectId(user._id);
     return this.cursoService.update(id, updateCursoInput, idUpdatedBy);
   }
 
@@ -121,10 +122,10 @@ export class CursoResolver
   @Mutation(() => Curso, { name: 'Curso_softDelete' })
   @RolesDec(...administradorUp)
   async softDelete(
-    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: string,
+    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: Types.ObjectId,
     @CurrentUser() user: UserRequest,
   ): Promise<Curso> {
-    const idThanos = user._id;
+    const idThanos = new Types.ObjectId(user._id);
     return this.cursoService.softDelete(idRemove, idThanos);
   }
 
@@ -141,7 +142,7 @@ export class CursoResolver
   @Mutation(() => Curso, { name: 'Curso_hardDelete' })
   @RolesDec(RolEnum.SUPERADMIN)
   async hardDelete(
-    @Args('id', { type: () => ID }, IdPipe) id: string,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<Curso> {
     return this.cursoService.hardDelete(id);
   }
@@ -155,11 +156,11 @@ export class CursoResolver
    *
    * @Roles: SUPERADMIN
    */
-  @Mutation(() => deletedCountOutput, {
+  @Mutation(() => DeletedCountOutput, {
     name: 'Curso_hardDeleteAllSoftDeleted',
   })
   @RolesDec(RolEnum.SUPERADMIN)
-  async hardDeleteAllSoftDeleted(): Promise<deletedCountOutput> {
+  async hardDeleteAllSoftDeleted(): Promise<DeletedCountOutput> {
     return this.cursoService.hardDeleteAllSoftDeleted();
   }
 
@@ -194,10 +195,10 @@ export class CursoResolver
   @Mutation(() => Curso, { name: 'Curso_restore' })
   @RolesDec(...administradorUp)
   async restore(
-    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: string,
+    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
     @CurrentUser() user: UserRequest,
   ): Promise<Curso> {
-    const userId = user._id;
+    const userId = new Types.ObjectId(user._id);
     return this.cursoService.restore(idRestore, userId);
   }
 }

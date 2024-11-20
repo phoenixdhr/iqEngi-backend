@@ -3,8 +3,9 @@
 import { Types } from 'mongoose';
 import { IMaterial } from './material.interface';
 import { CreateMaterialInput } from '../dtos/material-dtos/create-material.input';
+import { IdInterface } from 'src/common/interfaces/id.interface';
 
-export interface IUnidad {
+export interface IUnidad extends IdInterface {
   _id: Types.ObjectId;
 
   moduloId: Types.ObjectId;

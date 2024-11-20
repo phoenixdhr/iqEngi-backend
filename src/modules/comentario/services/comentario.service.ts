@@ -1,105 +1,79 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Comentario } from '../entities/comentario.entity';
 import { CreateComentarioInput } from '../dtos/create-comentario.input';
 import { UpdateComentarioInput } from '../dtos/update-comentario.input';
+import { BaseService } from 'src/common/services/base.service';
 
+/**
+ * Servicio para manejar las operaciones relacionadas con los comentarios.
+ * Extiende las funcionalidades básicas proporcionadas por `BaseService`.
+ */
 @Injectable()
-export class ComentarioService {
+export class ComentarioService extends BaseService<
+  Comentario,
+  UpdateComentarioInput,
+  CreateComentarioInput
+> {
+  /**
+   * Constructor del servicio de comentarios.
+   * Inyecta el modelo de Mongoose para la entidad `Comentario` y lo pasa al constructor de la clase padre `BaseService`.
+   *
+   * @param comentarioModel Modelo de Mongoose para la entidad `Comentario`.
+   */
   constructor(
     @InjectModel(Comentario.name)
     private readonly comentarioModel: Model<Comentario>,
-  ) {}
+  ) {
+    super(comentarioModel);
+  }
+
+  //#region Métodos Generales IBaseResolver modificados
 
   /**
    * Crea un nuevo comentario.
    * @param createComentarioInput Datos para crear el comentario.
+   * @param userid ID del usuario que crea el comentario.
    * @returns El comentario creado.
+   * @throws NotFoundException si el curso al que se asocia el comentario no existe.
    */
   async create(
     createComentarioInput: CreateComentarioInput,
+    userid: Types.ObjectId,
   ): Promise<Comentario> {
-    const newComentario = new this.comentarioModel(createComentarioInput);
-    return newComentario.save();
-  }
+    const idCurso = new Types.ObjectId(createComentarioInput.cursoId);
 
-  /**
-   * Obtiene todos los comentarios.
-   * @returns Un array de comentarios.
-   */
-  async findAll(): Promise<Comentario[]> {
-    return this.comentarioModel.find().exec();
-  }
+    // Verifica si el curso al que se asocia el comentario existe.
+    const curso = await this.findByCursoId(idCurso);
 
-  /**
-   * Obtiene un comentario por su ID.
-   * @param id ID del comentario.
-   * @returns El comentario encontrado.
-   * @throws NotFoundException si el comentario no existe.
-   */
-  async findById(id: string): Promise<Comentario> {
-    const comentario = await this.comentarioModel.findById(id).exec();
-    if (!comentario) {
-      throw new NotFoundException(`Comentario con ID ${id} no encontrado`);
+    if (!curso) {
+      throw new NotFoundException(
+        'El curso al que se intenta comentar no existe',
+      );
     }
-    return comentario;
+
+    // Crea el comentario utilizando el método heredado de `BaseService`.
+    return super.create({ ...createComentarioInput, cursoId: idCurso }, userid);
   }
 
+  // #region Métodos personalizadas
+
   /**
-   * Obtiene los comentarios por el ID del curso.
+   * Obtiene los comentarios asociados a un curso específico por su ID.
    * @param cursoId ID del curso.
-   * @returns Un array de comentarios.
+   * @returns Un array de comentarios relacionados con el curso.
    */
-  async findByCursoId(cursoId: string): Promise<Comentario[]> {
+  async findByCursoId(cursoId: Types.ObjectId): Promise<Comentario[]> {
     return this.comentarioModel.find({ cursoId }).exec();
   }
 
   /**
-   * Obtiene los comentarios por el ID del usuario.
+   * Obtiene los comentarios realizados por un usuario específico por su ID.
    * @param usuarioId ID del usuario.
-   * @returns Un array de comentarios.
+   * @returns Un array de comentarios realizados por el usuario.
    */
-  async findByUsuarioId(usuarioId: string): Promise<Comentario[]> {
+  async findByUsuarioId(usuarioId: Types.ObjectId): Promise<Comentario[]> {
     return this.comentarioModel.find({ usuarioId }).exec();
-  }
-
-  /**
-   * Actualiza un comentario por su ID.
-   * @param id ID del comentario a actualizar.
-   * @param updateComentarioInput Datos para actualizar el comentario.
-   * @returns El comentario actualizado.
-   * @throws NotFoundException si el comentario no existe.
-   */
-  async update(
-    id: string,
-    updateComentarioInput: UpdateComentarioInput,
-  ): Promise<Comentario> {
-    const updatedComentario = await this.comentarioModel
-      .findByIdAndUpdate(id, updateComentarioInput, {
-        new: true,
-        runValidators: true,
-      })
-      .exec();
-    if (!updatedComentario) {
-      throw new NotFoundException(`Comentario con ID ${id} no encontrado`);
-    }
-    return updatedComentario;
-  }
-
-  /**
-   * Elimina un comentario por su ID.
-   * @param id ID del comentario a eliminar.
-   * @returns El comentario eliminado.
-   * @throws NotFoundException si el comentario no existe.
-   */
-  async remove(id: string): Promise<Comentario> {
-    const deletedComentario = await this.comentarioModel
-      .findByIdAndDelete(id)
-      .exec();
-    if (!deletedComentario) {
-      throw new NotFoundException(`Comentario con ID ${id} no encontrado`);
-    }
-    return deletedComentario;
   }
 }

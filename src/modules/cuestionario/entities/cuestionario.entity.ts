@@ -3,7 +3,6 @@ import { Types } from 'mongoose';
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 
 import { Pregunta, PreguntaSchema } from './pregunta.entity';
-import { Curso } from 'src/modules/curso/entities/curso.entity';
 import { ICuestionario } from '../interfaces/cuestionario.interface';
 import { Coleccion } from 'src/common/enums';
 import { AuditFields } from 'src/common/clases/audit-fields.class';
@@ -16,7 +15,7 @@ export class Cuestionario extends AuditFields implements ICuestionario {
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Field(() => Curso)
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Coleccion.Curso, required: true })
   cursoId: Types.ObjectId;
 

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { CuestionarioRespuestaController } from './controllers/cuestionario-respuesta.controller';
+import { RespuestaCuestionarioController } from './controllers/respuesta-cuestionario.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { RespuestaCuestionarioResolver } from './resolvers/respuesta-cuestionario.resolver';
-import { CuestionarioRespuestaService } from './services/cuestionario-respuesta.service';
+import { RespuestaCuestionarioService } from './services/respuesta-cuestionario.service';
 import {
   RespuestaCuestionario,
   RespuestaCuestionarioSchema,
@@ -26,12 +26,12 @@ import { RespuestaPreguntaResolver } from './resolvers/respuesta-pregunta.resolv
     ]),
   ],
   providers: [
-    CuestionarioRespuestaService,
+    RespuestaCuestionarioService,
     RespuestaCuestionarioResolver,
     RespuestaPreguntaService,
     RespuestaPreguntaResolver,
   ],
-  controllers: [CuestionarioRespuestaController],
-  exports: [CuestionarioRespuestaService],
+  controllers: [RespuestaCuestionarioController],
+  exports: [RespuestaCuestionarioService],
 })
-export class CuestionarioRespuestaModule {}
+export class RespuestaCuestionarioModule {}

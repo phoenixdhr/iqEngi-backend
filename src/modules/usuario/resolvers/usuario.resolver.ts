@@ -15,10 +15,11 @@ import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
-import { deletedCountOutput } from '../dtos/usuarios-dtos/deleted-count.output';
+import { DeletedCountOutput } from '../dtos/usuarios-dtos/deleted-count.output';
 import { CreateUsuarioInput } from '../dtos/usuarios-dtos/create-usuario.input';
 import SearchField from 'src/common/clases/search-field.class';
 import SearchFieldArgs from 'src/common/dtos/search-field.args';
+import { Types } from 'mongoose';
 
 /**
  * Resolver para manejar las operaciones de Usuario.
@@ -121,7 +122,7 @@ export class UsuarioResolver {
   @Query(() => UsuarioOutput, { name: 'usuario' })
   @RolesDec(...administradorUp)
   async findById(
-    @Args('id', { type: () => ID }, IdPipe) id: string, // Aplica el Pipe aquí
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId, // Aplica el Pipe aquí
   ): Promise<UsuarioOutput> {
     return this.usuarioService.findById(id);
   }
@@ -170,7 +171,7 @@ export class UsuarioResolver {
     @Args('updateUsuarioInput') updateUsuarioInput: UpdateUsuarioInput,
     @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
-    const id = user._id;
+    const id = new Types.ObjectId(user._id);
     return this.usuarioService.update(id, updateUsuarioInput, id);
   }
 
@@ -184,11 +185,11 @@ export class UsuarioResolver {
   @Mutation(() => UsuarioOutput, { name: 'usuario_update_onlyAdmin' })
   @RolesDec(...administradorUp)
   async updateUsuariofromAdmin(
-    @Args('id', { type: () => ID }, IdPipe) id: string,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
     @Args('updateUsuarioInput') updateUsuarioInput: UpdateUsuarioInput,
     @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
-    const idUpdatedBy = user._id;
+    const idUpdatedBy = new Types.ObjectId(user._id);
     return this.usuarioService.update(id, updateUsuarioInput, idUpdatedBy);
   }
 
@@ -206,10 +207,10 @@ export class UsuarioResolver {
   @Mutation(() => UsuarioOutput, { name: 'usuario_softDelete' })
   @RolesDec(...administradorUp)
   async softDelete(
-    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: string, // Aplica el Pipe aquí
+    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: Types.ObjectId, // Aplica el Pipe aquí
     @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
-    const idThanos = user._id;
+    const idThanos = new Types.ObjectId(user._id);
     return this.usuarioService.softDelete(idRemove, idThanos);
   }
 
@@ -243,10 +244,10 @@ export class UsuarioResolver {
   @Mutation(() => UsuarioOutput, { name: 'usuario_restore' })
   @RolesDec(...administradorUp)
   async restore(
-    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: string, // Aplica el Pipe aquí
+    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId, // Aplica el Pipe aquí
     @CurrentUser() user: UserRequest,
   ): Promise<UsuarioOutput> {
-    const userId = user._id;
+    const userId = new Types.ObjectId(user._id);
     return this.usuarioService.restore(idRestore, userId);
   }
 
@@ -261,7 +262,7 @@ export class UsuarioResolver {
   @Mutation(() => UsuarioOutput, { name: 'usuario_hardDelete' })
   @RolesDec(RolEnum.SUPERADMIN)
   async hardDelete(
-    @Args('id', { type: () => ID }, IdPipe) id: string,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<UsuarioOutput> {
     return this.usuarioService.hardDelete(id);
   }
@@ -272,11 +273,11 @@ export class UsuarioResolver {
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => deletedCountOutput, {
+  @Mutation(() => DeletedCountOutput, {
     name: 'usuarios_hardDeleteAllSoftDeleted',
   })
   @RolesDec(RolEnum.SUPERADMIN)
-  async hardDeleteAllSoftDeleted(): Promise<deletedCountOutput> {
+  async hardDeleteAllSoftDeleted(): Promise<DeletedCountOutput> {
     return this.usuarioService.hardDeleteAllSoftDeleted();
   }
 }

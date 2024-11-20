@@ -6,10 +6,10 @@ import {
   IsArray,
   IsMobilePhone,
 } from 'class-validator';
-import { IPerfil } from '../../interfaces/perfil.interface';
+import { IPerfilInput } from '../../interfaces/perfil.interface';
 
 @InputType()
-export class CreatePerfilInput implements IPerfil {
+export class CreatePerfilInput implements IPerfilInput {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()

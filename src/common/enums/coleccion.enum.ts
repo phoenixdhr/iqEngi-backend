@@ -4,4 +4,5 @@ export enum Coleccion {
   Cuestionario = 'Cuestionario',
   Modulo = 'Modulo',
   Unidad = 'Unidad',
+  CursoComprado = 'CursoComprado',
 }

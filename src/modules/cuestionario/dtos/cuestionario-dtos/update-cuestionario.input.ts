@@ -1,9 +1,9 @@
-import { InputType, PartialType } from '@nestjs/graphql';
+import { InputType, OmitType, PartialType } from '@nestjs/graphql';
 import { CreateCuestionarioInput } from './create-cuestionario.input';
 
 @InputType()
 export class UpdateCuestionarioInput extends PartialType(
-  CreateCuestionarioInput,
+  OmitType(CreateCuestionarioInput, ['cursoId'] as const),
 ) {
   // @Field(() => ID)
   // @IsNotEmpty()

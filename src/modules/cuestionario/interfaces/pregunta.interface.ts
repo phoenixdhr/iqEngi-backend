@@ -4,8 +4,9 @@ import { Types } from 'mongoose';
 import { IOpcion } from './opcion.interface';
 import { TipoPregunta } from 'src/common/enums/tipo-pregunta.enum';
 import { CreateOpcionInput } from '../dtos/opcion-dtos/create-opcion.input';
+import { IdInterface } from 'src/common/interfaces/id.interface';
 
-export interface IPregunta {
+export interface IPregunta extends IdInterface {
   _id: Types.ObjectId;
   enunciado: string;
   tipoPregunta: TipoPregunta; // O el enum TipoPregunta

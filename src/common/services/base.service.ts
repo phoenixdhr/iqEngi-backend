@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { CreatedUpdatedDeletedBy } from '../interfaces/created-updated-deleted-by.interface';
 import { PaginationArgs, SearchTextArgs } from '../dtos';
-import { deletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
+import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { ReturnDocument } from 'mongodb';
 import SearchField from '../clases/search-field.class';
 
@@ -28,10 +28,13 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @param userId - (Opcional) ID del usuario que realiza la creación.
    * @returns El documento creado como una instancia del modelo.
    */
-  async create(createDto: Partial<U> | Partial<T>, userId: string): Promise<T> {
+  async create(
+    createDto: Partial<U> | Partial<T>,
+    userId: Types.ObjectId,
+  ): Promise<T> {
     const created = await this.model.create({
       ...createDto,
-      createdBy: new Types.ObjectId(userId),
+      createdBy: userId,
     });
     return created;
   }
@@ -88,7 +91,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @returns El documento encontrado.
    * @throws NotFoundException si no se encuentra el documento.
    */
-  async findById(id: string): Promise<T> {
+  async findById(id: Types.ObjectId): Promise<T> {
     const document = await this.model.findById(id);
 
     if (!document) {
@@ -97,6 +100,23 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
       );
     }
 
+    return document;
+  }
+
+  /**
+   * Busca un documento específico en la base de datos por su ID.
+   *
+   * @param id - El ID único del documento que se desea buscar.
+   * @returns El documento encontrado.
+   * @throws NotFoundException - Si no se encuentra un documento con el ID proporcionado.
+   */
+  async findOne(id: Types.ObjectId): Promise<T> {
+    const document = await this.model.findOne({ _id: id });
+    if (!document) {
+      throw new NotFoundException(
+        `Documento ${this.model.collection.name} con ID "${id}" no encontrado`,
+      );
+    }
     return document;
   }
 
@@ -110,9 +130,9 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @throws NotFoundException si no se encuentra el documento.
    */
   async update(
-    id: string,
+    id: Types.ObjectId,
     updateDto: Partial<W>,
-    idUpdatedBy: string,
+    idUpdatedBy: Types.ObjectId,
   ): Promise<T> {
     const document = await this.model.findByIdAndUpdate(
       id,
@@ -125,7 +145,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
     if (!document) {
       throw new NotFoundException(
-        `Documento ${this.model.collection.name}con ID "${id}" no encontrado`,
+        `Documento ${this.model.collection.name} con ID "${id}" no encontrado`,
       );
     }
 
@@ -140,13 +160,16 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @returns El documento eliminado.
    * @throws NotFoundException si el documento no existe.
    */
-  async softDelete(idDelete: string, idThanos: string): Promise<T> {
+  async softDelete(
+    idDelete: Types.ObjectId,
+    idThanos: Types.ObjectId,
+  ): Promise<T> {
     const documentSoftDeleted = await this.model.findByIdAndUpdate(
       idDelete,
       {
         deleted: true,
         deletedAt: new Date(),
-        deletedBy: new Types.ObjectId(idThanos),
+        deletedBy: idThanos,
       },
       { new: true },
     );
@@ -166,16 +189,14 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @returns El documento eliminado.
    * @throws NotFoundException si el documento no existe.
    */
-  async hardDelete(idHardDelete: string): Promise<T> {
-    const id = new Types.ObjectId(idHardDelete);
-
+  async hardDelete(idHardDelete: Types.ObjectId): Promise<T> {
     const document = await this.model.collection.findOne({
-      _id: id,
+      _id: idHardDelete,
     });
 
     if (!document) {
       throw new NotFoundException(
-        `Documento ${this.model.collection.name} con ID "${id}" no encontrado`,
+        `Documento ${this.model.collection.name} con ID "${idHardDelete}" no encontrado`,
       );
     }
 
@@ -186,7 +207,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
     }
 
     const deletedDocument = await this.model.collection.findOneAndDelete({
-      _id: id,
+      _id: idHardDelete,
     });
 
     return deletedDocument as unknown as T;
@@ -196,7 +217,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * Elimina todos los documentos marcados como "deleted: true".
    * @returns un objeto con el numero de documentos eliminados.
    */
-  async hardDeleteAllSoftDeleted(): Promise<deletedCountOutput> {
+  async hardDeleteAllSoftDeleted(): Promise<DeletedCountOutput> {
     try {
       const result = await this.model.deleteMany({ deleted: true });
       return { deletedCount: result.deletedCount };
@@ -230,28 +251,27 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
   /**
    * Restaura un documento eliminado.
-   * @param id ID del documento a restaurar.
-   * @param userUpdatedId ID del documento que realiza la restauración.
+   * @param idRestore ID del documento a restaurar.
+   * @param updatedBy ID del documento que realiza la restauración.
    * @returns El documento restaurado.
    * @throws NotFoundException si el documento no existe.
    */
-  async restore(id: string, userUpdatedId: string): Promise<T> {
-    // Convertir el id a ObjectId si es necesario
-    const idRestore = new Types.ObjectId(id);
-    const updatedBy = new Types.ObjectId(userUpdatedId);
-
+  async restore(
+    idRestore: Types.ObjectId,
+    updatedBy: Types.ObjectId,
+  ): Promise<T> {
     try {
       const document = await this.model.collection.findOne({ _id: idRestore });
 
       if (!document) {
         throw new NotFoundException(
-          `Documento ${this.model.collection.name} ID "${id}" no encontrado, tal vez ya esta eliminado`,
+          `Documento ${this.model.collection.name} ID "${idRestore}" no encontrado, tal vez ya esta eliminado`,
         );
       }
 
       if (!document.deleted) {
         throw new ConflictException(
-          `El documento ${this.model.collection.name} con ID "${id}" no está marcado como eliminado, no es necesario restaurarlo`,
+          `El documento ${this.model.collection.name} con ID "${idRestore}" no está marcado como eliminado, no es necesario restaurarlo`,
         );
       }
 

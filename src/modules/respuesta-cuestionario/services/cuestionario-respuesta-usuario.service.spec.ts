@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CuestionarioRespuestaService } from './cuestionario-respuesta.service';
+import { RespuestaCuestionarioService } from './respuesta-cuestionario.service';
 
 describe('CuestionarioRespuestaUsuarioService', () => {
-  let service: CuestionarioRespuestaService;
+  let service: RespuestaCuestionarioService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CuestionarioRespuestaService],
+      providers: [RespuestaCuestionarioService],
     }).compile();
 
-    service = module.get<CuestionarioRespuestaService>(
-      CuestionarioRespuestaService,
+    service = module.get<RespuestaCuestionarioService>(
+      RespuestaCuestionarioService,
     );
   });
 

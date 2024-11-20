@@ -1,9 +1,10 @@
 // src/common/resolvers/base-resolver.interface.ts
 
-import { deletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
+import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { PaginationArgs, SearchTextArgs } from '../dtos';
 import SearchField from '../clases/search-field.class';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
+import { Types } from 'mongoose';
 
 /**
  * Interfaz que define los métodos básicos que deben implementar todos los resolvers.
@@ -48,7 +49,7 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
    * @param id ID de la entidad.
    * @returns La entidad encontrada.
    */
-  findById(id: string): Promise<OutputDocument>;
+  findById(id: Types.ObjectId): Promise<OutputDocument>;
 
   /**
    * Actualiza una entidad existente.
@@ -58,7 +59,7 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
    * @returns La entidad actualizada.
    */
   update(
-    id: string,
+    id: Types.ObjectId,
     updateInput: UpdateInput,
     user: UserRequest,
   ): Promise<OutputDocument>;
@@ -69,20 +70,23 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
    * @param user ID del usuario que realiza la eliminación.
    * @returns La entidad eliminada.
    */
-  softDelete(idRemove: string, user: UserRequest): Promise<OutputDocument>;
+  softDelete(
+    idRemove: Types.ObjectId,
+    user: UserRequest,
+  ): Promise<OutputDocument>;
 
   /**
    * Elimina permanentemente una entidad por su ID.
    * @param idRemove ID de la entidad a eliminar.
    * @returns La entidad eliminada.
    */
-  hardDelete(idRemove: string): Promise<OutputDocument>;
+  hardDelete(idRemove: Types.ObjectId): Promise<OutputDocument>;
 
   /**
    * Elimina permanentemente todas las entidades que están marcadas como eliminadas.
    * @returns Un objeto con el número de entidades eliminadas.
    */
-  hardDeleteAllSoftDeleted(): Promise<deletedCountOutput>;
+  hardDeleteAllSoftDeleted(): Promise<DeletedCountOutput>;
 
   /**
    * Obtiene todas las entidades que están marcadas como eliminadas, con opciones de paginación.
@@ -97,5 +101,8 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
    * @param user ID del usuario que realiza la restauración.
    * @returns La entidad restaurada.
    */
-  restore(idRestore: string, user: UserRequest): Promise<OutputDocument>;
+  restore(
+    idRestore: Types.ObjectId,
+    user: UserRequest,
+  ): Promise<OutputDocument>;
 }

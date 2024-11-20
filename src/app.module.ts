@@ -8,7 +8,7 @@ import { InstructorModule } from './modules/instructor/instructor.module';
 import { OrdenModule } from './modules/orden/orden.module';
 import { ComentarioModule } from './modules/comentario/comentario.module';
 import { CuestionarioModule } from './modules/cuestionario/cuestionario.module';
-import { CuestionarioRespuestaModule } from './modules/cuestionario-respuesta/cuestionario-respuesta.module';
+import { RespuestaCuestionarioModule } from './modules/respuesta-cuestionario/respuesta-cuestionario.module';
 
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -58,7 +58,7 @@ import mongoose from 'mongoose';
     CategoriaModule,
     ComentarioModule,
     CuestionarioModule,
-    CuestionarioRespuestaModule,
+    RespuestaCuestionarioModule,
     CursoModule,
     CursoCompradoModule,
     InstructorModule,

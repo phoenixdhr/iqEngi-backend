@@ -1,9 +1,9 @@
 import { Types } from 'mongoose';
 import { Nivel } from 'src/common/enums/nivel.enum';
+import { IdInterface } from 'src/common/interfaces/id.interface';
 
-export interface ICurso {
+export interface ICurso extends IdInterface {
   _id: Types.ObjectId;
-
   titulo: string;
   descripcionCorta: string;
   descripcionLarga?: string;

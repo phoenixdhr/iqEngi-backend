@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { UsuarioService } from './services/usuario.service';
 import { OrdenModule } from 'src/modules/orden/orden.module';
-import { CuestionarioRespuestaModule } from 'src/modules/cuestionario-respuesta/cuestionario-respuesta.module';
+import { RespuestaCuestionarioModule } from 'src/modules/respuesta-cuestionario/respuesta-cuestionario.module';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { CursoModule } from 'src/modules/curso/curso.module';
@@ -23,7 +23,7 @@ import { AuthModule } from '../auth/auth.module';
     MailModule,
     ComentarioModule,
     OrdenModule,
-    CuestionarioRespuestaModule,
+    RespuestaCuestionarioModule,
     CuestionarioModule,
     forwardRef(() => CursoModule),
     forwardRef(() => AuthModule),

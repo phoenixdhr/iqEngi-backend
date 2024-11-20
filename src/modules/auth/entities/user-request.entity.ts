@@ -1,11 +1,12 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { RolEnum } from 'src/common/enums';
 import { UserGoogle } from '../interfaces/google-user.interface';
+import { Types } from 'mongoose';
 
 @ObjectType()
 export class UserRequest implements UserGoogle {
   @Field(() => ID)
-  _id: string;
+  _id: Types.ObjectId;
 
   @Field(() => [RolEnum])
   roles: [RolEnum];

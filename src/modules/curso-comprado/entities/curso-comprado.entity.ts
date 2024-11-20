@@ -8,6 +8,7 @@ import { ICursoComprado } from '../interfaces/curso-comprado.interface';
 
 import { AuditFields } from 'src/common/clases/audit-fields.class';
 import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
+import { Coleccion } from 'src/common/enums';
 
 // #region CursoComprado
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
@@ -21,12 +22,16 @@ export class CursoComprado extends AuditFields implements ICursoComprado {
   usuarioId: Types.ObjectId;
 
   @Field(() => Curso)
-  @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
+  @Prop({ type: Types.ObjectId, ref: Coleccion.Curso, required: true })
   cursoId: Types.ObjectId;
 
   @Field()
+  @Prop({ required: true })
+  tituloCurso: string;
+
+  @Field()
   @Prop({ required: true, default: Date.now })
-  fechaCompra: Date;
+  fechaCompra?: Date;
 
   @Field({ nullable: true })
   @Prop()
@@ -34,15 +39,19 @@ export class CursoComprado extends AuditFields implements ICursoComprado {
 
   @Field(() => EstadoAccesoCurso)
   @Prop({ enum: EstadoAccesoCurso, default: EstadoAccesoCurso.Activo })
-  estadoAcceso: EstadoAccesoCurso;
+  estadoAcceso?: EstadoAccesoCurso;
 
   @Field(() => Float, { defaultValue: 0 })
   @Prop({ default: 0 })
-  progreso: number; // Porcentaje de avance en el curso
+  progreso?: number; // Porcentaje de avance en el curso
 
   @Field({ defaultValue: false })
   @Prop({ default: false })
-  cursoCompletado: boolean;
+  cursoCompletado?: boolean;
+
+  @Field(() => Float, { nullable: true })
+  @Prop({ default: 0 })
+  ultimaNota?: number;
 
   @Field()
   @Prop({ default: false })

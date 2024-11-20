@@ -25,6 +25,7 @@ import { Response } from 'express';
 import { Usuario } from 'src/modules/usuario/entities/usuario.entity';
 import { UpdatePasswordInput } from 'src/modules/usuario/dtos/usuarios-dtos/update-password';
 import { MailService } from 'src/modules/mail/mail.service';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class JwtAuthService {
@@ -99,7 +100,8 @@ export class JwtAuthService {
    */
   async validatePayload(payload: IPayload): Promise<UsuarioOutput> {
     // Verifica que el usuario con el ID dado en el payload existe.
-    const user = await this.usuarioService.findById(payload.sub);
+    const subId = payload.sub;
+    const user = await this.usuarioService.findById(subId);
     if (!user) {
       // Si el usuario no existe, lanza una excepción de autenticación.
       throw new UnauthorizedException('Token inválido o usuario no encontrado');
@@ -117,7 +119,7 @@ export class JwtAuthService {
    * @throws NotFoundException si el usuario no existe.
    */
   async updatePassword(
-    id: string,
+    id: Types.ObjectId,
     updatePasswordInput: UpdatePasswordInput,
   ): Promise<Usuario> {
     const { oldPassword, newPassword } = updatePasswordInput;

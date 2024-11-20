@@ -1,8 +1,9 @@
 // curso/interfaces/modulo.interface.ts
 
 import { Types } from 'mongoose';
+import { IdInterface } from 'src/common/interfaces/id.interface';
 
-export interface IModulo {
+export interface IModulo extends IdInterface {
   _id: Types.ObjectId;
 
   cursoId: Types.ObjectId;

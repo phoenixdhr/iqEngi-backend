@@ -4,7 +4,7 @@ import { Resolver, Query, Mutation, Args, ID, Float } from '@nestjs/graphql';
 import { Calificacion } from '../entities/calificacion.entity';
 import { CalificacionService } from '../services/calificacion.service';
 import { CreateCalificacionInput } from '../dtos/create-calificacion.input';
-import { CreateCalificacionUserInput } from '../dtos/create-calificacion-user.input';
+import { CreateCalificacion_userInput } from '../dtos/create-calificacion-user.input';
 
 import { UpdateCalificacionInput } from '../dtos/update-calificacion.input';
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
@@ -14,7 +14,7 @@ import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
 import { administradorUp, RolEnum } from 'src/common/enums/rol.enum';
 import { PaginationArgs } from 'src/common/dtos/pagination.args';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
-import { deletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
+import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { UseGuards } from '@nestjs/common';
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
@@ -26,13 +26,13 @@ import { Types } from 'mongoose';
  *
  * @Guard : JwtGqlAuthGuard, RolesGuard
  */
-@UseGuards(JwtGqlAuthGuard, RolesGuard)
 @Resolver(() => Calificacion)
+@UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CalificacionResolver
   implements
     IBaseResolver<
       Calificacion,
-      CreateCalificacionUserInput,
+      CreateCalificacion_userInput,
       UpdateCalificacionInput
     >
 {
@@ -42,7 +42,7 @@ export class CalificacionResolver
   /**
    * Crea una nueva calificación de un curso, por un usuario.
    *
-   * @param CreateCalificacionUserInput Datos necesarios para crear la calificación.
+   * @param createCalificacionUserInput Datos necesarios para crear la calificación.
    * @param user Usuario autenticado que realiza la creación.
    * @returns La calificación creada.
    *
@@ -50,15 +50,15 @@ export class CalificacionResolver
   @Mutation(() => Calificacion, { name: 'Calificacion_create' })
   async create(
     @Args('createCalificacionInput')
-    CreateCalificacionUserInput: CreateCalificacionUserInput,
+    createCalificacionUserInput: CreateCalificacion_userInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Calificacion> {
     const userId = new Types.ObjectId(user._id);
-    const CreateCalificacionInput = {
-      ...CreateCalificacionUserInput,
+    const createCalificacionInput = {
+      ...createCalificacionUserInput,
       usuarioId: userId,
     } as CreateCalificacionInput;
-    return this.calificacionService.create(CreateCalificacionInput, user._id);
+    return this.calificacionService.create(createCalificacionInput, userId);
   }
 
   /**
@@ -86,7 +86,7 @@ export class CalificacionResolver
   @Query(() => Calificacion, { name: 'Calificacion' })
   @RolesDec(...administradorUp)
   async findById(
-    @Args('id', { type: () => ID }, IdPipe) id: string,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<Calificacion> {
     return this.calificacionService.findById(id);
   }
@@ -104,12 +104,12 @@ export class CalificacionResolver
    */
   @Mutation(() => Calificacion, { name: 'Calificacion_update' })
   async update(
-    @Args('id', { type: () => ID }, IdPipe) id: string,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
     @Args('updateCalificacionInput')
     updateCalificacionInput: UpdateCalificacionInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Calificacion> {
-    const idUpdatedBy = user._id;
+    const idUpdatedBy = new Types.ObjectId(user._id);
 
     return this.calificacionService.update(
       id,
@@ -130,10 +130,10 @@ export class CalificacionResolver
   @Mutation(() => Calificacion, { name: 'Calificacion_softDelete' })
   @RolesDec(...administradorUp)
   async softDelete(
-    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: string,
+    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: Types.ObjectId,
     @CurrentUser() user: UserRequest,
   ): Promise<Calificacion> {
-    const idThanos = user._id;
+    const idThanos = new Types.ObjectId(user._id);
     return this.calificacionService.softDelete(idRemove, idThanos);
   }
 
@@ -150,7 +150,7 @@ export class CalificacionResolver
   @Mutation(() => Calificacion, { name: 'Calificacion_hardDelete' })
   @RolesDec(RolEnum.SUPERADMIN)
   async hardDelete(
-    @Args('id', { type: () => ID }, IdPipe) id: string,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<Calificacion> {
     return this.calificacionService.hardDelete(id);
   }
@@ -164,11 +164,11 @@ export class CalificacionResolver
    *
    * @Roles: SUPERADMIN
    */
-  @Mutation(() => deletedCountOutput, {
+  @Mutation(() => DeletedCountOutput, {
     name: 'Calificacion_hardDeleteAllSoftDeleted',
   })
   @RolesDec(RolEnum.SUPERADMIN)
-  async hardDeleteAllSoftDeleted(): Promise<deletedCountOutput> {
+  async hardDeleteAllSoftDeleted(): Promise<DeletedCountOutput> {
     return this.calificacionService.hardDeleteAllSoftDeleted();
   }
 
@@ -203,12 +203,14 @@ export class CalificacionResolver
   @Mutation(() => Calificacion, { name: 'Calificacion_restore' })
   @RolesDec(...administradorUp)
   async restore(
-    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: string, // Aplica el Pipe aquí
+    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId, // Aplica el Pipe aquí
     @CurrentUser() user: UserRequest,
   ): Promise<Calificacion> {
-    const userId = user._id;
+    const userId = new Types.ObjectId(user._id);
     return this.calificacionService.restore(idRestore, userId);
   }
+
+  //#region Consultas personalizadas
 
   /**
    * Calcula el promedio de calificaciones de un curso específico.
@@ -220,12 +222,11 @@ export class CalificacionResolver
    */
   @Query(() => Float, { name: 'Calificacion_promedioCalificaciones' })
   async calculatePromedio(
-    @Args('cursoId', { type: () => ID }, IdPipe) cursoId: string,
+    @Args('cursoId', { type: () => ID }, IdPipe) cursoId: Types.ObjectId,
   ): Promise<number> {
     return this.calificacionService.calculatePromedio(cursoId);
   }
 
-  //#region Consultas personalizadas
   /**
    * Obtiene todas las calificaciones asociadas a un curso específico.
    *
@@ -236,7 +237,7 @@ export class CalificacionResolver
    */
   @Query(() => [Calificacion], { name: 'Calificaciones_PorCurso' })
   async findByCurso(
-    @Args('cursoId', { type: () => ID }, IdPipe) cursoId: string,
+    @Args('cursoId', { type: () => ID }, IdPipe) cursoId: Types.ObjectId,
   ): Promise<Calificacion[]> {
     return this.calificacionService.findByCursoId(cursoId);
   }
@@ -251,7 +252,7 @@ export class CalificacionResolver
    */
   @Query(() => [Calificacion], { name: 'Calificaciones_PorUsuario' })
   async findByUsuario(
-    @Args('usuarioId', { type: () => ID }, IdPipe) usuarioId: string,
+    @Args('usuarioId', { type: () => ID }, IdPipe) usuarioId: Types.ObjectId,
   ): Promise<Calificacion[]> {
     return this.calificacionService.findByUsuarioId(usuarioId);
   }
