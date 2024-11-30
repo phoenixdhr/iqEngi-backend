@@ -22,7 +22,7 @@ export class CreateCursoInput implements ICursoInput {
   @Field()
   @IsNotEmpty()
   @IsString()
-  titulo: string;
+  courseTitle: string;
 
   @Field()
   @IsNotEmpty()

@@ -93,7 +93,7 @@ scalar DateTime
 
 type Curso {
   _id: ID!
-  titulo: String!
+  courseTitle: String!
   descripcionCorta: String!
   descripcionLarga: String
   nivel: Nivel
@@ -184,7 +184,7 @@ type CursoComprado {
   _id: ID!
   usuarioId: Usuario!
   cursoId: Curso!
-  tituloCurso: String!
+  courseTitle: String!
   fechaCompra: DateTime!
   fechaExpiracion: DateTime
   estadoAcceso: EstadoAccesoCurso!
@@ -342,6 +342,7 @@ type Mutation {
   Pregunta_hardDelete(id: ID!): Pregunta!
   Pregunta_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Pregunta_restore(idRestore: ID!): Pregunta!
+  createPregunta_____COPYInput(docId: ID!, createPreguntaInput: CreatePreguntaInput!): Pregunta!
   Calificacion_create(createCalificacionInput: CreateCalificacion_userInput!): Calificacion!
   Calificacion_update(id: ID!, updateCalificacionInput: UpdateCalificacionInput!): Calificacion!
   Calificacion_softDelete(idRemove: ID!): Calificacion!
@@ -419,7 +420,7 @@ input UpdateComentarioInput {
 }
 
 input CreateCursoInput {
-  titulo: String!
+  courseTitle: String!
   descripcionCorta: String!
   descripcionLarga: String
   nivel: Nivel
@@ -439,7 +440,7 @@ input CreateCursoInput {
 }
 
 input UpdateCursoInput {
-  titulo: String
+  courseTitle: String
   descripcionCorta: String
   descripcionLarga: String
   nivel: Nivel
@@ -525,8 +526,10 @@ input UpdateCategoriaInput {
 
 input CreateCursoComprado_userInput {
   cursoId: ID!
+  courseTitle: Float
 }
 
 input UpdateCursoCompradoInput {
   cursoId: ID
+  courseTitle: Float
 }

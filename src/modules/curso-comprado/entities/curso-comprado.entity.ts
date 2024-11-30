@@ -26,8 +26,8 @@ export class CursoComprado extends AuditFields implements ICursoComprado {
   cursoId: Types.ObjectId;
 
   @Field()
-  @Prop({ required: true })
-  tituloCurso: string;
+  @Prop()
+  courseTitle: string;
 
   @Field()
   @Prop({ required: true, default: Date.now })

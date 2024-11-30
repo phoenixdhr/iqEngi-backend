@@ -15,6 +15,8 @@ import { OpcionService } from './services/opcion.service';
 import { OpcionResolver } from './resolvers/opcion.resolver';
 import { PreguntaResolver } from './resolvers/pregunta.resolver';
 import { CursoModule } from '../curso/curso.module';
+import { PreguntaResolverCopy } from './resolvers/preguntaCOPY.resolver';
+import { PreguntaServiceCopy } from './services/preguntaCOPY.service';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { CursoModule } from '../curso/curso.module';
     OpcionService,
     OpcionResolver,
     PreguntaResolver,
+    PreguntaResolverCopy,
+    PreguntaServiceCopy,
   ],
   controllers: [CuestionarioController],
   exports: [CuestionarioService],

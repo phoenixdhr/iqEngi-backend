@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { model, Types } from 'mongoose';
 
 import { Categoria } from '../../categoria/entities/categoria.entity';
 import { Instructor } from '../../instructor/entities/instructor.entity';
@@ -12,8 +12,8 @@ import { Nivel } from 'src/common/enums/nivel.enum';
 import { AuditFields } from 'src/common/clases/audit-fields.class';
 import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
 import { CursoComprado } from 'src/modules/curso-comprado/entities/curso-comprado.entity';
-import { postUpdate_updateIn_relatedModel_Middleware } from 'src/common/middlewares/post-update-campo.middleware';
 import { Coleccion } from 'src/common/enums';
+import { addPreUpdateSyncMiddleware } from 'src/common/middlewares/pre-update-campo.middleware';
 
 // #region Curso
 @ObjectType()
@@ -24,7 +24,7 @@ export class Curso extends AuditFields implements ICurso {
 
   @Field()
   @Prop({ required: true })
-  titulo: string;
+  courseTitle: string;
 
   @Field()
   @Prop({ required: true })
@@ -107,7 +107,7 @@ export const CursoSchema = SchemaFactory.createForClass(Curso);
 
 //#region indexaciones
 // permite realizar busquedas por titulo
-CursoSchema.index({ titulo: 'text' }, { unique: true });
+CursoSchema.index({ courseTitle: 'text' }, { unique: true });
 
 CursoSchema.index({ categorias: 1 });
 CursoSchema.index({ instructor: 1 });
@@ -117,11 +117,11 @@ CursoSchema.index({ deleted: 1 });
 //#region Middelwares
 addSoftDeleteMiddleware<Curso, Curso>(CursoSchema);
 
-postUpdate_updateIn_relatedModel_Middleware<Curso, CursoComprado>(
+addPreUpdateSyncMiddleware<Curso, CursoComprado, 'cursoId'>(
   CursoSchema,
   Coleccion.CursoComprado,
-  'courseTitle',
+  'cursoId',
   (doc: Curso) => ({
-    tituloCurso: doc.titulo,
+    courseTitle: doc.courseTitle,
   }),
 );

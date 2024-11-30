@@ -6,6 +6,7 @@ import { BaseService } from 'src/common/services/base.service';
 import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CursoService } from 'src/modules/curso/services/curso.service';
+import { UpdateCursoInput } from 'src/modules/curso/dtos/curso-dtos/update-curso.input';
 
 @Injectable()
 export class CuestionarioService extends BaseService<
@@ -35,28 +36,33 @@ export class CuestionarioService extends BaseService<
     createCuestionarioInput: CreateCuestionarioInput,
     userid: Types.ObjectId,
   ): Promise<Cuestionario> {
+    const cursoIdAsigned = new Types.ObjectId(createCuestionarioInput.cursoId);
+
     // Verificar si ya existe un cuestionario para el curso
     const existingCuestionario = await this.cuestionarioModel.findOne({
-      cursoId: createCuestionarioInput.cursoId,
+      cursoId: cursoIdAsigned,
     });
 
     if (existingCuestionario) {
       throw new Error(
         // en español
-        `A cuestionario already exists for cursoId: ${createCuestionarioInput.cursoId}, ID del Cuestionario que ya existe para dicho curso es : ${existingCuestionario._id}`,
+        `A cuestionario already exists for cursoId: ${cursoIdAsigned}, ID del Cuestionario que ya existe para dicho curso es : ${existingCuestionario._id}`,
       );
     }
 
     // Crear el nuevo cuestionario
-    const newCuestionario = await super.create(createCuestionarioInput, userid);
+    const newCuestionario = await super.create(
+      { ...createCuestionarioInput, cursoId: cursoIdAsigned },
+      userid,
+    );
 
     // Actualizar el curso relacionado con el cuestionario
-    const idCurso = new Types.ObjectId(createCuestionarioInput.cursoId);
-    const dtoUpdateCurso = {
-      cuestionarioId: newCuestionario._id,
-    } as UpdateCuestionarioInput;
 
-    await this.cursoService.update(idCurso, dtoUpdateCurso, userid);
+    const dtoUpdateCurso = {
+      cuestionarioId: new Types.ObjectId(newCuestionario._id),
+    } as UpdateCursoInput;
+
+    await this.cursoService.update(cursoIdAsigned, dtoUpdateCurso, userid);
 
     return newCuestionario;
   }

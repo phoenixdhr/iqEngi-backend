@@ -34,10 +34,12 @@ export class CursoService extends BaseService<
     createCursoInput: CreateCursoInput,
     userid: Types.ObjectId,
   ): Promise<Curso> {
-    const titulo = createCursoInput.titulo;
+    const titulo = createCursoInput.courseTitle;
 
     if (titulo) {
-      const curso = await this.cursoModel.findOne({ titulo: titulo }).exec();
+      const curso = await this.cursoModel
+        .findOne({ courseTitle: titulo })
+        .exec();
 
       if (curso) {
         throw new Error(`El curso ya existe con id ${curso.id}`);
@@ -64,7 +66,7 @@ export class CursoService extends BaseService<
     pagination?: PaginationArgs,
   ): Promise<Curso[]> {
     const searchField: SearchField<Curso> = new SearchField();
-    searchField.field = 'titulo';
+    searchField.field = 'courseTitle';
 
     return super.findAllBy(searchArgs, searchField, pagination) as Promise<
       Curso[]

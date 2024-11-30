@@ -27,6 +27,9 @@ export class CreateCursoCompradoInput implements ICursoCompradoInput {
   @IsOptional()
   fechaExpiracion?: Date;
 
+  @Field(() => Float, { nullable: true })
+  courseTitle: string;
+
   // Se eliminan los campos de estadoAcceso, progreso y cursoCompletado en CreateCursoCompradoInput para que el usuario no pueda modificarlos
 
   @Field(() => EstadoAccesoCurso, { nullable: true })

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CursoController } from './controllers/curso.controller';
 import { CursoService } from './services/curso.service';
 
@@ -28,14 +28,14 @@ import {
       { name: Modulo.name, schema: ModuloSchema },
       { name: Unidad.name, schema: UnidadSchema },
       { name: Material.name, schema: MaterialSchema },
-      { name: CursoComprado.name, schema: CursoCompradoSchema },
+      // { name: CursoComprado.name, schema: CursoCompradoSchema },
     ]),
-    // forwardRef(() => OrdenModule),
-    // forwardRef(() => CategoriaModule),
-    // forwardRef(() => UsuarioModule),
-    // ComentarioModule,
-    // CuestionarioModule,
-    // InstructorModule,
+    forwardRef(() =>
+      MongooseModule.forFeature([
+        { name: CursoComprado.name, schema: CursoCompradoSchema },
+      ]),
+    ),
+    // forwardRef(() => CursoCompradoModule),
   ],
   controllers: [CursoController],
   providers: [

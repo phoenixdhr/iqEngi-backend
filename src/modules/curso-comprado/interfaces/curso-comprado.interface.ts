@@ -8,7 +8,7 @@ export interface ICursoComprado extends IdInterface {
   _id: Types.ObjectId;
   usuarioId: Types.ObjectId;
   cursoId: Types.ObjectId;
-  tituloCurso: string;
+  courseTitle: string;
   fechaCompra?: Date;
   fechaExpiracion?: Date;
   estadoAcceso?: EstadoAccesoCurso;
@@ -19,7 +19,7 @@ export interface ICursoComprado extends IdInterface {
 
 export type ICursoCompradoInput = Omit<
   ICursoComprado,
-  '_id' | 'fechaCompra' | 'fechaExpiracion' | 'tituloCurso'
+  '_id' | 'fechaCompra' | 'fechaExpiracion' | 'courseTitle'
 >;
 
 // export interface ICursoCompradoInput {

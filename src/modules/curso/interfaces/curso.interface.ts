@@ -4,7 +4,7 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 
 export interface ICurso extends IdInterface {
   _id: Types.ObjectId;
-  titulo: string;
+  courseTitle: string;
   descripcionCorta: string;
   descripcionLarga?: string;
   nivel?: Nivel;

@@ -42,13 +42,12 @@ export class CursoCompradoService extends BaseService<
       ...createCursoCompradoInput,
       cursoId: new Types.ObjectId(createCursoCompradoInput.cursoId),
       usuarioId: new Types.ObjectId(createCursoCompradoInput.usuarioId),
-      tituloCurso: curso.titulo,
+      courseTitle: curso.courseTitle,
     };
+    console.log('data to create curso comprado:', data);
+    const newCursoComprado = await super.create({ ...data }, userid);
 
-    const newCursoComprado = super.create(
-      { ...data, cursoId: idCurso },
-      userid,
-    );
+    console.log('newCursoComprado:      ', newCursoComprado);
 
     return newCursoComprado;
   }
