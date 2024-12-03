@@ -29,7 +29,7 @@ export class CreateUnidadInput implements IUnidadInput {
   @Field()
   @IsNotEmpty()
   @IsString()
-  titulo: string;
+  unidadTitle: string;
 
   @Field({ nullable: true })
   @IsOptional()

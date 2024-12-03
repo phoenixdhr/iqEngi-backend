@@ -11,7 +11,7 @@ export class Material extends Document implements IMaterial {
 
   @Field()
   @Prop({ required: true })
-  titulo: string;
+  materialTitle: string;
 
   @Field({ nullable: true })
   @Prop()

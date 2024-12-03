@@ -66,4 +66,14 @@ export class CuestionarioService extends BaseService<
 
     return newCuestionario;
   }
+
+  async findById(cuestionarioId: Types.ObjectId): Promise<Cuestionario> {
+    const cuestionario = super.findById_WithSubDocuments_ActiveOrInactive(
+      cuestionarioId,
+      'preguntas',
+      false,
+    );
+
+    return cuestionario;
+  }
 }

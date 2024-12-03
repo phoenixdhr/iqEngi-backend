@@ -8,7 +8,7 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 export interface ICuestionario extends IdInterface {
   _id: Types.ObjectId;
   cursoId: Types.ObjectId;
-  titulo: string;
+  cuestionarioTitle?: string;
   descripcion?: string;
   preguntas?: IPregunta[];
   numeroPreguntasPresentar?: number; // numero de preguntas correctas con las que se aprueba el curso

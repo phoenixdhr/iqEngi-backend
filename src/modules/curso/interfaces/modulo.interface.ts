@@ -8,7 +8,7 @@ export interface IModulo extends IdInterface {
 
   cursoId: Types.ObjectId;
   numeroModulo: number;
-  titulo: string;
+  moduloTitle: string;
   descripcion?: string;
   unidades?: Types.ObjectId[];
 }

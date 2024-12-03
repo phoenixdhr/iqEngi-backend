@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { model, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 import { Categoria } from '../../categoria/entities/categoria.entity';
 import { Instructor } from '../../instructor/entities/instructor.entity';

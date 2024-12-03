@@ -49,7 +49,11 @@ export class CursoCompradoResolver
       ...createCursoCompradoUserInput,
       usuarioId: userId,
     } as CreateCursoCompradoInput;
-    return this.cursoCompradoService.create(createCursoCompradoInput, userId);
+    return (
+      await (
+        await this.cursoCompradoService.create(createCursoCompradoInput, userId)
+      ).populate('cursoId')
+    ).populate('usuarioId');
   }
 
   /**
@@ -60,7 +64,7 @@ export class CursoCompradoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Query(() => [CursoComprado], { name: 'CursoCompradoes' })
+  @Query(() => [CursoComprado], { name: 'CursoComprados' })
   @RolesDec(...administradorUp)
   async findAll(@Args() pagination?: PaginationArgs): Promise<CursoComprado[]> {
     return this.cursoCompradoService.findAll(pagination);
@@ -82,29 +86,30 @@ export class CursoCompradoResolver
     return this.cursoCompradoService.findById(id);
   }
 
-  /**
-   * Actualiza una compra de curso existente por su ID.
-   * NOTA: Este método no es necesario según la lógica actual de la aplicación y puede eliminarse.
-   *
-   * @param id ID de la compra de curso a actualizar.
-   * @param updateCursoCompradoInput Datos para actualizar la compra de curso.
-   * @param user Usuario autenticado que realiza la operación.
-   * @returns La compra de curso actualizada.
-   */
-  @Mutation(() => CursoComprado, { name: 'CursoComprado_update' })
-  async update(
-    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
-    @Args('updateCursoCompradoInput')
-    updateCursoCompradoInput: UpdateCursoCompradoInput,
-    @CurrentUser() user: UserRequest,
-  ): Promise<CursoComprado> {
-    const idUpdatedBy = new Types.ObjectId(user._id);
-    return this.cursoCompradoService.update(
-      id,
-      updateCursoCompradoInput,
-      idUpdatedBy,
-    );
-  }
+  // LA FUNCION UPDATE NO ES NECESARIA Y PUEDE SER ELIMINADA
+  // /**
+  //  * Actualiza una compra de curso existente por su ID.
+  //  * NOTA: Este método no es necesario según la lógica actual de la aplicación y puede eliminarse.
+  //  *
+  //  * @param id ID de la compra de curso a actualizar.
+  //  * @param updateCursoCompradoInput Datos para actualizar la compra de curso.
+  //  * @param user Usuario autenticado que realiza la operación.
+  //  * @returns La compra de curso actualizada.
+  //  */
+  // @Mutation(() => CursoComprado, { name: 'CursoComprado_update' })
+  // async update(
+  //   @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
+  //   @Args('updateCursoCompradoInput')
+  //   updateCursoCompradoInput: UpdateCursoCompradoInput,
+  //   @CurrentUser() user: UserRequest,
+  // ): Promise<CursoComprado> {
+  //   const idUpdatedBy = new Types.ObjectId(user._id);
+  //   return this.cursoCompradoService.update(
+  //     id,
+  //     updateCursoCompradoInput,
+  //     idUpdatedBy,
+  //   );
+  // }
 
   /**
    * Elimina lógicamente una compra de curso por su ID (soft delete).

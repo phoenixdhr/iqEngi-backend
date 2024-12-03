@@ -19,9 +19,9 @@ export class Cuestionario extends AuditFields implements ICuestionario {
   @Prop({ type: Types.ObjectId, ref: Coleccion.Curso, required: true })
   cursoId: Types.ObjectId;
 
-  @Field()
-  @Prop({ required: true })
-  titulo: string;
+  @Field({ nullable: true })
+  @Prop()
+  cuestionarioTitle?: string;
 
   @Field({ nullable: true })
   @Prop()

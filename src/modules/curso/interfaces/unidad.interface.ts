@@ -10,7 +10,7 @@ export interface IUnidad extends IdInterface {
 
   moduloId: Types.ObjectId;
   numeroUnidad: number;
-  titulo: string;
+  unidadTitle: string;
   descripcion?: string;
   urlVideo?: string;
   materiales?: IMaterial[];

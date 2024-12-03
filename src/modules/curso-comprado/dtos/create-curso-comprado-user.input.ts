@@ -11,5 +11,6 @@ export class CreateCursoComprado_userInput extends OmitType(
     'progreso',
     'cursoCompletado',
     'ultimaNota',
+    'courseTitle',
   ],
 ) {}

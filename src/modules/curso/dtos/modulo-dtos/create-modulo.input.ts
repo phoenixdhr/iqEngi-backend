@@ -27,7 +27,7 @@ export class CreateModuloInput implements IModuloInput {
   @Field()
   @IsNotEmpty()
   @IsString()
-  titulo: string;
+  moduloTitle: string;
 
   @Field({ nullable: true })
   @IsOptional()

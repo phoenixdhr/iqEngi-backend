@@ -26,7 +26,7 @@ export class Unidad extends AuditFields implements IUnidad {
 
   @Field()
   @Prop({ required: true })
-  titulo: string;
+  unidadTitle: string;
 
   @Field({ nullable: true })
   @Prop()

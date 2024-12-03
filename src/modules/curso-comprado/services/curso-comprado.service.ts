@@ -44,10 +44,8 @@ export class CursoCompradoService extends BaseService<
       usuarioId: new Types.ObjectId(createCursoCompradoInput.usuarioId),
       courseTitle: curso.courseTitle,
     };
-    console.log('data to create curso comprado:', data);
-    const newCursoComprado = await super.create({ ...data }, userid);
 
-    console.log('newCursoComprado:      ', newCursoComprado);
+    const newCursoComprado = await super.create({ ...data }, userid);
 
     return newCursoComprado;
   }

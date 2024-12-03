@@ -25,7 +25,7 @@ export class Modulo extends AuditFields implements IModulo {
 
   @Field()
   @Prop({ required: true })
-  titulo: string;
+  moduloTitle: string;
 
   @Field({ nullable: true })
   @Prop()

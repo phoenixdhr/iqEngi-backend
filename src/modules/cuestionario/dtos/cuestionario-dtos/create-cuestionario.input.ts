@@ -5,12 +5,9 @@ import {
   IsOptional,
   IsInt,
   Min,
-  ValidateNested,
-  IsArray,
   IsMongoId,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { CreatePreguntaInput } from '../pregunta-dtos/create-pregunta.input';
+
 import { ICuestionarioInput } from '../../interfaces/cuestionario.interface';
 import { Types } from 'mongoose';
 
@@ -21,22 +18,22 @@ export class CreateCuestionarioInput implements ICuestionarioInput {
   @IsMongoId()
   cursoId: Types.ObjectId;
 
-  @Field()
-  @IsNotEmpty()
+  @Field({ nullable: true })
+  @IsOptional()
   @IsString()
-  titulo: string;
+  cuestionarioTitle?: string;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
   descripcion?: string;
 
-  @Field(() => [CreatePreguntaInput], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreatePreguntaInput)
-  preguntas?: CreatePreguntaInput[];
+  // @Field(() => [CreatePreguntaInput], { nullable: true })
+  // @IsOptional()
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // @Type(() => CreatePreguntaInput)
+  // preguntas?: CreatePreguntaInput[];
 
   @Field(() => Int, { nullable: true })
   @IsOptional()

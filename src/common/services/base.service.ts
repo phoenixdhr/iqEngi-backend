@@ -119,6 +119,54 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
     }
     return document;
   }
+  /**
+   * Recupera un documento por su ID y filtra su campo de subdocumentos basado en el estado 'deleted'.
+   * @param id - El ID del documento principal.
+   * @param subDocumentField - El nombre del campo de subdocumentos (arreglo) a filtrar.
+   * @param deleted - El estado 'deleted' por el cual filtrar los subdocumentos (por defecto es false).
+   * @returns El documento con el campo de subdocumentos filtrado.
+   * @throws NotFoundException si el documento no existe.
+   * @throws InternalServerErrorException si el subDocumentField no existe en el esquema del modelo.
+   */
+  async findById_WithSubDocuments_ActiveOrInactive<K extends keyof T>(
+    id: Types.ObjectId,
+    subDocumentField: K,
+    deleted: boolean = false,
+  ): Promise<T> {
+    // Verificar que subDocumentField es un campo válido en el esquema
+    if (!this.model.schema.paths[subDocumentField as string]) {
+      throw new InternalServerErrorException(
+        `El campo "${String(subDocumentField)}" no existe en el esquema del modelo ${this.model.collection.name}`,
+      );
+    }
+
+    const result = await this.model
+      .aggregate([
+        { $match: { _id: id, deleted: false } }, // Filtrar el documento principal
+        {
+          // Añadir un campo con los subdocumentos filtrados
+          $addFields: {
+            [subDocumentField]: {
+              $filter: {
+                input: `$${String(subDocumentField)}`,
+                as: 'subDocument',
+                cond: { $eq: ['$$subDocument.deleted', deleted] },
+              },
+            },
+          },
+        },
+      ])
+      .exec()
+      .then((results) => results[0]);
+
+    if (!result) {
+      throw new NotFoundException(
+        `Documento ${this.model.collection.name} con ID "${id}" no encontrado`,
+      );
+    }
+
+    return result as T;
+  }
 
   //#region update
   /**

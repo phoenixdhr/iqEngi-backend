@@ -1,19 +1,17 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { TipoPregunta } from 'src/common/enums/tipo-pregunta.enum';
-import { Opcion, OpcionSchema } from './opcion.entity';
-import { Types } from 'mongoose';
-import { Modulo } from 'src/modules/curso/entities/modulo.entity';
-import { Unidad } from 'src/modules/curso/entities/unidad.entity';
-import { IPregunta } from '../interfaces/pregunta.interface';
 import { AuditFields } from 'src/common/clases/audit-fields.class';
-import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
+import { IPregunta } from '../../interfaces/pregunta.interface';
 import { IdInterface } from 'src/common/interfaces/id.interface';
+import { TipoPregunta } from 'src/common/enums';
+import { Prop } from '@nestjs/mongoose';
+import { Opcion, OpcionSchema } from '../../entities/opcion.entity';
+import { Modulo } from 'src/modules/curso/entities/modulo.entity';
+import { Types } from 'mongoose';
+import { Unidad } from 'src/modules/curso/entities/unidad.entity';
 
 // #region Pregunta
 @ObjectType()
-@Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
-export class Pregunta extends AuditFields implements IPregunta, IdInterface {
+export class Preguntas extends AuditFields implements IPregunta, IdInterface {
   @Field(() => ID)
   _id: Types.ObjectId;
 
@@ -41,9 +39,3 @@ export class Pregunta extends AuditFields implements IPregunta, IdInterface {
   @Prop({ default: false })
   deleted: boolean;
 }
-
-export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);
-
-PreguntaSchema.index({ deleted: 1 });
-
-addSoftDeleteMiddleware<Pregunta, Pregunta>(PreguntaSchema);

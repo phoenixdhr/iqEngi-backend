@@ -16,12 +16,17 @@ import { PaginationArgs } from 'src/common/dtos';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { PreguntaServiceCopy } from '../services/preguntaCOPY.service';
+import { CuestionarioService } from '../services/cuestionario.service';
+import { Preguntas } from '../dtos/pregunta-dtos/preguntas.output';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 // implements IBaseResolver<Pregunta, UpdatePreguntaInput, CreatePreguntaInput>
 export class PreguntaResolverCopy {
-  constructor(private readonly preguntaServiceCopy: PreguntaServiceCopy) {}
+  constructor(
+    private readonly preguntaServiceCopy: PreguntaServiceCopy,
+    private readonly cuestionarioService: CuestionarioService,
+  ) {}
 
   //#region create
   /**
@@ -33,166 +38,118 @@ export class PreguntaResolverCopy {
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Pregunta, { name: 'createPregunta_____COPYInput' })
+  @Mutation(() => Pregunta, { name: 'Pregunta_create' })
   @RolesDec(...administradorUp)
   async create(
-    @Args('docId', { type: () => ID }, IdPipe) docId: Types.ObjectId,
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
     @Args('createPreguntaInput') createPreguntaInput: CreatePreguntaInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Pregunta> {
     const userId = new Types.ObjectId(user._id);
-    return this.preguntaServiceCopy.create(docId, createPreguntaInput, userId);
+    return this.preguntaServiceCopy.pushToArray(
+      idCuestionario,
+      userId,
+      createPreguntaInput,
+    );
   }
   //#endregion
 
-  // //#region find
-  // /**
-  //  * Obtiene todas las preguntas con opciones de paginación.
-  //  *
-  //  * @param pagination - Opcional. Opciones de paginación.
-  //  * @returns Un array de preguntas.
-  //  *
-  //  * @Roles: ADMINISTRADOR, SUPERADMIN
-  //  */
-  // @Query(() => [Pregunta], { name: 'Preguntas' })
-  // @RolesDec(...administradorUp)
-  // async findAll(@Args() pagination?: PaginationArgs): Promise<Pregunta[]> {
-  //   return this.preguntaService.findAll(pagination);
-  // }
+  @Query(() => Pregunta, { name: 'Pregunta' })
+  @RolesDec(...administradorUp)
+  async findById(
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
+    @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
+  ): Promise<Pregunta> {
+    return this.preguntaServiceCopy.findById(idCuestionario, idPregunta);
+  }
 
-  // /**
-  //  * Obtiene una pregunta específica por su ID.
-  //  *
-  //  * @param id - ID único de la pregunta.
-  //  * @returns La pregunta encontrada.
-  //  *
-  //  * @Roles: ADMINISTRADOR, SUPERADMIN
-  //  */
-  // @Query(() => Pregunta, { name: 'Pregunta' })
-  // @RolesDec(...administradorUp)
-  // async findById(
-  //   @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
-  // ): Promise<Pregunta> {
-  //   return this.preguntaService.findById(id);
-  // }
-  // //#endregion
+  @Query(() => [Pregunta], { name: 'Preguntas' })
+  @RolesDec(...administradorUp)
+  async findAll(
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
+  ): Promise<Pregunta[]> {
+    return (await this.cuestionarioService.findById(idCuestionario)).preguntas;
+  }
 
-  // //#region update
-  // /**
-  //  * Actualiza una pregunta existente por su ID.
-  //  *
-  //  * @param id - ID de la pregunta a actualizar.
-  //  * @param updatePreguntaInput - Datos para actualizar la pregunta.
-  //  * @param user - Usuario autenticado que realiza la actualización.
-  //  * @returns La pregunta actualizada.
-  //  *
-  //  * @Roles: ADMINISTRADOR, SUPERADMIN
-  //  */
-  // @Mutation(() => Pregunta, { name: 'Pregunta_update' })
-  // @RolesDec(...administradorUp)
-  // async update(
-  //   @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
-  //   @Args('updatePreguntaInput') updatePreguntaInput: UpdatePreguntaInput,
-  //   @CurrentUser() user: UserRequest,
-  // ): Promise<Pregunta> {
-  //   const idUpdatedBy = new Types.ObjectId(user._id);
-  //   return this.preguntaService.update(id, updatePreguntaInput, idUpdatedBy);
-  // }
-  // //#endregion
 
-  // //#region delete
-  // /**
-  //  * Elimina lógicamente una pregunta por su ID.
-  //  *
-  //  * @param idRemove - ID de la pregunta a eliminar.
-  //  * @param user - Usuario autenticado que realiza la eliminación.
-  //  * @returns La pregunta eliminada lógicamente.
-  //  *
-  //  * @Roles: ADMINISTRADOR, SUPERADMIN
-  //  */
-  // @Mutation(() => Pregunta, { name: 'Pregunta_softDelete' })
-  // @RolesDec(...administradorUp)
-  // async softDelete(
-  //   @Args('idRemove', { type: () => ID }, IdPipe) idRemove: Types.ObjectId,
-  //   @CurrentUser() user: UserRequest,
-  // ): Promise<Pregunta> {
-  //   const idThanos = new Types.ObjectId(user._id);
-  //   return this.preguntaService.softDelete(idRemove, idThanos);
-  // }
 
-  // /**
-  //  * Elimina permanentemente una pregunta por su ID.
-  //  *
-  //  * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
-  //  *
-  //  * @param id - ID de la pregunta a eliminar permanentemente.
-  //  * @returns La pregunta eliminada definitivamente.
-  //  *
-  //  * @Roles: SUPERADMIN
-  //  */
-  // @Mutation(() => Pregunta, { name: 'Pregunta_hardDelete' })
-  // @RolesDec(RolEnum.SUPERADMIN)
-  // async hardDelete(
-  //   @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
-  // ): Promise<Pregunta> {
-  //   return this.preguntaService.hardDelete(id);
-  // }
+  @Mutation(() => Pregunta, { name: 'Pregunta_update' })
+  @RolesDec(...administradorUp)
+  async update(
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
+    @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
 
-  // /**
-  //  * Elimina permanentemente todas las preguntas que han sido eliminadas lógicamente.
-  //  *
-  //  * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
-  //  *
-  //  * @returns Un objeto que contiene el conteo de preguntas eliminadas.
-  //  *
-  //  * @Roles: SUPERADMIN
-  //  */
-  // @Mutation(() => DeletedCountOutput, {
-  //   name: 'Pregunta_hardDeleteAllSoftDeleted',
-  // })
-  // @RolesDec(RolEnum.SUPERADMIN)
-  // async hardDeleteAllSoftDeleted(): Promise<DeletedCountOutput> {
-  //   return this.preguntaService.hardDeleteAllSoftDeleted();
-  // }
-  // //#endregion
+    @Args('updatePreguntaInput') updatePreguntaInput: UpdatePreguntaInput,
+    @CurrentUser() user: UserRequest,
+  ): Promise<Pregunta> {
+    const idUpdatedBy = new Types.ObjectId(user._id);
+    return this.preguntaServiceCopy.updateInArray(
+      idCuestionario,
+      idPregunta,
+      idUpdatedBy,
+      updatePreguntaInput,
+    );
+  }
 
-  // //#region restore
-  // /**
-  //  * Obtiene todas las preguntas que han sido eliminadas lógicamente.
-  //  *
-  //  * @param pagination - Opcional. Opciones de paginación.
-  //  * @returns Un array de preguntas eliminadas lógicamente.
-  //  *
-  //  * @Roles: ADMINISTRADOR, SUPERADMIN
-  //  */
-  // @Query(() => [Pregunta], {
-  //   name: 'Pregunta_findSoftDeleted',
-  // })
-  // @RolesDec(...administradorUp)
-  // async findSoftDeleted(
-  //   @Args({ type: () => PaginationArgs, nullable: true })
-  //   pagination?: PaginationArgs,
-  // ): Promise<Pregunta[]> {
-  //   return this.preguntaService.findSoftDeleted(pagination);
-  // }
 
-  // /**
-  //  * Restaura una pregunta que ha sido eliminada lógicamente.
-  //  *
-  //  * @param idRestore - ID de la pregunta a restaurar.
-  //  * @param user - Usuario autenticado que realiza la restauración.
-  //  * @returns La pregunta restaurada.
-  //  *
-  //  * @Roles: ADMINISTRADOR, SUPERADMIN
-  //  */
-  // @Mutation(() => Pregunta, { name: 'Pregunta_restore' })
-  // @RolesDec(...administradorUp)
-  // async restore(
-  //   @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
-  //   @CurrentUser() user: UserRequest,
-  // ): Promise<Pregunta> {
-  //   const userId = new Types.ObjectId(user._id);
-  //   return this.preguntaService.restore(idRestore, userId);
-  // }
-  // //#endregion
+  @Mutation(() => Pregunta, { name: 'Pregunta_softDelete' })
+  @RolesDec(...administradorUp)
+  async softDelete(
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
+    @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
+    @CurrentUser() user: UserRequest,
+  ): Promise<Pregunta> {
+    const idThanos = new Types.ObjectId(user._id);
+    return this.preguntaServiceCopy.softDelete(
+      idCuestionario,
+      idPregunta,
+      idThanos,
+    );
+  }
+
+
+  @Mutation(() => Pregunta, { name: 'Pregunta_restore' })
+  @RolesDec(...administradorUp)
+  async restore(
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
+    @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
+    @CurrentUser() user: UserRequest,
+  ): Promise<Pregunta> {
+    const idUser = new Types.ObjectId(user._id);
+    return this.preguntaServiceCopy.restore(idCuestionario, idPregunta, idUser);
+  }
+
+  @Query(() => [Pregunta], { name: 'Pregunta_findSoftDeleted' })
+  @RolesDec(...administradorUp)
+  async findSoftDeleted(
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
+  ): Promise<Pregunta[]> {
+    return this.preguntaServiceCopy.findSoftDeleted(idCuestionario);
+  }
+
+  @Mutation(() => Pregunta, { name: 'Pregunta_hardDelete' })
+  @RolesDec(RolEnum.SUPERADMIN)
+  async hardDelete(
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
+    @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
+  ): Promise<Pregunta> {
+    return this.preguntaServiceCopy.pullIfDeleted(idCuestionario, idPregunta);
+  }
+
+  @Mutation(() => [Pregunta], { name: 'Pregunta_hardDeleteAllSoftDeleted' })
+  @RolesDec(RolEnum.SUPERADMIN)
+  async hardDeleteAllSoftDeleted(
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
+  ): Promise<Pregunta[]> {
+    return this.preguntaServiceCopy.pullAllDeleted(idCuestionario);
+  }
 }

@@ -58,7 +58,7 @@ export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
    * @param user  usuario que realiza la actualización.
    * @returns La entidad actualizada.
    */
-  update(
+  update?(
     id: Types.ObjectId,
     updateInput: UpdateInput,
     user: UserRequest,

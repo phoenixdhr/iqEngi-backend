@@ -7,7 +7,7 @@ export class CreateMaterialInput implements IMaterialInput {
   @Field()
   @IsNotEmpty()
   @IsString()
-  titulo: string;
+  materialTitle: string;
 
   @Field({ nullable: true })
   @IsOptional()

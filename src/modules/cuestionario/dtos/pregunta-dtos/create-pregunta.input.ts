@@ -4,21 +4,17 @@ import {
   IsString,
   IsEnum,
   IsOptional,
-  ValidateNested,
-  IsArray,
   IsMongoId,
 } from 'class-validator';
 import { TipoPregunta } from 'src/common/enums/tipo-pregunta.enum';
-import { Type } from 'class-transformer';
-import { CreateOpcionInput } from '../opcion-dtos/create-opcion.input';
+
 import { Types } from 'mongoose';
 import { IPreguntaInput } from '../../interfaces/pregunta.interface';
 
 @InputType()
 export class CreatePreguntaInput implements IPreguntaInput {
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
-  @IsString()
   enunciado: string;
 
   @Field(() => TipoPregunta)
@@ -26,12 +22,12 @@ export class CreatePreguntaInput implements IPreguntaInput {
   @IsEnum(TipoPregunta)
   tipoPregunta: TipoPregunta;
 
-  @Field(() => [CreateOpcionInput], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateOpcionInput)
-  opciones?: CreateOpcionInput[];
+  // @Field(() => [CreateOpcionInput], { nullable: true })
+  // @IsOptional()
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // @Type(() => CreateOpcionInput)
+  // opciones?: CreateOpcionInput[];
 
   @Field(() => ID, { nullable: true })
   @IsOptional()
