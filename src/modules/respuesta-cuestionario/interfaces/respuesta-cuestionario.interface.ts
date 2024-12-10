@@ -8,9 +8,9 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 
 export interface IRespuestaCuestionario extends IdInterface {
   _id: Types.ObjectId;
-  usuarioId: Types.ObjectId;
+  usuarioId?: Types.ObjectId;
   cursoId: Types.ObjectId;
-  cuestionarioId: Types.ObjectId;
+  cuestionarioId?: Types.ObjectId;
   respuestas: IRespuestaPregunta[];
   fecha: Date;
   nota?: number;
@@ -21,5 +21,5 @@ export type IRespuestaCuestionarioInput = Omit<
   IRespuestaCuestionario,
   'fecha' | '_id' | 'respuestas'
 > & {
-  respuestas: CreateRespuestaPreguntaInput[];
+  respuestas?: CreateRespuestaPreguntaInput[];
 };

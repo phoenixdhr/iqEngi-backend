@@ -32,7 +32,7 @@ export class CursoCompradoService extends BaseService<
   ): Promise<CursoComprado> {
     const idCurso = new Types.ObjectId(createCursoCompradoInput.cursoId);
 
-    const curso = await this.cursoService.findOne(idCurso);
+    const curso = await this.cursoService.findById(idCurso);
 
     if (!curso) {
       throw new NotFoundException('El curso no existe');

@@ -4,7 +4,7 @@
 
 type Categoria {
   _id: ID!
-  nombre: String!
+  nombreCategoria: String!
   descripcion: String
   deleted: Boolean!
 }
@@ -202,9 +202,21 @@ enum EstadoAccesoCurso {
 
 type RespuestaPregunta {
   _id: ID!
-  preguntaId: Pregunta!
+  preguntaId: ID!
   opcionIds: [Opcion!]
   respuestaAbierta: String
+  deleted: Boolean!
+}
+
+type RespuestaCuestionario {
+  _id: ID!
+  usuarioId: ID!
+  cursoId: ID!
+  cuestionarioId: ID!
+  respuestas: [RespuestaPregunta!]
+  fecha: DateTime!
+  nota: Float
+  estado: String!
   deleted: Boolean!
 }
 
@@ -268,15 +280,25 @@ type Query {
   Curso_findAllByTitle(search: String, offset: Int = 0, limit: Int = 10): [Curso!]!
   Curso(id: ID!): Curso!
   Curso_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Curso!]!
+  RespuestaCuestionarios(offset: Int = 0, limit: Int = 10): [RespuestaCuestionario!]!
+  RespuestaCuestionario(id: ID!): RespuestaCuestionario!
+  RespuestaCuestionario_byCursoID(cursoId: ID!): [RespuestaCuestionario!]!
+  RespuestaCuestionario_byUsuarioId(usuarioId: ID!): [RespuestaCuestionario!]!
+  RespuestaCuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [RespuestaCuestionario!]!
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
   Cuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
-  Opcions(offset: Int = 0, limit: Int = 10): [Opcion!]!
-  Opcion(id: ID!): Opcion!
-  Opcion_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Opcion!]!
+  Opcion(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
+  Opciones(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
+  Opcion_findSoftDeleted(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
   Pregunta(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Preguntas(idCuestionario: ID!): [Pregunta!]!
   Pregunta_findSoftDeleted(idCuestionario: ID!): [Pregunta!]!
+  CursoComprados(offset: Int = 0, limit: Int = 10): [CursoComprado!]!
+  CursoComprado(id: ID!): CursoComprado!
+  CursoComprado_findSoftDeleted(offset: Int = 0, limit: Int = 10): [CursoComprado!]!
+  CursoCompradoes_PorCurso(cursoId: ID!): [CursoComprado!]!
+  CursoCompradoes_PorUsuario(usuarioId: ID!): [CursoComprado!]!
   Calificaciones(offset: Int = 0, limit: Int = 10): [Calificacion!]!
   Calificacion(id: ID!): Calificacion!
   Calificacion_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Calificacion!]!
@@ -287,11 +309,10 @@ type Query {
   Categorias_findAllByNombre(search: String, offset: Int = 0, limit: Int = 10): [Categoria!]!
   Categoria(id: ID!): Categoria!
   Categorias_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Categoria!]!
-  CursoComprados(offset: Int = 0, limit: Int = 10): [CursoComprado!]!
-  CursoComprado(id: ID!): CursoComprado!
-  CursoComprado_findSoftDeleted(offset: Int = 0, limit: Int = 10): [CursoComprado!]!
-  CursoCompradoes_PorCurso(cursoId: ID!): [CursoComprado!]!
-  CursoCompradoes_PorUsuario(usuarioId: ID!): [CursoComprado!]!
+  Instructores(offset: Int = 0, limit: Int = 10): [Instructor!]!
+  Instructor_findAllByNombre(search: String, offset: Int = 0, limit: Int = 10): [Instructor!]!
+  Instructor(id: ID!): Instructor!
+  Instructor_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Instructor!]!
 }
 
 input RolesInput {
@@ -324,24 +345,35 @@ type Mutation {
   Curso_hardDelete(id: ID!): Curso!
   Curso_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Curso_restore(idRestore: ID!): Curso!
+  RespuestaCuestionario_create(createCuestionarioInput: CreateRespuestaCuestionarioInput!): RespuestaCuestionario!
+  RespuestaCuestionario_update(id: ID!, updateCuestionarioInput: UpdateRespuestaCuestionarioInput!): RespuestaCuestionario!
+  RespuestaCuestionario_softDelete(idRemove: ID!): RespuestaCuestionario!
+  RespuestaCuestionario_hardDelete(id: ID!): RespuestaCuestionario!
+  RespuestaCuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
+  RespuestaCuestionario_restore(idRestore: ID!): RespuestaCuestionario!
   Cuestionario_create(createCuestionarioInput: CreateCuestionarioInput!): Cuestionario!
   Cuestionario_update(id: ID!, updateCuestionarioInput: UpdateCuestionarioInput!): Cuestionario!
   Cuestionario_softDelete(idRemove: ID!): Cuestionario!
   Cuestionario_hardDelete(id: ID!): Cuestionario!
   Cuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Cuestionario_restore(idRestore: ID!): Cuestionario!
-  Opcion_create(createOpcionInput: CreateOpcionInput!): Opcion!
-  Opcion_update(id: ID!, updateOpcionInput: UpdateOpcionInput!): Opcion!
-  Opcion_softDelete(idRemove: ID!): Opcion!
-  Opcion_hardDelete(id: ID!): Opcion!
-  Opcion_hardDeleteAllSoftDeleted: DeletedCountOutput!
-  Opcion_restore(idRestore: ID!): Opcion!
+  Opcion_create(idCuestionario: ID!, idPregunta: ID!, createOpcionInput: CreateOpcionInput!): Opcion!
+  Opcion_update(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!, updateOpcionInput: UpdateOpcionInput!): Opcion!
+  Opcion_softDelete(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
+  Opcion_restore(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
+  Opcion_hardDelete(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
+  Opcion_hardDeleteAllSoftDeleted(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
   Pregunta_create(idCuestionario: ID!, createPreguntaInput: CreatePreguntaInput!): Pregunta!
   Pregunta_update(idCuestionario: ID!, idPregunta: ID!, updatePreguntaInput: UpdatePreguntaInput!): Pregunta!
   Pregunta_softDelete(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Pregunta_restore(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Pregunta_hardDelete(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Pregunta_hardDeleteAllSoftDeleted(idCuestionario: ID!): [Pregunta!]!
+  CursoComprado_create(createCursoCompradoInput: CreateCursoComprado_userInput!): CursoComprado!
+  CursoComprado_softDelete(idRemove: ID!): CursoComprado!
+  CursoComprado_hardDelete(id: ID!): CursoComprado!
+  CursoComprado_hardDeleteAllSoftDeleted: DeletedCountOutput!
+  CursoComprado_restore(idRestore: ID!): CursoComprado!
   Calificacion_create(createCalificacionInput: CreateCalificacion_userInput!): Calificacion!
   Calificacion_update(id: ID!, updateCalificacionInput: UpdateCalificacionInput!): Calificacion!
   Calificacion_softDelete(idRemove: ID!): Calificacion!
@@ -354,11 +386,12 @@ type Mutation {
   Categorias_hardDelete(id: ID!): Categoria!
   Categorias_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Categorias_restore(idRestore: ID!): Categoria!
-  CursoComprado_create(createCursoCompradoInput: CreateCursoComprado_userInput!): CursoComprado!
-  CursoComprado_softDelete(idRemove: ID!): CursoComprado!
-  CursoComprado_hardDelete(id: ID!): CursoComprado!
-  CursoComprado_hardDeleteAllSoftDeleted: DeletedCountOutput!
-  CursoComprado_restore(idRestore: ID!): CursoComprado!
+  Instructor_create(createInstructorInput: CreateInstructorInput!): Instructor!
+  Instructor_update(id: ID!, updateInstructorInput: UpdateInstructorInput!): Instructor!
+  Instructor_softDelete(idRemove: ID!): Instructor!
+  Instructor_hardDelete(id: ID!): Instructor!
+  Instructor_hardDeleteAllSoftDeleted: DeletedCountOutput!
+  Instructor_restore(idRestore: ID!): Instructor!
 }
 
 input CreateUsuarioInput {
@@ -457,6 +490,38 @@ input UpdateCursoInput {
   cuestionarioId: ID
 }
 
+input CreateRespuestaCuestionarioInput {
+  usuarioId: ID
+  cursoId: ID!
+  cuestionarioId: ID
+  respuestas: [CreateRespuestaPreguntaInput!]
+  nota: Float
+  estado: EstadoCuestionario = En_progreso
+}
+
+input CreateRespuestaPreguntaInput {
+  preguntaId: ID!
+  opcionIds: [ID!]
+  respuestaAbierta: String
+}
+
+"""Estados de un cuestionario"""
+enum EstadoCuestionario {
+  Aprobado
+  Desaprobado
+  En_progreso
+  Sin_empezar
+}
+
+input UpdateRespuestaCuestionarioInput {
+  usuarioId: ID
+  cursoId: ID
+  cuestionarioId: ID
+  respuestas: [CreateRespuestaPreguntaInput!]
+  nota: Float
+  estado: EstadoCuestionario = En_progreso
+}
+
 input CreateCuestionarioInput {
   cursoId: ID!
   cuestionarioTitle: String
@@ -496,6 +561,10 @@ input UpdatePreguntaInput {
   unidadId: ID
 }
 
+input CreateCursoComprado_userInput {
+  cursoId: ID!
+}
+
 input CreateCalificacion_userInput {
   cursoId: ID!
   valor: Int!
@@ -509,15 +578,27 @@ input UpdateCalificacionInput {
 }
 
 input CreateCategoriaInput {
-  nombre: String!
+  nombreCategoria: String!
   descripcion: String
 }
 
 input UpdateCategoriaInput {
-  nombre: String
+  nombreCategoria: String
   descripcion: String
 }
 
-input CreateCursoComprado_userInput {
-  cursoId: ID!
+input CreateInstructorInput {
+  firstName: String!
+  lastName: String!
+  profesion: String
+  especializacion: [String!]
+  pais: String
+}
+
+input UpdateInstructorInput {
+  firstName: String
+  lastName: String
+  profesion: String
+  especializacion: [String!]
+  pais: String
 }

@@ -1,5 +1,4 @@
 import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
 import { Cuestionario } from '../entities/cuestionario.entity';
 import { UpdateCuestionarioInput } from '../dtos/cuestionario-dtos/update-cuestionario.input';
 import { CreateCuestionarioInput } from '../dtos/cuestionario-dtos/create-cuestionario.input';
@@ -15,12 +14,13 @@ import { Types } from 'mongoose';
 import { PaginationArgs } from 'src/common/dtos';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
+import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CuestionarioResolver
   implements
-    IBaseResolver<
+    IResolverBase<
       Cuestionario,
       UpdateCuestionarioInput,
       CreateCuestionarioInput
@@ -29,10 +29,10 @@ export class CuestionarioResolver
   constructor(private readonly cuestionarioService: CuestionarioService) {}
 
   /**
-   * Crea un nuevo cuestionario.
+   * Crea un nuevo cuestionario y lo asocia a un curso específico.
    *
    * @param createCuestionarioInput Datos necesarios para crear el cuestionario.
-   * @param user Usuario autenticado que realiza la creación.
+   * @param user Usuario autenticado que realiza la operación.
    * @returns El cuestionario creado.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
@@ -49,10 +49,10 @@ export class CuestionarioResolver
   }
 
   /**
-   * Obtiene todos los cuestionarios con opciones de paginación.
+   * Obtiene todos los cuestionarios, con soporte opcional para paginación.
    *
-   * @param pagination Opcional. Opciones de paginación.
-   * @returns Un array de cuestionarios.
+   * @param pagination Opciones de paginación (opcional).
+   * @returns Una lista de cuestionarios.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -62,27 +62,10 @@ export class CuestionarioResolver
     return this.cuestionarioService.findAll(pagination);
   }
 
-  // /**
-  //  * Obtiene todos los Cuestionarios con opciones de paginación y búsqueda.
-  //  * @param searchArgs Objeto que contiene un campo "serch" (texto que se usara para realizar busquedas).
-  //  * @param pagination Opciones de paginación.
-  //  * @returns Un array de Cuestionarios.
-  //  *
-  //  * @Roles: ADMINISTRADOR, SUPERADMIN
-  //  */
-  // @Query(() => [Cuestionario], { name: 'Cuestionario_findAllByTitle' })
-  // @RolesDec(...administradorUp)
-  // async findAllByTitle(
-  //   @Args() searchArgs: SearchTextArgs,
-  //   @Args() pagination?: PaginationArgs,
-  // ): Promise<Cuestionario[]> {
-  //   return this.cuestionarioService.findAllByTitle(searchArgs, pagination);
-  // }
-
   /**
-   * Obtiene un cuestionario específico por su ID.
+   * Obtiene un cuestionario por su ID único.
    *
-   * @param id ID único del cuestionario.
+   * @param id ID del cuestionario a buscar.
    * @returns El cuestionario encontrado.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
@@ -96,10 +79,10 @@ export class CuestionarioResolver
   }
 
   /**
-   * Actualiza un cuestionario existente por su ID.
+   * Actualiza los datos de un cuestionario existente.
    *
    * @param id ID del cuestionario a actualizar.
-   * @param updateCuestionarioInput Datos para actualizar el cuestionario.
+   * @param updateCuestionarioInput Datos actualizados del cuestionario.
    * @param user Usuario autenticado que realiza la actualización.
    * @returns El cuestionario actualizado.
    *
@@ -122,7 +105,7 @@ export class CuestionarioResolver
   }
 
   /**
-   * Elimina lógicamente un cuestionario por su ID.
+   * Realiza una eliminación lógica de un cuestionario, marcándolo como eliminado.
    *
    * @param idRemove ID del cuestionario a eliminar.
    * @param user Usuario autenticado que realiza la eliminación.
@@ -143,10 +126,10 @@ export class CuestionarioResolver
   /**
    * Elimina permanentemente un cuestionario por su ID.
    *
-   * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
+   * Este método solo está disponible para usuarios con el rol SUPERADMIN.
    *
-   * @param id ID del cuestionario a eliminar permanentemente.
-   * @returns El cuestionario eliminado definitivamente.
+   * @param id ID del cuestionario a eliminar definitivamente.
+   * @returns El cuestionario eliminado de forma permanente.
    *
    * @Roles: SUPERADMIN
    */
@@ -159,11 +142,11 @@ export class CuestionarioResolver
   }
 
   /**
-   * Elimina permanentemente todos los cuestionarios que han sido eliminados lógicamente.
+   * Elimina de forma permanente todos los cuestionarios marcados como eliminados lógicamente.
    *
-   * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
+   * Este método solo puede ser ejecutado por usuarios con el rol SUPERADMIN.
    *
-   * @returns Un objeto que contiene el conteo de cuestionarios eliminados.
+   * @returns Un objeto con el conteo de los cuestionarios eliminados.
    *
    * @Roles: SUPERADMIN
    */
@@ -176,10 +159,10 @@ export class CuestionarioResolver
   }
 
   /**
-   * Obtiene todos los cuestionarios que han sido eliminados lógicamente.
+   * Obtiene una lista de cuestionarios eliminados lógicamente.
    *
-   * @param pagination Opcional. Opciones de paginación.
-   * @returns Un array de cuestionarios eliminados lógicamente.
+   * @param pagination Opciones de paginación (opcional).
+   * @returns Una lista de cuestionarios marcados como eliminados.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -195,7 +178,7 @@ export class CuestionarioResolver
   }
 
   /**
-   * Restaura un cuestionario que ha sido eliminado lógicamente.
+   * Restaura un cuestionario previamente eliminado lógicamente.
    *
    * @param idRestore ID del cuestionario a restaurar.
    * @param user Usuario autenticado que realiza la restauración.

@@ -18,5 +18,6 @@ import { CursoModule } from '../curso/curso.module';
   ],
   providers: [CursoCompradoService, CursoCompradoResolver],
   controllers: [CursoCompradoController],
+  exports: [CursoCompradoService],
 })
 export class CursoCompradoModule {}

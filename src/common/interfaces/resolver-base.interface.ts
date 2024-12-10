@@ -12,7 +12,7 @@ import { Types } from 'mongoose';
  * @template CreateInput - Tipo del DTO para crear una entidad.
  * @template UpdateInput - Tipo del DTO para actualizar una entidad.
  */
-export interface IBaseResolver<OutputDocument, CreateInput, UpdateInput> {
+export interface IResolverBase<OutputDocument, CreateInput, UpdateInput> {
   /**
    * Crea una nueva entidad.
    * @param createInput Datos para crear la entidad.

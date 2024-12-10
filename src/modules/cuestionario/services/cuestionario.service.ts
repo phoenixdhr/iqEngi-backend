@@ -16,21 +16,22 @@ export class CuestionarioService extends BaseService<
 > {
   constructor(
     @InjectModel(Cuestionario.name)
-    private readonly cuestionarioModel: Model<Cuestionario>, // Renombrado para mayor claridad
-    private readonly cursoService: CursoService,
+    private readonly cuestionarioModel: Model<Cuestionario>, // Modelo Mongoose para gestionar los datos de Cuestionario en la base de datos.
+    private readonly cursoService: CursoService, // Servicio para interactuar con la entidad Curso.
   ) {
-    super(cuestionarioModel);
+    super(cuestionarioModel); // Inicialización del servicio base con el modelo Cuestionario.
   }
 
   /**
-   * Crea un nuevo cuestionario.
+   * Crea un nuevo cuestionario asociado a un curso.
    *
-   * Antes de crear un cuestionario, verifica si ya existe uno asociado al curso.
-   * Si ya existe, lanza un error para evitar duplicados.
+   * Este método verifica si ya existe un cuestionario asociado al curso
+   * especificado. Si es así, lanza un error para evitar duplicados. Luego,
+   * crea el cuestionario y actualiza la referencia en el curso correspondiente.
    *
-   * @param createCuestionarioInput Datos necesarios para crear el cuestionario.
-   * @param userid ID del usuario que está creando el cuestionario.
-   * @returns El cuestionario creado.
+   * @param createCuestionarioInput Objeto con los datos necesarios para crear un cuestionario.
+   * @param userid ID del usuario que realiza la operación.
+   * @returns El cuestionario recién creado.
    */
   async create(
     createCuestionarioInput: CreateCuestionarioInput,
@@ -38,26 +39,25 @@ export class CuestionarioService extends BaseService<
   ): Promise<Cuestionario> {
     const cursoIdAsigned = new Types.ObjectId(createCuestionarioInput.cursoId);
 
-    // Verificar si ya existe un cuestionario para el curso
+    // Verifica si ya existe un cuestionario para el curso proporcionado.
     const existingCuestionario = await this.cuestionarioModel.findOne({
       cursoId: cursoIdAsigned,
     });
 
     if (existingCuestionario) {
       throw new Error(
-        // en español
-        `A cuestionario already exists for cursoId: ${cursoIdAsigned}, ID del Cuestionario que ya existe para dicho curso es : ${existingCuestionario._id}`,
+        `Ya existe un cuestionario asociado al curso con ID: ${cursoIdAsigned}. ` +
+          `El ID del cuestionario existente es: ${existingCuestionario._id}.`,
       );
     }
 
-    // Crear el nuevo cuestionario
+    // Crea un nuevo cuestionario utilizando el método del servicio base.
     const newCuestionario = await super.create(
       { ...createCuestionarioInput, cursoId: cursoIdAsigned },
       userid,
     );
 
-    // Actualizar el curso relacionado con el cuestionario
-
+    // Actualiza el curso relacionado para establecer la referencia al nuevo cuestionario.
     const dtoUpdateCurso = {
       cuestionarioId: new Types.ObjectId(newCuestionario._id),
     } as UpdateCursoInput;
@@ -67,11 +67,22 @@ export class CuestionarioService extends BaseService<
     return newCuestionario;
   }
 
+  /**
+   * Busca un cuestionario por su ID, incluyendo documentos relacionados.
+   *
+   * Este método utiliza un método base para obtener un cuestionario por su ID,
+   * incluyendo subdocumentos relacionados, como las preguntas, sin filtrar
+   * por estado (activo o inactivo).
+   *
+   * @param cuestionarioId ID del cuestionario a buscar.
+   * @returns El cuestionario encontrado, incluyendo sus subdocumentos.
+   */
   async findById(cuestionarioId: Types.ObjectId): Promise<Cuestionario> {
-    const cuestionario = super.findById_WithSubDocuments_ActiveOrInactive(
+    const cuestionario = super.findById_WithNestedSubDocuments_ActiveOrInactive(
       cuestionarioId,
-      'preguntas',
-      false,
+      'preguntas', // Subdocumento relacionado que se desea incluir.
+      'opciones', // Subdocumento relacionado que se desea incluir.
+      false, // No filtrar por estado (se incluyen cuestionarios activos e inactivos).
     );
 
     return cuestionario;

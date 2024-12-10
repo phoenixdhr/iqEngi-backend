@@ -34,7 +34,7 @@ export class CategoriaService extends BaseService<
   ): Promise<Categoria[]> {
     // Crea una instancia de `SearchField` especificando el campo de búsqueda como 'nombre'.
     const searchField: SearchField<Categoria> = new SearchField();
-    searchField.field = 'nombre';
+    searchField.field = 'nombreCategoria';
 
     // Llama al método `findAllBy` de la clase padre `BaseService` pasando los argumentos de búsqueda, el campo de búsqueda y los argumentos de paginación.
     return super.findAllBy(

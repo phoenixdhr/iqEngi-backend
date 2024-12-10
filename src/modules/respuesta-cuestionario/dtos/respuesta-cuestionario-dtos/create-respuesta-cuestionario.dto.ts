@@ -18,34 +18,37 @@ import { IRespuestaCuestionarioInput } from '../../interfaces/respuesta-cuestion
 export class CreateRespuestaCuestionarioInput
   implements IRespuestaCuestionarioInput
 {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   @IsNotEmpty()
   @IsMongoId()
-  usuarioId: Types.ObjectId;
+  @IsOptional()
+  usuarioId?: Types.ObjectId;
 
   @Field(() => ID)
   @IsNotEmpty()
   @IsMongoId()
   cursoId: Types.ObjectId;
 
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   @IsNotEmpty()
   @IsMongoId()
-  cuestionarioId: Types.ObjectId;
+  @IsOptional()
+  cuestionarioId?: Types.ObjectId;
 
-  @Field(() => [CreateRespuestaPreguntaInput])
-  @IsNotEmpty()
+  @Field(() => [CreateRespuestaPreguntaInput], { nullable: true })
+  // @IsNotEmpty()
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateRespuestaPreguntaInput)
-  respuestas: CreateRespuestaPreguntaInput[];
+  respuestas?: CreateRespuestaPreguntaInput[];
 
   @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
   nota?: number;
 
-  @Field(() => EstadoCuestionario)
+  @Field(() => EstadoCuestionario, { nullable: true })
   @IsEnum(EstadoCuestionario)
   @IsOptional()
   estado?: EstadoCuestionario = EstadoCuestionario.En_progreso;

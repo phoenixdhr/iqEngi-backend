@@ -9,7 +9,6 @@ import { CreateCalificacion_userInput } from '../dtos/create-calificacion-user.i
 import { UpdateCalificacionInput } from '../dtos/update-calificacion.input';
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
-import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
 import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
 import { administradorUp, RolEnum } from 'src/common/enums/rol.enum';
 import { PaginationArgs } from 'src/common/dtos/pagination.args';
@@ -19,6 +18,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
 import { Types } from 'mongoose';
+import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 
 /**
  * Resolver para manejar las operaciones de Calificación.
@@ -30,7 +30,7 @@ import { Types } from 'mongoose';
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CalificacionResolver
   implements
-    IBaseResolver<
+    IResolverBase<
       Calificacion,
       CreateCalificacion_userInput,
       UpdateCalificacionInput

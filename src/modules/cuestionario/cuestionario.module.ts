@@ -10,13 +10,11 @@ import {
 } from './entities/cuestionario.entity';
 import { Pregunta, PreguntaSchema } from './entities/pregunta.entity';
 import { Opcion, OpcionSchema } from './entities/opcion.entity';
-import { PreguntaService } from './services/pregunta.service';
 import { OpcionService } from './services/opcion.service';
 import { OpcionResolver } from './resolvers/opcion.resolver';
-import { PreguntaResolver } from './resolvers/pregunta.resolver';
 import { CursoModule } from '../curso/curso.module';
-import { PreguntaResolverCopy } from './resolvers/preguntaCOPY.resolver';
-import { PreguntaServiceCopy } from './services/preguntaCOPY.service';
+import { PreguntaService } from './services/pregunta.service';
+import { PreguntaResolver } from './resolvers/pregunta.resolver';
 
 @Module({
   imports: [
@@ -30,12 +28,10 @@ import { PreguntaServiceCopy } from './services/preguntaCOPY.service';
   providers: [
     CuestionarioService,
     CuestionarioResolver,
-    PreguntaService,
     OpcionService,
     OpcionResolver,
     PreguntaResolver,
-    PreguntaResolverCopy,
-    PreguntaServiceCopy,
+    PreguntaService,
   ],
   controllers: [CuestionarioController],
   exports: [CuestionarioService],

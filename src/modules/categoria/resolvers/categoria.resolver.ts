@@ -5,7 +5,6 @@ import { CategoriaService } from '../services/categoria.service';
 import { UseGuards } from '@nestjs/common';
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
-import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
 import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
@@ -16,12 +15,13 @@ import { Types } from 'mongoose';
 import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { UpdateCategoriaInput } from '../dtos/update-categoria.input';
 import { CreateCategoriaInput } from '../dtos/create-categoria.input';
+import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 @Resolver(() => Categoria)
 export class CategoriaResolver
   implements
-    IBaseResolver<Categoria, CreateCategoriaInput, UpdateCategoriaInput>
+    IResolverBase<Categoria, CreateCategoriaInput, UpdateCategoriaInput>
 {
   constructor(private readonly categoriaService: CategoriaService) {}
 

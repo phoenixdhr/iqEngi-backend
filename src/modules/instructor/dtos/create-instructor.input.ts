@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, OmitType } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsString,
@@ -9,7 +9,6 @@ import {
   Max,
 } from 'class-validator';
 import { IInstructorInput } from '../interfaces/instructor.interface';
-import { OmitType } from '@nestjs/swagger';
 
 @InputType()
 export class CreateInstructorDto implements IInstructorInput {
@@ -47,6 +46,7 @@ export class CreateInstructorDto implements IInstructorInput {
   pais?: string;
 }
 
+@InputType()
 export class CreateInstructorInput extends OmitType(CreateInstructorDto, [
   'calificacionPromedio',
 ]) {}

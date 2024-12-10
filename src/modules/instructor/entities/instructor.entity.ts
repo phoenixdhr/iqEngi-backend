@@ -45,5 +45,9 @@ export class Instructor extends AuditFields implements IInstructor {
 export const InstructorSchema = SchemaFactory.createForClass(Instructor);
 
 InstructorSchema.index({ deleted: 1 });
+InstructorSchema.index(
+  { firstName: 'text', lastName: 'text' },
+  { unique: true },
+);
 
 addSoftDeleteMiddleware<Instructor, Instructor>(InstructorSchema);

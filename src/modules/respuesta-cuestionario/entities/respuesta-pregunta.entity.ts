@@ -18,7 +18,7 @@ export class RespuestaPregunta
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Field(() => Pregunta)
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Pregunta.name, required: true })
   preguntaId: Types.ObjectId;
 

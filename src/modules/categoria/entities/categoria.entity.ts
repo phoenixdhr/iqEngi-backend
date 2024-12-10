@@ -14,7 +14,7 @@ export class Categoria extends AuditFields implements ICategoria {
 
   @Field()
   @Prop({ required: true, unique: true })
-  nombre: string;
+  nombreCategoria: string;
 
   @Field({ nullable: true })
   @Prop()

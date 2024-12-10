@@ -1,6 +1,5 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
 import { CursoComprado } from '../entities/curso-comprado.entity';
@@ -16,12 +15,13 @@ import { PaginationArgs } from 'src/common/dtos';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { CreateCursoCompradoInput } from '../dtos/create-curso-comprado.input';
+import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CursoCompradoResolver
   implements
-    IBaseResolver<
+    IResolverBase<
       CursoComprado,
       CreateCursoComprado_userInput,
       UpdateCursoCompradoInput

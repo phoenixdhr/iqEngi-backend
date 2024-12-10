@@ -7,7 +7,7 @@ export class CreateCategoriaInput implements ICategoriaInput {
   @Field()
   @IsNotEmpty()
   @IsString()
-  nombre: string;
+  nombreCategoria: string;
 
   @Field({ nullable: true })
   @IsOptional()

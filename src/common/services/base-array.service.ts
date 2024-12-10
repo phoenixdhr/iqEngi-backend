@@ -1,3 +1,598 @@
+// import { Model, Types, UpdateQuery } from 'mongoose';
+// import {
+//   InternalServerErrorException,
+//   NotFoundException,
+// } from '@nestjs/common';
+// import { IdInterface } from '../interfaces/id.interface';
+
+// export abstract class BaseArrayService<
+//   ModeloGeneral,
+//   Dto_Crear_SubModelo,
+//   Dto_Actualizar_SubmodeloInput,
+//   SubModelo extends IdInterface,
+// > {
+//   constructor(
+//     protected readonly modelo: Model<ModeloGeneral>,
+//     protected readonly subModelo: Model<SubModelo>,
+//   ) {}
+
+//   /**
+//    * Valida si el campo es un arreglo en el esquema y que sus elementos tengan _id.
+//    * @param nombreCampoArreglo - El nombre del campo que se va a validar.
+//    * @throws InternalServerErrorException si el campo no existe o no es un arreglo.
+//    */
+//   private validarCampoArreglo<CampoArregloGeneral extends keyof ModeloGeneral>(
+//     nombreCampoArreglo: CampoArregloGeneral,
+//   ): void {
+//     const rutaEsquema = this.modelo.schema.path(String(nombreCampoArreglo));
+
+//     if (!rutaEsquema) {
+//       throw new InternalServerErrorException(
+//         `El campo "${String(nombreCampoArreglo)}" no existe en el esquema.`,
+//       );
+//     }
+
+//     if (rutaEsquema.instance !== 'Array') {
+//       throw new InternalServerErrorException(
+//         `El campo "${String(nombreCampoArreglo)}" no es un arreglo.`,
+//       );
+//     }
+//   }
+
+//   //#region crear
+
+//   /**
+//    * Añade un elemento a un arreglo de cualquier documento.
+//    * @param idDocumento - ID del documento principal.
+//    * @param createdBy - ID del usuario que realiza la actualización.
+//    * @param dtoCrearSubModelo - Datos del submodelo a crear.
+//    * @param nombreCampoArreglo - Nombre del campo de tipo arreglo.
+//    * @returns El nuevo elemento añadido al arreglo.
+//    * @throws NotFoundException si no se encuentra el documento principal.
+//    */
+//   async pushToArray<K extends keyof ModeloGeneral>(
+//     idDocumento: Types.ObjectId,
+//     createdBy: Types.ObjectId,
+//     dtoCrearSubModelo: Dto_Crear_SubModelo,
+//     nombreCampoArreglo: K,
+//   ): Promise<SubModelo> {
+//     // Validar que el campo sea un arreglo y que sus elementos tengan _id
+//     this.validarCampoArreglo(nombreCampoArreglo);
+
+//     const nombreCampo = String(nombreCampoArreglo);
+
+//     // Definir la consulta de actualización con type assertion
+//     const actualizacion: UpdateQuery<ModeloGeneral> = {
+//       $push: {
+//         [nombreCampo]: dtoCrearSubModelo,
+//       },
+//     } as UpdateQuery<ModeloGeneral>;
+
+//     // Buscar y actualizar el documento
+//     const documentoActualizado = await this.modelo
+//       .findByIdAndUpdate(
+//         idDocumento,
+//         { ...actualizacion, createdBy: createdBy },
+//         { new: true },
+//       )
+//       .exec();
+
+//     if (!documentoActualizado) {
+//       throw new NotFoundException(
+//         `No se encontró el documento con ID "${idDocumento}"`,
+//       );
+//     }
+
+//     const arregloDocumentos = documentoActualizado[nombreCampo];
+//     const nuevoElemento = arregloDocumentos[arregloDocumentos.length - 1];
+
+//     return nuevoElemento;
+//   }
+
+//   //#endregion
+
+//   //#region encontrar
+
+//   /**
+//    * Recupera un documento por su ID y filtra un subdocumento y sus subsubdocumentos basado en el estado 'deleted'.
+//    *
+//    * @param id - El ID del documento principal.
+//    * @param subDocumentField - El nombre del campo de subdocumentos (arreglo) a filtrar. Ejemplo: 'preguntas'.
+//    * @param nestedSubDocumentField - El nombre del campo de subsubdocumentos dentro del subdocumento. Ejemplo: 'opciones'.
+//    * @param deleted - El estado 'deleted' por el cual filtrar los subdocumentos y subsubdocumentos (por defecto es false).
+//    *
+//    * @returns El documento principal con los subdocumentos y subsubdocumentos filtrados según el estado 'deleted'.
+//    *
+//    * @throws NotFoundException si el documento no existe.
+//    * @throws InternalServerErrorException si el subDocumentField o nestedSubDocumentField no existe en el esquema del modelo.
+//    */
+//   async findById_WithNestedSubDocuments_ActiveOrInactive(
+//     id: Types.ObjectId,
+//     subDocumentField: string, // El nombre del campo del subdocumento
+//     nestedSubDocumentField: string, // El nombre del campo del subsubdocumento
+//     deleted: boolean = false, // Estado 'deleted' para filtrar
+//   ): Promise<ModeloGeneral> {
+//     // Validar que el subDocumentField existe en el esquema del modelo
+//     if (!this.modelo.schema.paths[subDocumentField]) {
+//       throw new InternalServerErrorException(
+//         `El campo "${subDocumentField}" no existe en el esquema del modelo ${this.modelo.collection.name}`,
+//       );
+//     }
+
+//     // Consulta a MongoDB usando la operación de agregación
+//     const result = await this.modelo
+//       .aggregate([
+//         // Filtrar el documento principal por ID y estado 'deleted'
+//         { $match: { _id: id, deleted: false } },
+//         {
+//           // Filtrar los subdocumentos basado en el estado 'deleted'
+//           $addFields: {
+//             [subDocumentField]: {
+//               $filter: {
+//                 input: `$${subDocumentField}`, // Subdocumentos (por ejemplo, 'preguntas')
+//                 as: 'subDocument', // Alias para cada elemento en el arreglo
+//                 cond: { $eq: ['$$subDocument.deleted', deleted] }, // Condición de filtrado
+//               },
+//             },
+//           },
+//         },
+//         {
+//           // Filtrar los subsubdocumentos (por ejemplo, 'opciones') dentro de los subdocumentos
+//           $addFields: {
+//             [subDocumentField]: {
+//               $map: {
+//                 input: `$${subDocumentField}`, // Subdocumentos ya filtrados
+//                 as: 'subDocument', // Alias para cada subdocumento
+//                 in: {
+//                   $mergeObjects: [
+//                     '$$subDocument', // Conservar las propiedades existentes del subdocumento
+//                     {
+//                       [nestedSubDocumentField]: {
+//                         $filter: {
+//                           input: `$$subDocument.${nestedSubDocumentField}`, // Subsubdocumentos (por ejemplo, 'opciones')
+//                           as: 'nestedSubDocument', // Alias para cada subsubdocumento
+//                           cond: {
+//                             $eq: ['$$nestedSubDocument.deleted', deleted], // Condición de filtrado
+//                           },
+//                         },
+//                       },
+//                     },
+//                   ],
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       ])
+//       .exec()
+//       .then((results) => results[0]); // Obtener el primer (y único) resultado
+
+//     // Si no se encuentra el documento, lanzar una excepción
+//     if (!result) {
+//       throw new NotFoundException(
+//         `Documento ${this.modelo.collection.name} con ID "${id}" no encontrado`,
+//       );
+//     }
+
+//     // Retornar el documento filtrado
+//     return result as ModeloGeneral;
+//   }
+
+//   /**
+//    * Recupera un subdocumento específico por su ID dentro de un documento principal.
+//    * @param idModelo - ID del documento principal.
+//    * @param idSubModelo - ID del subdocumento a buscar.
+//    * @param nombreCampoArreglo - Nombre del campo de tipo arreglo.
+//    * @returns El subdocumento encontrado.
+//    * @throws NotFoundException si no se encuentra el documento o el subdocumento.
+//    */
+//   async findById(
+//     idModelo: Types.ObjectId,
+//     idSubModelo: Types.ObjectId,
+//     nombreCampoArreglo: keyof ModeloGeneral,
+//     nombreSubCampoNestedArreglo: keyof SubModelo,
+//   ): Promise<SubModelo> {
+//     // const documento: ModeloGeneral = await this.modelo.findById(idModelo);
+
+//     // if (!documento) {
+//     //   throw new NotFoundException(
+//     //     `Documento ${this.modelo.collection.name} con ID "${idModelo}" no encontrado`,
+//     //   );
+//     // }
+
+//     // this.validarCampoArreglo(nombreCampoArreglo);
+
+//     const documento =
+//       await this.findById_WithNestedSubDocuments_ActiveOrInactive(
+//         idModelo,
+//         String(nombreCampoArreglo),
+//         String(nombreSubCampoNestedArreglo),
+//       );
+
+//     const arregloSubDocumentos = documento[
+//       nombreCampoArreglo
+//     ] as unknown as SubModelo[];
+
+//     const subdocumento = arregloSubDocumentos.find(
+//       (subDoc) => String(subDoc._id) === String(idSubModelo),
+//     );
+
+//     if (!subdocumento) {
+//       throw new NotFoundException(
+//         `Subdocumento ${this.subModelo.collection.name} con ID "${idSubModelo}" no encontrado en el documento ${this.modelo.collection.name} con ID "${idModelo}"`,
+//       );
+//     }
+
+//     return subdocumento;
+//   }
+
+//   //#endregion
+
+//   //#region actualizar
+
+//   /**
+//    * Actualiza un elemento en el arreglo.
+//    * @param idDocumento - ID del documento principal.
+//    * @param idSubDocumento - ID del subdocumento a actualizar.
+//    * @param idActualizadoPor - ID del usuario que realiza la actualización.
+//    * @param datosActualizacion - Datos para actualizar el subdocumento.
+//    * @param nombreCampoArreglo - Nombre del campo de tipo arreglo.
+//    * @returns El subdocumento actualizado.
+//    * @throws NotFoundException si no se encuentra el documento o el subdocumento.
+//    */
+//   async updateInArray<K extends keyof ModeloGeneral>(
+//     idDocumento: Types.ObjectId,
+//     idSubDocumento: Types.ObjectId,
+//     idActualizadoPor: Types.ObjectId,
+//     datosActualizacion: Dto_Actualizar_SubmodeloInput,
+//     nombreCampoArreglo: K,
+//     nombreSubCampoNestedArreglo: keyof SubModelo,
+//   ): Promise<SubModelo> {
+//     const subDocumentoAntes = await this.findById(
+//       idDocumento,
+//       idSubDocumento,
+//       nombreCampoArreglo,
+//       nombreSubCampoNestedArreglo,
+//     );
+//     if (subDocumentoAntes.deleted) {
+//       throw new NotFoundException(
+//         `El subdocumento ha sido eliminado "${idSubDocumento}"`,
+//       );
+//     }
+//     // Validar que el campo sea un arreglo y que sus elementos tengan _id
+//     this.validarCampoArreglo(nombreCampoArreglo);
+
+//     const nombreCampo = String(nombreCampoArreglo);
+
+//     // Construir dinámicamente el objeto `$set`
+//     const camposActualizacion: Record<
+//       string,
+//       string | number | Types.ObjectId | boolean
+//     > = {};
+
+//     for (const [clave, valor] of Object.entries(datosActualizacion)) {
+//       // Agregar cada clave de datosActualizacion como parte del `$set`
+//       camposActualizacion[`${nombreCampo}.$[elem].${clave}`] = valor;
+//     }
+
+//     camposActualizacion[`${nombreCampo}.$[elem].updatedBy`] = idActualizadoPor;
+
+//     const consultaActualizacion: UpdateQuery<ModeloGeneral> = {
+//       $set: camposActualizacion,
+//     };
+
+//     // Buscar y actualizar el documento con filtros de arreglo
+//     const documento = await this.modelo
+//       .findOneAndUpdate({ _id: idDocumento }, consultaActualizacion, {
+//         new: true,
+//         arrayFilters: [{ 'elem._id': idSubDocumento }],
+//       })
+//       .exec();
+
+//     if (!documento) {
+//       throw new NotFoundException(
+//         `Documento ${this.modelo.modelName} con ID ${idDocumento} no encontrado`,
+//       );
+//     }
+
+//     const arregloSubDocumentos = documento[nombreCampo] as Array<SubModelo>;
+
+//     const subDocumentoActualizado = arregloSubDocumentos.find(
+//       (subDoc) => String(subDoc._id) === String(idSubDocumento),
+//     );
+//     return subDocumentoActualizado;
+//   }
+
+//   //#endregion
+
+//   //#region eliminar
+
+//   /**
+//    * Realiza una eliminación lógica (soft delete) de un subdocumento dentro de un arreglo.
+//    * Cambia la propiedad `deleted` a `true` y asigna el usuario que realizó la eliminación.
+//    * @param idDocumento - ID del documento principal.
+//    * @param idSubDocumentoEliminar - ID del subdocumento a eliminar.
+//    * @param idEliminadoPor - ID del usuario que realiza la eliminación.
+//    * @param nombreCampoArreglo - Nombre del campo de tipo arreglo.
+//    * @returns El subdocumento eliminado.
+//    * @throws NotFoundException si no se encuentra el documento o el subdocumento, o si ya está eliminado.
+//    */
+//   async softDelete<K extends keyof ModeloGeneral>(
+//     idDocumento: Types.ObjectId,
+//     idSubDocumentoEliminar: Types.ObjectId,
+//     idEliminadoPor: Types.ObjectId,
+//     nombreCampoArreglo: K,
+//     nombreSubCampoNestedArreglo: keyof SubModelo,
+//   ): Promise<SubModelo> {
+//     // Validar que el campo sea un arreglo y que sus elementos tengan _id
+//     const subDocumentoAntes = await this.findById(
+//       idDocumento,
+//       idSubDocumentoEliminar,
+//       nombreCampoArreglo,
+//       nombreSubCampoNestedArreglo,
+//     );
+
+//     if (subDocumentoAntes.deleted) {
+//       throw new NotFoundException(
+//         `El subdocumento ya fue eliminado "${idSubDocumentoEliminar}"`,
+//       );
+//     }
+
+//     this.validarCampoArreglo(nombreCampoArreglo);
+
+//     const nombreCampo = String(nombreCampoArreglo);
+
+//     // Construir dinámicamente el objeto `$set`
+//     const camposActualizacion: Record<
+//       string,
+//       string | Types.ObjectId | boolean
+//     > = {};
+
+//     camposActualizacion[`${nombreCampo}.$[elem].deleted`] = true;
+//     camposActualizacion[`${nombreCampo}.$[elem].deletedBy`] = idEliminadoPor;
+
+//     const consultaActualizacion: UpdateQuery<ModeloGeneral> = {
+//       $set: camposActualizacion,
+//     };
+
+//     // Buscar y actualizar el documento con filtros de arreglo
+//     const documento = await this.modelo
+//       .findOneAndUpdate({ _id: idDocumento }, consultaActualizacion, {
+//         new: true,
+//         arrayFilters: [{ 'elem._id': idSubDocumentoEliminar }],
+//       })
+//       .exec();
+
+//     if (!documento) {
+//       throw new NotFoundException(
+//         `Documento ${this.subModelo.modelName} con ID ${idDocumento} no encontrado`,
+//       );
+//     }
+
+//     const arregloSubDocumentos = documento[nombreCampo] as Array<SubModelo>;
+
+//     const subDocumentoEliminado = arregloSubDocumentos.find(
+//       (subDoc) => String(subDoc._id) === String(idSubDocumentoEliminar),
+//     );
+
+//     return subDocumentoEliminado;
+//   }
+
+//   /**
+//    * Restaura un subdocumento previamente eliminado.
+//    * @param idDocumento - ID del documento principal.
+//    * @param idSubDocumentoRestaurar - ID del subdocumento a restaurar.
+//    * @param idRestauradoPor - ID del usuario que realiza la restauración.
+//    * @param nombreCampoArreglo - Nombre del campo de tipo arreglo.
+//    * @returns El subdocumento restaurado.
+//    * @throws NotFoundException si no se encuentra el documento o el subdocumento, o si no está eliminado.
+//    */
+//   async restore<K extends keyof ModeloGeneral>(
+//     idDocumento: Types.ObjectId,
+//     idSubDocumentoRestaurar: Types.ObjectId,
+//     idRestauradoPor: Types.ObjectId,
+//     nombreCampoArreglo: K,
+//     nombreSubCampoNestedArreglo: keyof SubModelo,
+//   ): Promise<SubModelo> {
+//     const dtoActualizacion = {
+//       deleted: false,
+//     } as Dto_Actualizar_SubmodeloInput;
+
+//     const subDocumentoAntes = await this.findById(
+//       idDocumento,
+//       idSubDocumentoRestaurar,
+//       nombreCampoArreglo,
+//       nombreSubCampoNestedArreglo,
+//     );
+//     if (!subDocumentoAntes.deleted) {
+//       throw new NotFoundException(
+//         `El subdocumento ya fue restaurado "${idSubDocumentoRestaurar}"`,
+//       );
+//     }
+
+//     const nombreCampo = String(nombreCampoArreglo);
+
+//     const camposActualizacion: Record<
+//       string,
+//       string | number | Types.ObjectId | boolean
+//     > = {};
+
+//     for (const [clave, valor] of Object.entries(dtoActualizacion)) {
+//       // Agregar cada clave de dtoActualizacion como parte del `$set`
+//       camposActualizacion[`${nombreCampo}.$[elem].${clave}`] = valor;
+//     }
+
+//     camposActualizacion[`${nombreCampo}.$[elem].updatedBy`] = idRestauradoPor;
+
+//     const consultaActualizacion: UpdateQuery<ModeloGeneral> = {
+//       $set: camposActualizacion,
+//     };
+
+//     // Buscar y actualizar el documento con filtros de arreglo
+//     const documento = await this.modelo
+//       .findOneAndUpdate({ _id: idDocumento }, consultaActualizacion, {
+//         new: true,
+//         arrayFilters: [{ 'elem._id': idSubDocumentoRestaurar }],
+//       })
+//       .exec();
+
+//     if (!documento) {
+//       throw new NotFoundException(
+//         `Documento ${this.modelo.modelName} con ID ${idDocumento} no encontrado`,
+//       );
+//     }
+
+//     const arregloSubDocumentos = documento[nombreCampo] as Array<SubModelo>;
+
+//     const subDocumentoRestaurado = arregloSubDocumentos.find(
+//       (subDoc) => String(subDoc._id) === String(idSubDocumentoRestaurar),
+//     );
+//     return subDocumentoRestaurado;
+//   }
+
+//   //#endregion
+
+//   /**
+//    * Elimina definitivamente un subdocumento que ha sido previamente marcado como eliminado.
+//    * @param idDocumento - ID del documento principal.
+//    * @param idElemento - ID del subdocumento a eliminar.
+//    * @param nombreCampoArreglo - Nombre del campo de tipo arreglo.
+//    * @returns El subdocumento eliminado.
+//    * @throws NotFoundException si no se encuentra el documento o el subdocumento, o si no está marcado como eliminado.
+//    */
+//   async pullIfDeleted<K extends keyof ModeloGeneral>(
+//     idDocumento: Types.ObjectId,
+//     idElemento: Types.ObjectId,
+//     nombreCampoArreglo: K,
+//     nombreSubCampoNestedArreglo: keyof SubModelo,
+//   ): Promise<SubModelo> {
+//     // Validar que el campo sea un arreglo y que sus elementos tengan _id
+//     const subDocumentoAntes = await this.findById(
+//       idDocumento,
+//       idElemento,
+//       nombreCampoArreglo,
+//       nombreSubCampoNestedArreglo,
+//     );
+
+//     if (!subDocumentoAntes.deleted) {
+//       throw new NotFoundException(
+//         `El subdocumento "${idElemento}" debe estar marcado como eliminado (deleted: true) para eliminarse`,
+//       );
+//     }
+//     const nombreCampo = String(nombreCampoArreglo);
+
+//     // Buscar el documento y validar si el elemento tiene `deleted: true`
+//     const documento = await this.modelo
+//       .findOne({
+//         _id: idDocumento,
+//         [`${nombreCampo}._id`]: idElemento,
+//         [`${nombreCampo}.deleted`]: true,
+//       })
+//       .exec();
+
+//     if (!documento) {
+//       throw new NotFoundException(
+//         `El elemento con ID "${idElemento}" no se encuentra o no está marcado como eliminado en el documento con ID "${idDocumento}"`,
+//       );
+//     }
+//     // Realizar el `pull` del elemento marcado como eliminado
+//     const actualizacion = {
+//       $pull: {
+//         [nombreCampo]: { _id: idElemento },
+//       },
+//     };
+
+//     // Aquí hacemos el type assertion explícito para evitar conflictos de tipos
+//     const documentoActualizado = await this.modelo
+//       .findByIdAndUpdate(
+//         idDocumento,
+//         actualizacion as UpdateQuery<ModeloGeneral>,
+//         {
+//           new: true,
+//         },
+//       )
+//       .exec();
+
+//     if (!documentoActualizado) {
+//       throw new NotFoundException(
+//         `No se pudo actualizar el documento con ID "${idDocumento}"`,
+//       );
+//     }
+
+//     const subdocumento = documento[nombreCampo].find(
+//       (subDoc) => String(subDoc._id) === String(idElemento),
+//     );
+
+//     return subdocumento;
+//   }
+
+//   /**
+//    * Elimina todos los subdocumentos que han sido marcados como eliminados en un arreglo.
+//    * @param idDocumento - ID del documento principal.
+//    * @param nombreCampoArreglo - Nombre del campo de tipo arreglo.
+//    * @returns Un array de subdocumentos que fueron eliminados.
+//    * @throws NotFoundException si no se encuentran subdocumentos marcados como eliminados.
+//    */
+//   async pullAllDeleted<K extends keyof ModeloGeneral>(
+//     idDocumento: Types.ObjectId,
+//     nombreCampoArreglo: K,
+//   ): Promise<SubModelo[]> {
+//     // Validar que el campo sea un arreglo y que sus elementos tengan _id
+//     this.validarCampoArreglo(nombreCampoArreglo);
+
+//     const nombreCampo = String(nombreCampoArreglo);
+
+//     // Buscar el documento para obtener los elementos marcados como `deleted: true`
+//     const documento = await this.modelo.findOne({ _id: idDocumento }).exec();
+
+//     if (!documento) {
+//       throw new NotFoundException(
+//         `Documento ${this.modelo.collection.name} con ID "${idDocumento}" no encontrado`,
+//       );
+//     }
+
+//     const arregloSubDocumentos = documento[nombreCampo] as SubModelo[];
+
+//     // Filtrar los elementos que están marcados como `deleted: true`
+//     const elementosEliminados = arregloSubDocumentos.filter(
+//       (subDoc) => subDoc.deleted === true,
+//     );
+
+//     if (elementosEliminados.length === 0) {
+//       throw new NotFoundException(
+//         `No hay subdocumentos ${this.subModelo.collection.name} marcados como eliminados`,
+//       );
+//     }
+
+//     // Realizar el `pull` para eliminar todos los elementos marcados como `deleted: true`
+//     const actualizacion = {
+//       $pull: {
+//         [nombreCampo]: { deleted: true },
+//       },
+//     };
+
+//     // Actualizar el documento en la base de datos
+//     const documentoActualizado = await this.modelo
+//       .findByIdAndUpdate(
+//         idDocumento,
+//         actualizacion as UpdateQuery<ModeloGeneral>,
+//         {
+//           new: true,
+//         },
+//       )
+//       .exec();
+
+//     if (!documentoActualizado) {
+//       throw new NotFoundException(
+//         `No se pudo actualizar el documento con ID "${idDocumento}"`,
+//       );
+//     }
+
+//     // Retornar los elementos eliminados
+//     return elementosEliminados;
+//   }
+// }
+
 import { Model, Types, UpdateQuery } from 'mongoose';
 import {
   InternalServerErrorException,
@@ -5,453 +600,591 @@ import {
 } from '@nestjs/common';
 import { IdInterface } from '../interfaces/id.interface';
 
-// import { IdInterface } from '../interfaces/id.interface';
-
 export abstract class BaseArrayService<
-  ModelGeneral,
-  Dto_Create_SubModel,
-  Dto_Update_submodelInput,
-  SubModel extends IdInterface,
+  ModeloGeneral,
+  Dto_Crear_SubModelo,
+  Dto_Actualizar_SubmodeloInput,
+  SubModelo extends IdInterface,
 > {
   constructor(
-    protected readonly model: Model<ModelGeneral>,
-    protected readonly subModel: Model<SubModel>,
+    protected readonly modelo: Model<ModeloGeneral>,
+    protected readonly subModelo: Model<SubModelo>,
   ) {}
 
   /**
-   * Valida si el campo es un array en el esquema y que sus elementos tengan _id
+   * Valida que un campo en el esquema del modelo sea un arreglo.
+   * @param nombreCampoArreglo - El nombre del campo a validar.
+   * @throws InternalServerErrorException si el campo no existe o no es un arreglo.
    */
-  private validateArrayField<ArrayFieldGeneral extends keyof ModelGeneral>(
-    fieldArrayName: ArrayFieldGeneral,
+  private validarCampoArreglo<CampoArregloGeneral extends keyof ModeloGeneral>(
+    nombreCampoArreglo: CampoArregloGeneral,
   ): void {
-    const schemaPath = this.model.schema.path(String(fieldArrayName));
+    const rutaEsquema = this.modelo.schema.path(String(nombreCampoArreglo));
 
-    if (!schemaPath) {
+    if (!rutaEsquema) {
       throw new InternalServerErrorException(
-        `El campo "${String(fieldArrayName)}" no existe en el esquema.`,
+        `El campo "${String(nombreCampoArreglo)}" no existe en el esquema.`,
       );
     }
 
-    if (schemaPath.instance !== 'Array') {
+    if (rutaEsquema.instance !== 'Array') {
       throw new InternalServerErrorException(
-        `El campo "${String(fieldArrayName)}" no es un array.`,
+        `El campo "${String(nombreCampoArreglo)}" no es un arreglo.`,
       );
     }
   }
 
-  //#region create
+  //#region crear
 
   /**
-   * Añade un elemento a un array de cualquier documento
+   * Agrega un nuevo elemento a un arreglo en un documento específico.
+   * @param idDocumento - ID del documento principal.
+   * @param createdBy - ID del usuario que realiza la creación.
+   * @param dtoCrearSubModelo - Datos del submodelo a crear.
+   * @param nombreCampoArreglo - Nombre del campo que es un arreglo en el documento.
+   * @returns El nuevo elemento añadido al arreglo.
+   * @throws NotFoundException si no se encuentra el documento principal.
    */
-  async pushToArray<K extends keyof ModelGeneral>(
-    docId: Types.ObjectId,
-    updateBy: Types.ObjectId,
-    dto_Create_SubModel: Dto_Create_SubModel,
-    fieldArrayName: K,
-  ): Promise<SubModel> {
-    // Validar que el campo sea un array y que sus elementos tengan _id
-    this.validateArrayField(fieldArrayName);
+  async pushToArray<K extends keyof ModeloGeneral>(
+    idDocumento: Types.ObjectId,
+    createdBy: Types.ObjectId,
+    dtoCrearSubModelo: Dto_Crear_SubModelo,
+    nombreCampoArreglo: K,
+  ): Promise<SubModelo> {
+    // Validar que el campo sea un arreglo
+    this.validarCampoArreglo(nombreCampoArreglo);
 
-    const arrayFieldName = String(fieldArrayName);
+    const nombreCampo = String(nombreCampoArreglo);
 
-    // Definir la consulta de actualización con type assertion
-    const update: UpdateQuery<ModelGeneral> = {
+    // Definir la consulta de actualización
+    const actualizacion: UpdateQuery<ModeloGeneral> = {
       $push: {
-        [arrayFieldName]: dto_Create_SubModel,
+        [nombreCampo]: dtoCrearSubModelo,
       },
-    } as UpdateQuery<ModelGeneral>;
+    } as UpdateQuery<ModeloGeneral>; // No cambiar el tipado con "as"
 
     // Buscar y actualizar el documento
-    const updatedDoc = await this.model
-      .findByIdAndUpdate(docId, { ...update, updateBy }, { new: true })
+    const documentoActualizado = await this.modelo
+      .findByIdAndUpdate(
+        idDocumento,
+        { ...actualizacion, createdBy: createdBy },
+        { new: true },
+      )
       .exec();
 
-    if (!updatedDoc) {
+    if (!documentoActualizado) {
       throw new NotFoundException(
-        `No se encontró el documento con ID "${docId}"`,
+        `No se encontró el documento con ID "${idDocumento}"`,
       );
     }
 
-    const arrayDoc = updatedDoc[arrayFieldName];
-    const newElement = arrayDoc[arrayDoc.length - 1];
+    const arregloDocumentos = documentoActualizado[nombreCampo] as SubModelo[];
+    const nuevoElemento = arregloDocumentos[arregloDocumentos.length - 1];
 
-    return newElement;
+    return nuevoElemento;
   }
 
-  //#region find
+  //#endregion
+
+  //#region encontrar
+
   /**
-   * Recupera un documento específico por su ID.
-   * @param id - El ID del documento a buscar.
-   * @returns El documento encontrado.
-   * @throws NotFoundException si no se encuentra el documento.
+   * Recupera un documento por su ID y filtra sus subdocumentos y subsubdocumentos basados en el estado 'deleted'.
+   *
+   * @param id - ID del documento principal.
+   * @param subDocumentField - Nombre del campo de subdocumentos (arreglo) a filtrar (ejemplo: 'preguntas').
+   * @param nestedSubDocumentField - Nombre del campo de subsubdocumentos dentro del subdocumento (ejemplo: 'opciones').
+   * @param deleted - Estado 'deleted' por el cual filtrar los subdocumentos y subsubdocumentos (por defecto es false).
+   *
+   * @returns El documento principal con los subdocumentos y subsubdocumentos filtrados según el estado 'deleted'.
+   *
+   * @throws NotFoundException si el documento no existe.
+   * @throws InternalServerErrorException si el subDocumentField o nestedSubDocumentField no existe en el esquema del modelo.
+   */
+  async findById_WithNestedSubDocuments_ActiveOrInactive(
+    id: Types.ObjectId,
+    subDocumentField: string,
+    nestedSubDocumentField: string,
+    deleted: boolean = false,
+  ): Promise<ModeloGeneral> {
+    // Validar que el campo de subdocumentos existe en el esquema
+    if (!this.modelo.schema.paths[subDocumentField]) {
+      throw new InternalServerErrorException(
+        `El campo "${subDocumentField}" no existe en el esquema del modelo ${this.modelo.collection.name}`,
+      );
+    }
+
+    // Realizar una agregación para filtrar subdocumentos y subsubdocumentos
+    const result = await this.modelo
+      .aggregate([
+        // Filtrar el documento principal por ID y que no esté eliminado
+        { $match: { _id: id, deleted: false } },
+        {
+          // Filtrar los subdocumentos basados en el estado 'deleted'
+          $addFields: {
+            [subDocumentField]: {
+              $filter: {
+                input: `$${subDocumentField}`,
+                as: 'subDocument',
+                cond: { $eq: ['$$subDocument.deleted', deleted] },
+              },
+            },
+          },
+        },
+        {
+          // Filtrar los subsubdocumentos dentro de los subdocumentos
+          $addFields: {
+            [subDocumentField]: {
+              $map: {
+                input: `$${subDocumentField}`,
+                as: 'subDocument',
+                in: {
+                  $mergeObjects: [
+                    '$$subDocument',
+                    {
+                      [nestedSubDocumentField]: {
+                        $filter: {
+                          input: `$$subDocument.${nestedSubDocumentField}`,
+                          as: 'nestedSubDocument',
+                          cond: {
+                            $eq: ['$$nestedSubDocument.deleted', deleted],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      ])
+      .exec()
+      .then((results) => results[0]); // Obtener el primer resultado
+
+    // Si no se encuentra el documento, lanzar una excepción
+    if (!result) {
+      throw new NotFoundException(
+        `Documento ${this.modelo.collection.name} con ID "${id}" no encontrado`,
+      );
+    }
+
+    // Retornar el documento con subdocumentos filtrados
+    return result as ModeloGeneral;
+  }
+
+  /**
+   * Recupera un subdocumento específico por su ID dentro de un documento principal.
+   * @param idModelo - ID del documento principal.
+   * @param idSubModelo - ID del subdocumento a buscar.
+   * @param nombreCampoArreglo - Nombre del campo arreglo en el documento principal.
+   * @param nombreSubCampoNestedArreglo - Nombre del campo arreglo dentro del subdocumento.
+   * @returns El subdocumento encontrado.
+   * @throws NotFoundException si no se encuentra el documento o el subdocumento.
    */
   async findById(
-    idModel: Types.ObjectId,
-    idSubModel: Types.ObjectId,
-    fieldArrayName: keyof ModelGeneral,
-  ): Promise<SubModel> {
-    const document: ModelGeneral = await this.model.findById(idModel);
-
-    if (!document) {
-      throw new NotFoundException(
-        `Documento ${this.model.collection.name} con ID "${idModel}" no encontrado`,
+    idModelo: Types.ObjectId,
+    idSubModelo: Types.ObjectId,
+    nombreCampoArreglo: keyof ModeloGeneral,
+    nombreSubCampoNestedArreglo: keyof SubModelo,
+  ): Promise<SubModelo> {
+    // Obtener el documento con subdocumentos filtrados
+    const documento =
+      await this.findById_WithNestedSubDocuments_ActiveOrInactive(
+        idModelo,
+        String(nombreCampoArreglo),
+        String(nombreSubCampoNestedArreglo),
       );
-    }
 
-    this.validateArrayField(fieldArrayName);
+    const arregloSubDocumentos = documento[
+      nombreCampoArreglo
+    ] as unknown as SubModelo[];
 
-    const arraySubDocument = document[fieldArrayName] as unknown as SubModel[];
-
-    const subdocument = arraySubDocument.find(
-      (subDocument) => String(subDocument._id) == String(idSubModel),
+    // Buscar el subdocumento por ID
+    const subdocumento = arregloSubDocumentos.find(
+      (subDoc) => String(subDoc._id) === String(idSubModelo),
     );
 
-    if (!subdocument) {
+    if (!subdocumento) {
       throw new NotFoundException(
-        `Subdocumento ${this.subModel.collection.name} con ID "${idSubModel}" no encontrado en el documento ${this.model.collection.name} con ID "${idModel}"`,
+        `Subdocumento ${this.subModelo.collection.name} con ID "${idSubModelo}" no encontrado en el documento ${this.modelo.collection.name} con ID "${idModelo}"`,
       );
     }
 
-    return subdocument;
+    return subdocumento;
   }
 
-  //#region update
+  //#endregion
+
+  //#region actualizar
+
   /**
-   * Actualiza un elemento en el array
+   * Actualiza un subdocumento dentro de un arreglo en el documento principal.
+   * @param idDocumento - ID del documento principal.
+   * @param idSubDocumento - ID del subdocumento a actualizar.
+   * @param idActualizadoPor - ID del usuario que realiza la actualización.
+   * @param datosActualizacion - Datos para actualizar el subdocumento.
+   * @param nombreCampoArreglo - Nombre del campo arreglo en el documento principal.
+   * @param nombreSubCampoNestedArreglo - Nombre del campo arreglo dentro del subdocumento.
+   * @returns El subdocumento actualizado.
+   * @throws NotFoundException si no se encuentra el documento o el subdocumento, o si el subdocumento está eliminado.
    */
-  async updateInArray<K extends keyof ModelGeneral>(
-    docId: Types.ObjectId,
-    subDocId: Types.ObjectId,
-    idUpdatedBy: Types.ObjectId,
-    updateData: Dto_Update_submodelInput,
-    fieldArrayName: K,
-  ): Promise<SubModel> {
-    const before = await this.findById(docId, subDocId, fieldArrayName);
-    if (before.deleted) {
+  async updateInArray<K extends keyof ModeloGeneral>(
+    idDocumento: Types.ObjectId,
+    idSubDocumento: Types.ObjectId,
+    idActualizadoPor: Types.ObjectId,
+    datosActualizacion: Dto_Actualizar_SubmodeloInput,
+    nombreCampoArreglo: K,
+    nombreSubCampoNestedArreglo: keyof SubModelo,
+  ): Promise<SubModelo> {
+    // Verificar que el subdocumento no esté eliminado
+    const subDocumentoAntes = await this.findById(
+      idDocumento,
+      idSubDocumento,
+      nombreCampoArreglo,
+      nombreSubCampoNestedArreglo,
+    );
+    if (subDocumentoAntes.deleted) {
       throw new NotFoundException(
-        `El documento ha sido eliminado" ${subDocId}"`,
+        `El subdocumento ha sido eliminado "${idSubDocumento}"`,
       );
     }
-    // Validar que el campo sea un array y que sus elementos tengan _id
-    this.validateArrayField(fieldArrayName);
 
-    const arrayFieldName = String(fieldArrayName);
+    // Validar que el campo sea un arreglo
+    this.validarCampoArreglo(nombreCampoArreglo);
 
-    // Construir dinámicamente el objeto `$set`
-    const updateFields: Record<string, string | Types.ObjectId | boolean> = {};
-    // console.log('updateFields 1:', updateFields);
+    const nombreCampo = String(nombreCampoArreglo);
 
-    for (const [key, value] of Object.entries(updateData)) {
-      // Agregar cada clave del updateData como parte del `$set`
-      updateFields[`${arrayFieldName}.$[elem].${key}`] = value;
-      console.log(
-        'key:',
-        key,
+    // Construir el objeto `$set` para la actualización
+    const camposActualizacion: Record<
+      string,
+      string | number | Types.ObjectId | boolean
+    > = {};
 
-        `       ${arrayFieldName}.$[elem].${key}`,
-        '         value:',
-        value,
-      );
+    for (const [clave, valor] of Object.entries(datosActualizacion)) {
+      camposActualizacion[`${nombreCampo}.$[elem].${clave}`] = valor;
     }
-    // console.log('updateFields 2:', updateFields);
 
-    // Agregar el campo de auditoría `updatedBy`
-    updateFields[`${arrayFieldName}.$[elem].updatedBy`] = idUpdatedBy;
-    // console.log('updateFields 3:', updateFields);
+    camposActualizacion[`${nombreCampo}.$[elem].updatedBy`] = idActualizadoPor;
 
-    // // Definir la consulta de actualización con type assertion
-    // const updateQuery: UpdateQuery<ModelGeneral> = {
-    //   $set: {
-    //     [`${arrayFieldName}.$[elem]`]: {
-    //       ...updateData,
-    //       _id: subDocId,
-    //       updatedBy: idUpdatedBy,
-    //     },
-    //   },
-    // } as UpdateQuery<ModelGeneral>;
-
-    const updateQuery: UpdateQuery<ModelGeneral> = {
-      $set: updateFields,
+    const consultaActualizacion: UpdateQuery<ModeloGeneral> = {
+      $set: camposActualizacion,
     };
 
-    // Buscar y actualizar el documento con filtros de array
-    const document = await this.model
-      .findOneAndUpdate({ _id: docId }, updateQuery, {
+    // Actualizar el subdocumento utilizando filtros de arreglo
+    const documento = await this.modelo
+      .findOneAndUpdate({ _id: idDocumento }, consultaActualizacion, {
         new: true,
-        arrayFilters: [{ 'elem._id': subDocId }],
+        arrayFilters: [{ 'elem._id': idSubDocumento }],
       })
       .exec();
 
-    if (!document) {
+    if (!documento) {
       throw new NotFoundException(
-        `Documento ${this.model.modelName} con ID ${docId} no encontrado`,
+        `Documento ${this.modelo.modelName} con ID ${idDocumento} no encontrado`,
       );
     }
 
-    const arraySubdocuments = document[fieldArrayName] as Array<SubModel>;
+    const arregloSubDocumentos = documento[nombreCampo] as SubModelo[];
 
-    const subDocument = arraySubdocuments.find(
-      (sudDoc) => String(sudDoc._id) === String(subDocId),
+    // Obtener el subdocumento actualizado
+    const subDocumentoActualizado = arregloSubDocumentos.find(
+      (subDoc) => String(subDoc._id) === String(idSubDocumento),
     );
-    console.log('document:                ', document);
-    return subDocument;
+    return subDocumentoActualizado;
   }
 
-  //#region delete
+  //#endregion
 
-  // crea un metodo llamado softdelete, que cambia la propiedad deleted a true de un elemento que esta dentro de un array
-  async softDelete<K extends keyof ModelGeneral>(
-    idDoc: Types.ObjectId,
-    idSubDocDelete: Types.ObjectId,
-    idThanos: Types.ObjectId,
-    fieldArrayName: K,
-  ): Promise<SubModel> {
-    // Validar que el campo sea un array y que sus elementos tengan _id
+  //#region eliminar
 
-    const subDocumentBefore = await this.findById(
-      idDoc,
-      idSubDocDelete,
-      fieldArrayName,
+  /**
+   * Realiza una eliminación lógica (soft delete) de un subdocumento dentro de un arreglo.
+   * Cambia la propiedad `deleted` a `true` y asigna el usuario que realizó la eliminación.
+   * @param idDocumento - ID del documento principal.
+   * @param idSubDocumentoEliminar - ID del subdocumento a eliminar.
+   * @param idEliminadoPor - ID del usuario que realiza la eliminación.
+   * @param nombreCampoArreglo - Nombre del campo arreglo en el documento principal.
+   * @param nombreSubCampoNestedArreglo - Nombre del campo arreglo dentro del subdocumento.
+   * @returns El subdocumento eliminado lógicamente.
+   * @throws NotFoundException si no se encuentra el documento o el subdocumento, o si ya está eliminado.
+   */
+  async softDelete<K extends keyof ModeloGeneral>(
+    idDocumento: Types.ObjectId,
+    idSubDocumentoEliminar: Types.ObjectId,
+    idEliminadoPor: Types.ObjectId,
+    nombreCampoArreglo: K,
+    nombreSubCampoNestedArreglo: keyof SubModelo,
+  ): Promise<SubModelo> {
+    // Verificar que el subdocumento no esté ya eliminado
+    const subDocumentoAntes = await this.findById(
+      idDocumento,
+      idSubDocumentoEliminar,
+      nombreCampoArreglo,
+      nombreSubCampoNestedArreglo,
     );
 
-    if (subDocumentBefore.deleted) {
+    if (subDocumentoAntes.deleted) {
       throw new NotFoundException(
-        `El subdocumento ya fue eliminado "${idSubDocDelete}"`,
+        `El subdocumento ya fue eliminado "${idSubDocumentoEliminar}"`,
       );
     }
 
-    this.validateArrayField(fieldArrayName);
+    this.validarCampoArreglo(nombreCampoArreglo);
 
-    const arrayFieldName = String(fieldArrayName);
+    const nombreCampo = String(nombreCampoArreglo);
 
-    // Construir dinámicamente el objeto `$set`
-    const updateFields: Record<string, string | Types.ObjectId | boolean> = {};
+    // Construir el objeto `$set` para marcar como eliminado
+    const camposActualizacion: Record<
+      string,
+      string | Types.ObjectId | boolean
+    > = {};
 
-    updateFields[`${arrayFieldName}.$[elem].deleted`] = true;
-    updateFields[`${arrayFieldName}.$[elem].deletedBy`] = idThanos;
+    camposActualizacion[`${nombreCampo}.$[elem].deleted`] = true;
+    camposActualizacion[`${nombreCampo}.$[elem].deletedBy`] = idEliminadoPor;
 
-    const updateQuery: UpdateQuery<ModelGeneral> = {
-      $set: updateFields,
+    const consultaActualizacion: UpdateQuery<ModeloGeneral> = {
+      $set: camposActualizacion,
     };
 
-    // Buscar y actualizar el documento con filtros de array
-    const document = await this.model
-      .findOneAndUpdate({ _id: idDoc }, updateQuery, {
+    // Actualizar el subdocumento utilizando filtros de arreglo
+    const documento = await this.modelo
+      .findOneAndUpdate({ _id: idDocumento }, consultaActualizacion, {
         new: true,
-        arrayFilters: [{ 'elem._id': idSubDocDelete }],
+        arrayFilters: [{ 'elem._id': idSubDocumentoEliminar }],
       })
       .exec();
 
-    if (!document) {
+    if (!documento) {
       throw new NotFoundException(
-        `Documento ${this.subModel.modelName} con ID ${idDoc} no encontrado`,
+        `Documento ${this.subModelo.modelName} con ID ${idDocumento} no encontrado`,
       );
     }
 
-    const arraySubdocuments = document[fieldArrayName] as Array<SubModel>;
+    const arregloSubDocumentos = documento[nombreCampo] as SubModelo[];
 
-    const subDocument = arraySubdocuments.find(
-      (sudDoc) => String(sudDoc._id) === String(idSubDocDelete),
+    // Obtener el subdocumento eliminado
+    const subDocumentoEliminado = arregloSubDocumentos.find(
+      (subDoc) => String(subDoc._id) === String(idSubDocumentoEliminar),
     );
 
-    return subDocument;
+    return subDocumentoEliminado;
   }
 
-  async restore<K extends keyof ModelGeneral>(
-    idDoc: Types.ObjectId,
-    idSubDocRestore: Types.ObjectId,
-    updatedBy: Types.ObjectId,
-    fieldArrayName: K,
-  ): Promise<SubModel> {
-    const dtoUPdate = { deleted: false } as Dto_Update_submodelInput;
+  /**
+   * Restaura un subdocumento previamente eliminado lógicamente.
+   * @param idDocumento - ID del documento principal.
+   * @param idSubDocumentoRestaurar - ID del subdocumento a restaurar.
+   * @param idRestauradoPor - ID del usuario que realiza la restauración.
+   * @param nombreCampoArreglo - Nombre del campo arreglo en el documento principal.
+   * @param nombreSubCampoNestedArreglo - Nombre del campo arreglo dentro del subdocumento.
+   * @returns El subdocumento restaurado.
+   * @throws NotFoundException si no se encuentra el documento o el subdocumento, o si no está eliminado.
+   */
+  async restore<K extends keyof ModeloGeneral>(
+    idDocumento: Types.ObjectId,
+    idSubDocumentoRestaurar: Types.ObjectId,
+    idRestauradoPor: Types.ObjectId,
+    nombreCampoArreglo: K,
+    nombreSubCampoNestedArreglo: keyof SubModelo,
+  ): Promise<SubModelo> {
+    const dtoActualizacion = {
+      deleted: false,
+    } as Dto_Actualizar_SubmodeloInput;
 
-    const before = await this.findById(idDoc, idSubDocRestore, fieldArrayName);
-    if (!before.deleted) {
+    // Verificar que el subdocumento esté eliminado
+    const subDocumentoAntes = await this.findById(
+      idDocumento,
+      idSubDocumentoRestaurar,
+      nombreCampoArreglo,
+      nombreSubCampoNestedArreglo,
+    );
+    if (!subDocumentoAntes.deleted) {
       throw new NotFoundException(
-        `El documento ya fue restaurado" ${idSubDocRestore}"`,
+        `El subdocumento ya fue restaurado "${idSubDocumentoRestaurar}"`,
       );
     }
 
-    const arrayFieldName = String(fieldArrayName);
+    const nombreCampo = String(nombreCampoArreglo);
 
-    // Construir dinámicamente el objeto `$set`
-    const updateFields: Record<string, string | Types.ObjectId | boolean> = {};
-    // console.log('updateFields 1:', updateFields);
+    // Construir el objeto `$set` para restaurar el subdocumento
+    const camposActualizacion: Record<
+      string,
+      string | number | Types.ObjectId | boolean
+    > = {};
 
-    for (const [key, value] of Object.entries(dtoUPdate)) {
-      // Agregar cada clave del updateData como parte del `$set`
-      updateFields[`${arrayFieldName}.$[elem].${key}`] = value;
-      console.log(
-        'key:',
-        key,
-
-        `       ${arrayFieldName}.$[elem].${key}`,
-        '         value:',
-        value,
-      );
+    for (const [clave, valor] of Object.entries(dtoActualizacion)) {
+      camposActualizacion[`${nombreCampo}.$[elem].${clave}`] = valor;
     }
-    // console.log('updateFields 2:', updateFields);
 
-    // Agregar el campo de auditoría `updatedBy`
-    updateFields[`${arrayFieldName}.$[elem].updatedBy`] = idSubDocRestore;
-    // console.log('updateFields 3:', updateFields);
+    camposActualizacion[`${nombreCampo}.$[elem].updatedBy`] = idRestauradoPor;
 
-    // // Definir la consulta de actualización con type assertion
-    // const updateQuery: UpdateQuery<ModelGeneral> = {
-    //   $set: {
-    //     [`${arrayFieldName}.$[elem]`]: {
-    //       ...updateData,
-    //       _id: subDocId,
-    //       updatedBy: idUpdatedBy,
-    //     },
-    //   },
-    // } as UpdateQuery<ModelGeneral>;
-
-    const updateQuery: UpdateQuery<ModelGeneral> = {
-      $set: updateFields,
+    const consultaActualizacion: UpdateQuery<ModeloGeneral> = {
+      $set: camposActualizacion,
     };
 
-    // Buscar y actualizar el documento con filtros de array
-    const document = await this.model
-      .findOneAndUpdate({ _id: idDoc }, updateQuery, {
+    // Actualizar el subdocumento utilizando filtros de arreglo
+    const documento = await this.modelo
+      .findOneAndUpdate({ _id: idDocumento }, consultaActualizacion, {
         new: true,
-        arrayFilters: [{ 'elem._id': idSubDocRestore }],
+        arrayFilters: [{ 'elem._id': idSubDocumentoRestaurar }],
       })
       .exec();
 
-    if (!document) {
+    if (!documento) {
       throw new NotFoundException(
-        `Documento ${this.model.modelName} con ID ${idDoc} no encontrado`,
+        `Documento ${this.modelo.modelName} con ID ${idDocumento} no encontrado`,
       );
     }
 
-    const arraySubdocuments = document[fieldArrayName] as Array<SubModel>;
+    const arregloSubDocumentos = documento[nombreCampo] as SubModelo[];
 
-    const subDocument = arraySubdocuments.find(
-      (sudDoc) => String(sudDoc._id) === String(idSubDocRestore),
+    // Obtener el subdocumento restaurado
+    const subDocumentoRestaurado = arregloSubDocumentos.find(
+      (subDoc) => String(subDoc._id) === String(idSubDocumentoRestaurar),
     );
-    console.log('document:                ', document);
-    return subDocument;
+    return subDocumentoRestaurado;
   }
 
-  async pullIfDeleted<K extends keyof ModelGeneral>(
-    docId: Types.ObjectId,
-    elementId: Types.ObjectId,
-    fieldArrayName: K,
-  ): Promise<SubModel> {
-    // Validar que el campo sea un array y que sus elementos tengan _id
-    const subDocumentBefore = await this.findById(
-      docId,
-      elementId,
-      fieldArrayName,
+  //#endregion
+
+  /**
+   * Elimina definitivamente un subdocumento que ha sido previamente marcado como eliminado.
+   * @param idDocumento - ID del documento principal.
+   * @param idElemento - ID del subdocumento a eliminar definitivamente.
+   * @param nombreCampoArreglo - Nombre del campo arreglo en el documento principal.
+   * @param nombreSubCampoNestedArreglo - Nombre del campo arreglo dentro del subdocumento.
+   * @returns El subdocumento eliminado definitivamente.
+   * @throws NotFoundException si no se encuentra el documento o el subdocumento, o si no está marcado como eliminado.
+   */
+  async pullIfDeleted<K extends keyof ModeloGeneral>(
+    idDocumento: Types.ObjectId,
+    idElemento: Types.ObjectId,
+    nombreCampoArreglo: K,
+    nombreSubCampoNestedArreglo: keyof SubModelo,
+  ): Promise<SubModelo> {
+    // Verificar que el subdocumento esté marcado como eliminado
+    const subDocumentoAntes = await this.findById(
+      idDocumento,
+      idElemento,
+      nombreCampoArreglo,
+      nombreSubCampoNestedArreglo,
     );
 
-    if (!subDocumentBefore.deleted) {
+    if (!subDocumentoAntes.deleted) {
       throw new NotFoundException(
-        `El subdocumento "${elementId}" debe estar cargado como deleted true para eliminarse`,
+        `El subdocumento "${idElemento}" debe estar marcado como eliminado (deleted: true) para eliminarse`,
       );
     }
-    const arrayFieldName = String(fieldArrayName);
 
-    // Buscar el documento y validar si el elemento tiene `deleted: true`
-    console.log('CHIPI');
-    const document = await this.model
+    const nombreCampo = String(nombreCampoArreglo);
+
+    // Verificar que el documento y el subdocumento existen y están eliminados
+    const documento = await this.modelo
       .findOne({
-        _id: docId,
-        [`${arrayFieldName}._id`]: elementId,
-        [`${arrayFieldName}.deleted`]: true,
+        _id: idDocumento,
+        [`${nombreCampo}._id`]: idElemento,
+        [`${nombreCampo}.deleted`]: true,
       })
       .exec();
 
-    console.log('CHAPA');
-    if (!document) {
+    if (!documento) {
       throw new NotFoundException(
-        `El elemento con ID "${elementId}" no se encuentra o no está marcado como eliminado en el documento con ID "${docId}"`,
+        `El elemento con ID "${idElemento}" no se encuentra o no está marcado como eliminado en el documento con ID "${idDocumento}"`,
       );
     }
-    console.log('document[arrayFieldName]       ', document[arrayFieldName]);
-    // Realizar el `pull` del elemento marcado como eliminado
-    const update = {
+
+    // Realizar el `pull` para eliminar definitivamente el subdocumento
+    const actualizacion = {
       $pull: {
-        [arrayFieldName]: { _id: elementId },
-      },
-    };
-
-    // Aquí hacemos el type assertion explícito para evitar conflictos de tipos
-    const updatedDoc = await this.model
-      .findByIdAndUpdate(docId, update as UpdateQuery<ModelGeneral>, {
-        new: true,
-      })
-      .exec();
-
-    if (!updatedDoc) {
-      throw new NotFoundException(
-        `No se pudo actualizar el documento con ID "${docId}"`,
-      );
-    }
-
-    const subdocument = document[arrayFieldName].find(
-      (subDocument) => String(subDocument._id) === String(elementId),
-    );
-
-    console.log('subdocument:', subdocument);
-
-    return subdocument;
-  }
-
-  async pullAllDeleted<K extends keyof ModelGeneral>(
-    docId: Types.ObjectId,
-    fieldArrayName: K,
-  ): Promise<SubModel[]> {
-    // Validar que el campo sea un array y que sus elementos tengan _id
-    this.validateArrayField(fieldArrayName);
-
-    const arrayFieldName = String(fieldArrayName);
-
-    // Buscar el documento para obtener los elementos marcados como `deleted: true`
-    const document = await this.model.findOne({ _id: docId }).exec();
-
-    if (!document) {
-      throw new NotFoundException(
-        `Documento ${this.model.collection.name}con ID "${docId}" no encontrado`,
-      );
-    }
-
-    const arraySubdocuments = document[arrayFieldName] as SubModel[];
-
-    // // Filtrar los elementos que están marcados como `deleted: true`
-    const deletedElements = arraySubdocuments.filter(
-      (subDoc) => subDoc.deleted === true,
-    );
-
-    if (deletedElements.length === 0) {
-      throw new NotFoundException(
-        `No hay subdocumentos ${this.subModel.collection.name} marcados como eliminados"`,
-      );
-    }
-
-    // Realizar el `pull` para eliminar todos los elementos marcados como `deleted: true`
-    const update = {
-      $pull: {
-        [arrayFieldName]: { deleted: true },
+        [nombreCampo]: { _id: idElemento },
       },
     };
 
     // Actualizar el documento en la base de datos
-    const updatedDoc = await this.model
-      .findByIdAndUpdate(docId, update as UpdateQuery<ModelGeneral>, {
-        new: true,
-      })
+    const documentoActualizado = await this.modelo
+      .findByIdAndUpdate(
+        idDocumento,
+        actualizacion as UpdateQuery<ModeloGeneral>, // No cambiar el tipado con "as"
+        {
+          new: true,
+        },
+      )
       .exec();
 
-    if (!updatedDoc) {
+    if (!documentoActualizado) {
       throw new NotFoundException(
-        `No se pudo actualizar el documento con ID "${docId}"`,
+        `No se pudo actualizar el documento con ID "${idDocumento}"`,
       );
     }
 
-    // Retornar los elementos eliminados
-    return deletedElements;
+    // Retornar el subdocumento eliminado (antes de ser eliminado)
+    return subDocumentoAntes;
+  }
+
+  /**
+   * Elimina definitivamente todos los subdocumentos marcados como eliminados en un arreglo.
+   * @param idDocumento - ID del documento principal.
+   * @param nombreCampoArreglo - Nombre del campo arreglo en el documento principal.
+   * @returns Un arreglo de subdocumentos que fueron eliminados.
+   * @throws NotFoundException si no se encuentran subdocumentos marcados como eliminados.
+   */
+  async pullAllDeleted<K extends keyof ModeloGeneral>(
+    idDocumento: Types.ObjectId,
+    nombreCampoArreglo: K,
+  ): Promise<SubModelo[]> {
+    // Validar que el campo sea un arreglo
+    this.validarCampoArreglo(nombreCampoArreglo);
+
+    const nombreCampo = String(nombreCampoArreglo);
+
+    // Buscar el documento para obtener los subdocumentos eliminados
+    const documento = await this.modelo.findOne({ _id: idDocumento }).exec();
+
+    if (!documento) {
+      throw new NotFoundException(
+        `Documento ${this.modelo.collection.name} con ID "${idDocumento}" no encontrado`,
+      );
+    }
+
+    const arregloSubDocumentos = documento[nombreCampo] as SubModelo[];
+
+    // Filtrar los subdocumentos que están marcados como `deleted: true`
+    const elementosEliminados = arregloSubDocumentos.filter(
+      (subDoc) => subDoc.deleted === true,
+    );
+
+    if (elementosEliminados.length === 0) {
+      throw new NotFoundException(
+        `No hay subdocumentos ${this.subModelo.collection.name} marcados como eliminados`,
+      );
+    }
+
+    // Realizar el `pull` para eliminar todos los subdocumentos marcados como eliminados
+    const actualizacion = {
+      $pull: {
+        [nombreCampo]: { deleted: true },
+      },
+    };
+
+    // Actualizar el documento en la base de datos
+    const documentoActualizado = await this.modelo
+      .findByIdAndUpdate(
+        idDocumento,
+        actualizacion as UpdateQuery<ModeloGeneral>, // No cambiar el tipado con "as"
+        {
+          new: true,
+        },
+      )
+      .exec();
+
+    if (!documentoActualizado) {
+      throw new NotFoundException(
+        `No se pudo actualizar el documento con ID "${idDocumento}"`,
+      );
+    }
+
+    // Retornar los subdocumentos que fueron eliminados
+    return elementosEliminados;
   }
 }

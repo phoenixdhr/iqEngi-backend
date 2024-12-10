@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { Comentario } from '../entities/comentario.entity';
 import { ComentarioService } from '../services/comentario.service';
 import { UpdateComentarioInput } from '../dtos/update-comentario.input';
-import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
+
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
 import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
@@ -16,6 +16,7 @@ import { CreateComentarioInput } from '../dtos/create-comentario.input';
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
 import { UseGuards } from '@nestjs/common';
+import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 
 /**
  * Resolver para manejar las operaciones relacionadas con los comentarios.
@@ -25,7 +26,7 @@ import { UseGuards } from '@nestjs/common';
 @Resolver(() => Comentario)
 export class ComentarioResolver
   implements
-    IBaseResolver<
+    IResolverBase<
       Comentario,
       CreateComentario_userInput,
       UpdateComentarioInput

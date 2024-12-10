@@ -1,5 +1,4 @@
 import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { IBaseResolver } from 'src/common/interfaces/base-resolver.interface';
 import { Curso } from '../entities/curso.entity';
 import { UpdateCursoInput } from '../dtos/curso-dtos/update-curso.input';
 import { CreateCursoInput } from '../dtos/curso-dtos/create-curso.input';
@@ -15,11 +14,12 @@ import { UseGuards } from '@nestjs/common';
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
 import { Types } from 'mongoose';
+import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CursoResolver
-  implements IBaseResolver<Curso, UpdateCursoInput, CreateCursoInput>
+  implements IResolverBase<Curso, UpdateCursoInput, CreateCursoInput>
 {
   constructor(private readonly cursoService: CursoService) {}
 

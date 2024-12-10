@@ -5,7 +5,7 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 
 export interface ICategoria extends IdInterface {
   _id: Types.ObjectId;
-  nombre: string;
+  nombreCategoria: string;
   descripcion?: string;
 }
 

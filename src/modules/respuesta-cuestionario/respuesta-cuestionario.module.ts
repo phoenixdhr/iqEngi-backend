@@ -14,6 +14,9 @@ import {
 } from './entities/respuesta-pregunta.entity';
 import { RespuestaPreguntaService } from './services/respuesta-pregunta.service';
 import { RespuestaPreguntaResolver } from './resolvers/respuesta-pregunta.resolver';
+import { CursoModule } from '../curso/curso.module';
+import { CuestionarioModule } from '../cuestionario/cuestionario.module';
+import { CursoCompradoModule } from '../curso-comprado/curso-comprado.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { RespuestaPreguntaResolver } from './resolvers/respuesta-pregunta.resolv
       },
       { name: RespuestaPregunta.name, schema: RespuestaPreguntaSchema },
     ]),
+    CursoModule,
+    CuestionarioModule,
+    CursoCompradoModule,
   ],
   providers: [
     RespuestaCuestionarioService,

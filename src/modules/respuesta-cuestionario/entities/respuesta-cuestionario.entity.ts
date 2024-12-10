@@ -26,20 +26,20 @@ export class RespuestaCuestionario
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Field(() => Usuario)
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Usuario.name, required: true })
   usuarioId: Types.ObjectId;
 
-  @Field(() => Curso)
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Curso.name, required: true })
   cursoId: Types.ObjectId; // sera extraido de Cuestionario usando CuestionarioId, y se agregara al DTo correspondiente antes de ser guardado.
 
-  @Field(() => Cuestionario)
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Cuestionario.name, required: true })
   cuestionarioId: Types.ObjectId;
 
-  @Field(() => [RespuestaPregunta])
-  @Prop({ type: [RespuestaPreguntaUsuarioSchema], required: true })
+  @Field(() => [RespuestaPregunta], { nullable: true })
+  @Prop({ type: [RespuestaPreguntaUsuarioSchema], default: [] })
   respuestas: RespuestaPregunta[];
 
   @Field()
@@ -63,9 +63,14 @@ export const RespuestaCuestionarioSchema = SchemaFactory.createForClass(
   RespuestaCuestionario,
 );
 
+// RespuestaCuestionarioSchema.index(
+//   { usuarioId: 1, cursoId: 1, cuestionarioId: 1 },
+//   { unique: true },
+// );
+
 RespuestaCuestionarioSchema.index(
   { usuarioId: 1, cursoId: 1, cuestionarioId: 1 },
-  { unique: true },
+  { unique: true, partialFilterExpression: { deleted: false } },
 );
 
 RespuestaCuestionarioSchema.index({ deleted: 1 });
