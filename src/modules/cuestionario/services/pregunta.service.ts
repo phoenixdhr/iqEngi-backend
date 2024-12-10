@@ -3,13 +3,13 @@ import { Pregunta } from '../entities/pregunta.entity';
 import { CreatePreguntaInput } from '../dtos/pregunta-dtos/create-pregunta.input';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { BaseArrayService } from 'src/common/services/base-array.service';
+import { BaseArrayWithNestedArrayService } from 'src/common/services/base-array-with-nested-array.service';
 import { Cuestionario } from '../entities/cuestionario.entity';
 import { UpdatePreguntaInput } from '../dtos/pregunta-dtos/update-pregunta.input';
 import { CuestionarioService } from './cuestionario.service';
 
 @Injectable()
-export class PreguntaService extends BaseArrayService<
+export class PreguntaService extends BaseArrayWithNestedArrayService<
   Cuestionario,
   CreatePreguntaInput,
   UpdatePreguntaInput,
