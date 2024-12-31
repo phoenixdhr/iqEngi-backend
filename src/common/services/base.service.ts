@@ -601,7 +601,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
     // Verificar que subDocumentField es un campo válido en el esquema
     if (!this.model.schema.paths[subDocumentField as string]) {
       throw new InternalServerErrorException(
-        `El campo "${String(subDocumentField)}" no existe en el esquema del modelo ${this.model.collection.name}`,
+        `El campo "${String(subDocumentField)}" no existe en el esquema del modelo   ${this.model.collection.name}`,
       );
     }
 
@@ -651,7 +651,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
     // Validar que el subDocumentField existe en el esquema del modelo
     if (!this.model.schema.paths[subDocumentField]) {
       throw new InternalServerErrorException(
-        `El campo "${subDocumentField}" no existe en el esquema del modelo ${this.model.collection.name}`,
+        `El campo "${subDocumentField}" no existe en el esquema del modelo  cccc ${this.model.collection.name}`,
       );
     }
 
