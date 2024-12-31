@@ -200,10 +200,16 @@ enum EstadoAccesoCurso {
   Inactivo
 }
 
+type OpcionOutput {
+  _id: ID
+  textOpcion: String
+  orden: Int
+}
+
 type RespuestaPregunta {
   _id: ID!
   preguntaId: ID!
-  opcionIds: [Opcion!]
+  respuestaId: [OpcionOutput!]
   respuestaAbierta: String
   deleted: Boolean!
 }
@@ -281,10 +287,13 @@ type Query {
   Curso(id: ID!): Curso!
   Curso_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Curso!]!
   RespuestaCuestionarios(offset: Int = 0, limit: Int = 10): [RespuestaCuestionario!]!
-  RespuestaCuestionario(id: ID!): RespuestaCuestionario!
-  RespuestaCuestionario_byCursoID(cursoId: ID!): [RespuestaCuestionario!]!
+  RespuestaCuestionario(respuestaCuestionarioId: ID!): RespuestaCuestionario!
+  RespuestaCuestionario_byCursoId(cursoId: ID!): [RespuestaCuestionario!]!
   RespuestaCuestionario_byUsuarioId(usuarioId: ID!): [RespuestaCuestionario!]!
   RespuestaCuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [RespuestaCuestionario!]!
+  RespuestaPregunta(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
+  RespuestaPreguntas(idRespuestaCuestionario: ID!): [RespuestaPregunta!]!
+  RespuestaPregunta_findSoftDeleted(idRespuestaCuestionario: ID!): [RespuestaPregunta!]!
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
   Cuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
@@ -345,12 +354,18 @@ type Mutation {
   Curso_hardDelete(id: ID!): Curso!
   Curso_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Curso_restore(idRestore: ID!): Curso!
-  RespuestaCuestionario_create(createCuestionarioInput: CreateRespuestaCuestionarioInput!): RespuestaCuestionario!
-  RespuestaCuestionario_update(id: ID!, updateCuestionarioInput: UpdateRespuestaCuestionarioInput!): RespuestaCuestionario!
-  RespuestaCuestionario_softDelete(idRemove: ID!): RespuestaCuestionario!
-  RespuestaCuestionario_hardDelete(id: ID!): RespuestaCuestionario!
+  RespuestaCuestionario_create(createRespuestaCuestionarioInput: CreateRespuestaCuestionarioInput!): RespuestaCuestionario!
+  RespuestaCuestionario_update(respuestaCuestionarioUpdateId: ID!, updateRespuestaCuestionarioInput: UpdateRespuestaCuestionarioInput!): RespuestaCuestionario!
+  RespuestaCuestionario_softDelete(respuestaCuestionarioId: ID!): RespuestaCuestionario!
+  RespuestaCuestionario_hardDelete(respuestaCuestionarioId: ID!): RespuestaCuestionario!
+  RespuestaCuestionario_restore(respuestaCuestionarioId: ID!): RespuestaCuestionario!
   RespuestaCuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
-  RespuestaCuestionario_restore(idRestore: ID!): RespuestaCuestionario!
+  RespuestaPregunta_create(idRespuestaCuestionario: ID!, createRespuestaPreguntaInput: CreateRespuestaPreguntaInput!, idCuestionario: ID!): RespuestaPregunta!
+  RespuestaPregunta_update(idRespuestaCuestionario: ID!, idPregunta: ID!, updatePreguntaInput: UpdateRespuestaPreguntaInput!): RespuestaPregunta!
+  RespuestaPregunta_softDelete(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
+  RespuestaPregunta_restore(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
+  RespuestaPregunta_hardDelete(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
+  RespuestaPregunta_hardDeleteAllSoftDeleted(idRespuestaCuestionario: ID!): [RespuestaPregunta!]!
   Cuestionario_create(createCuestionarioInput: CreateCuestionarioInput!): Cuestionario!
   Cuestionario_update(id: ID!, updateCuestionarioInput: UpdateCuestionarioInput!): Cuestionario!
   Cuestionario_softDelete(idRemove: ID!): Cuestionario!
@@ -501,8 +516,7 @@ input CreateRespuestaCuestionarioInput {
 
 input CreateRespuestaPreguntaInput {
   preguntaId: ID!
-  opcionIds: [ID!]
-  respuestaAbierta: String
+  respuestaId: [ID!]
 }
 
 """Estados de un cuestionario"""
@@ -520,6 +534,11 @@ input UpdateRespuestaCuestionarioInput {
   respuestas: [CreateRespuestaPreguntaInput!]
   nota: Float
   estado: EstadoCuestionario = En_progreso
+}
+
+input UpdateRespuestaPreguntaInput {
+  preguntaId: ID
+  respuestaId: [ID!]
 }
 
 input CreateCuestionarioInput {

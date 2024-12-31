@@ -19,6 +19,7 @@ export interface IResolver_SubDocument<Entity, CreateInput, UpdateInput> {
     parentId: Types.ObjectId,
     createInput: CreateInput,
     user: UserRequest,
+    idOtherDocument?: Types.ObjectId,
   ): Promise<Entity>;
 
   /**

@@ -115,7 +115,7 @@ export abstract class BaseArrayWithNestedArrayService<
     // Validar que el campo de subdocumentos existe en el esquema
     if (!this.modelo.schema.paths[subDocumentField]) {
       throw new InternalServerErrorException(
-        `El campo "${subDocumentField}" no existe en el esquema del modelo ${this.modelo.collection.name}`,
+        `El campo "${subDocumentField}"no existe en el esquema del modelo ${this.modelo.collection.name}`,
       );
     }
 

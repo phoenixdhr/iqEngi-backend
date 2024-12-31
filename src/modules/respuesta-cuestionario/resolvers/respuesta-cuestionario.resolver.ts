@@ -13,9 +13,13 @@ import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator'
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
 import { Types } from 'mongoose';
 import { PaginationArgs } from 'src/common/dtos';
-import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
+import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 
+/**
+ * Resolver encargado de gestionar las respuestas de cuestionarios.
+ * Se aplican guardas de autenticación y roles para restringir el acceso a métodos específicos.
+ */
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class RespuestaCuestionarioResolver
@@ -31,11 +35,11 @@ export class RespuestaCuestionarioResolver
   ) {}
 
   /**
-   * Crea una nueva respuesta a un cuestionario y la asocia a un curso específico.
+   * Crea una nueva respuesta asociada a un cuestionario.
    *
-   * @param createCuestionarioInput Objeto con los datos necesarios para la creación.
-   * @param user Usuario autenticado que realiza la operación.
-   * @returns La respuesta al cuestionario creada.
+   * @param createRespuestaCuestionarioInput Datos necesarios para la creación de la respuesta.
+   * @param currentUser Información del usuario autenticado que realiza la operación.
+   * @returns La respuesta creada, asociada al cuestionario.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -44,59 +48,60 @@ export class RespuestaCuestionarioResolver
   })
   @RolesDec(...administradorUp)
   async create(
-    @Args('createCuestionarioInput')
-    createCuestionarioInput: CreateRespuestaCuestionarioInput,
-    @CurrentUser() user: UserRequest,
+    @Args('createRespuestaCuestionarioInput')
+    createRespuestaCuestionarioInput: CreateRespuestaCuestionarioInput,
+    @CurrentUser() currentUser: UserRequest,
   ): Promise<RespuestaCuestionario> {
-    const userId = new Types.ObjectId(user._id);
+    const creatorUserId = new Types.ObjectId(currentUser._id);
     return this.respuestaCuestionarioService.create(
-      createCuestionarioInput,
-      userId,
+      createRespuestaCuestionarioInput,
+      creatorUserId,
     );
   }
 
   /**
-   * Obtiene una lista de todas las respuestas a cuestionarios, con soporte opcional para paginación.
+   * Obtiene una lista de respuestas de cuestionarios, con soporte opcional de paginación.
    *
-   * @param pagination Parámetros de paginación (opcional).
-   * @returns Una lista de respuestas a cuestionarios.
+   * @param paginationArgs (Opcional) Parámetros de paginación.
+   * @returns Una lista de respuestas de cuestionarios.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => [RespuestaCuestionario], { name: 'RespuestaCuestionarios' })
   @RolesDec(...administradorUp)
   async findAll(
-    @Args() pagination?: PaginationArgs,
+    @Args() paginationArgs?: PaginationArgs,
   ): Promise<RespuestaCuestionario[]> {
-    return this.respuestaCuestionarioService.findAll(pagination);
+    return this.respuestaCuestionarioService.findAll(paginationArgs);
   }
 
   /**
-   * Obtiene una respuesta a un cuestionario por su ID único.
+   * Busca una respuesta específica mediante su ID único.
    *
-   * @param id ID de la respuesta a cuestionario a buscar.
-   * @returns La respuesta al cuestionario correspondiente.
+   * @param respuestaCuestionarioId ID de la respuesta a cuestionario a buscar.
+   * @returns La respuesta correspondiente al ID proporcionado.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => RespuestaCuestionario, { name: 'RespuestaCuestionario' })
   @RolesDec(...administradorUp)
   async findById(
-    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
+    @Args('respuestaCuestionarioId', { type: () => ID }, IdPipe)
+    respuestaCuestionarioId: Types.ObjectId,
   ): Promise<RespuestaCuestionario> {
-    return this.respuestaCuestionarioService.findById(id);
+    return this.respuestaCuestionarioService.findById(respuestaCuestionarioId);
   }
 
   /**
-   * Busca respuestas a cuestionarios asociadas a un curso específico.
+   * Busca respuestas asociadas a un curso específico.
    *
-   * @param cursoId ID del curso para el cual se quieren obtener respuestas.
-   * @returns Una lista de respuestas asociadas al curso.
+   * @param cursoId ID del curso.
+   * @returns Lista de respuestas asociadas al curso indicado.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => [RespuestaCuestionario], {
-    name: 'RespuestaCuestionario_byCursoID',
+    name: 'RespuestaCuestionario_byCursoId',
   })
   @RolesDec(...administradorUp)
   async findByCursoId(
@@ -106,10 +111,10 @@ export class RespuestaCuestionarioResolver
   }
 
   /**
-   * Busca respuestas a cuestionarios asociadas a un usuario específico.
+   * Busca respuestas asociadas a un usuario específico.
    *
-   * @param usuarioId ID del usuario para el cual se quieren obtener respuestas.
-   * @returns Una lista de respuestas asociadas al usuario.
+   * @param usuarioId ID del usuario.
+   * @returns Lista de respuestas asociadas al usuario.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -124,12 +129,12 @@ export class RespuestaCuestionarioResolver
   }
 
   /**
-   * Actualiza una respuesta a un cuestionario existente.
+   * Actualiza los datos de una respuesta existente.
    *
-   * @param id ID de la respuesta a cuestionario a actualizar.
-   * @param updateCuestionarioInput Datos actualizados de la respuesta.
-   * @param user Usuario autenticado que realiza la operación.
-   * @returns La respuesta al cuestionario actualizada.
+   * @param respuestaCuestionarioUpdateId ID de la respuesta a actualizar.
+   * @param updateRespuestaCuestionarioInput Datos actualizados de la respuesta.
+   * @param currentUser Información del usuario autenticado.
+   * @returns La respuesta actualizada.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -138,25 +143,26 @@ export class RespuestaCuestionarioResolver
   })
   @RolesDec(...administradorUp)
   async update(
-    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
-    @Args('updateCuestionarioInput')
-    updateCuestionarioInput: UpdateRespuestaCuestionarioInput,
-    @CurrentUser() user: UserRequest,
+    @Args('respuestaCuestionarioUpdateId', { type: () => ID }, IdPipe)
+    respuestaCuestionarioUpdateId: Types.ObjectId,
+    @Args('updateRespuestaCuestionarioInput')
+    updateRespuestaCuestionarioInput: UpdateRespuestaCuestionarioInput,
+    @CurrentUser() currentUser: UserRequest,
   ): Promise<RespuestaCuestionario> {
-    const idUpdatedBy = new Types.ObjectId(user._id);
+    const updaterUserId = new Types.ObjectId(currentUser._id);
     return this.respuestaCuestionarioService.update(
-      id,
-      updateCuestionarioInput,
-      idUpdatedBy,
+      respuestaCuestionarioUpdateId,
+      updateRespuestaCuestionarioInput,
+      updaterUserId,
     );
   }
 
   /**
-   * Marca una respuesta a cuestionario como eliminada lógicamente.
+   * Elimina lógicamente una respuesta de cuestionario.
    *
-   * @param idRemove ID de la respuesta a eliminar.
-   * @param user Usuario autenticado que realiza la operación.
-   * @returns La respuesta al cuestionario marcada como eliminada.
+   * @param respuestaCuestionarioId ID de la respuesta a eliminar.
+   * @param currentUser Información del usuario autenticado que realiza la operación.
+   * @returns La respuesta que ha sido marcada como eliminada lógicamente.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -165,18 +171,22 @@ export class RespuestaCuestionarioResolver
   })
   @RolesDec(...administradorUp)
   async softDelete(
-    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: Types.ObjectId,
-    @CurrentUser() user: UserRequest,
+    @Args('respuestaCuestionarioId', { type: () => ID }, IdPipe)
+    respuestaCuestionarioId: Types.ObjectId,
+    @CurrentUser() currentUser: UserRequest,
   ): Promise<RespuestaCuestionario> {
-    const idThanos = new Types.ObjectId(user._id);
-    return this.respuestaCuestionarioService.softDelete(idRemove, idThanos);
+    const deleterUserId = new Types.ObjectId(currentUser._id);
+    return this.respuestaCuestionarioService.softDelete(
+      respuestaCuestionarioId,
+      deleterUserId,
+    );
   }
 
   /**
-   * Elimina permanentemente una respuesta a cuestionario.
+   * Elimina permanentemente una respuesta de cuestionario.
    *
-   * @param id ID de la respuesta a eliminar permanentemente.
-   * @returns La respuesta al cuestionario eliminada permanentemente.
+   * @param respuestaCuestionarioId ID de la respuesta a eliminar permanentemente.
+   * @returns La respuesta eliminada de forma permanente.
    *
    * @Roles: SUPERADMIN
    */
@@ -185,15 +195,43 @@ export class RespuestaCuestionarioResolver
   })
   @RolesDec(RolEnum.SUPERADMIN)
   async hardDelete(
-    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
+    @Args('respuestaCuestionarioId', { type: () => ID }, IdPipe)
+    respuestaCuestionarioId: Types.ObjectId,
   ): Promise<RespuestaCuestionario> {
-    return this.respuestaCuestionarioService.hardDelete(id);
+    return this.respuestaCuestionarioService.hardDelete(
+      respuestaCuestionarioId,
+    );
   }
 
   /**
-   * Elimina permanentemente todas las respuestas marcadas como eliminadas lógicamente.
+   * Restaura una respuesta eliminada lógicamente.
    *
-   * @returns Conteo de respuestas eliminadas permanentemente.
+   * @param respuestaCuestionarioId ID de la respuesta a restaurar.
+   * @param currentUser Información del usuario autenticado que realiza la restauración.
+   * @returns La respuesta que ha sido restaurada.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Mutation(() => RespuestaCuestionario, {
+    name: 'RespuestaCuestionario_restore',
+  })
+  @RolesDec(...administradorUp)
+  async restore(
+    @Args('respuestaCuestionarioId', { type: () => ID }, IdPipe)
+    respuestaCuestionarioId: Types.ObjectId,
+    @CurrentUser() currentUser: UserRequest,
+  ): Promise<RespuestaCuestionario> {
+    const restorerUserId = new Types.ObjectId(currentUser._id);
+    return this.respuestaCuestionarioService.restore(
+      respuestaCuestionarioId,
+      restorerUserId,
+    );
+  }
+
+  /**
+   * Elimina permanentemente todas las respuestas que fueron eliminadas lógicamente.
+   *
+   * @returns Número de respuestas que se han eliminado de manera permanente.
    *
    * @Roles: SUPERADMIN
    */
@@ -206,10 +244,10 @@ export class RespuestaCuestionarioResolver
   }
 
   /**
-   * Obtiene respuestas a cuestionarios que fueron eliminadas lógicamente.
+   * Obtiene una lista de respuestas que fueron eliminadas lógicamente, con soporte de paginación opcional.
    *
-   * @param pagination Parámetros de paginación (opcional).
-   * @returns Una lista de respuestas eliminadas lógicamente.
+   * @param paginationArgs (Opcional) Parámetros de paginación.
+   * @returns Lista de respuestas marcadas como eliminadas lógicamente.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -219,29 +257,8 @@ export class RespuestaCuestionarioResolver
   @RolesDec(...administradorUp)
   async findSoftDeleted(
     @Args({ type: () => PaginationArgs, nullable: true })
-    pagination?: PaginationArgs,
+    paginationArgs?: PaginationArgs,
   ): Promise<RespuestaCuestionario[]> {
-    return this.respuestaCuestionarioService.findSoftDeleted(pagination);
-  }
-
-  /**
-   * Restaura una respuesta a cuestionario eliminada lógicamente.
-   *
-   * @param idRestore ID de la respuesta a restaurar.
-   * @param user Usuario autenticado que realiza la operación.
-   * @returns La respuesta al cuestionario restaurada.
-   *
-   * @Roles: ADMINISTRADOR, SUPERADMIN
-   */
-  @Mutation(() => RespuestaCuestionario, {
-    name: 'RespuestaCuestionario_restore',
-  })
-  @RolesDec(...administradorUp)
-  async restore(
-    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
-    @CurrentUser() user: UserRequest,
-  ): Promise<RespuestaCuestionario> {
-    const userId = new Types.ObjectId(user._id);
-    return this.respuestaCuestionarioService.restore(idRestore, userId);
+    return this.respuestaCuestionarioService.findSoftDeleted(paginationArgs);
   }
 }

@@ -6,7 +6,7 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 export interface IOpcion extends IdInterface {
   _id: Types.ObjectId;
   textOpcion: string;
-  esCorrecta: boolean;
+  esCorrecta?: boolean;
   orden?: number;
 }
 

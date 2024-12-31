@@ -8,6 +8,7 @@ import { Model, Types } from 'mongoose';
 import { CursoService } from 'src/modules/curso/services/curso.service';
 import { CursoCompradoService } from 'src/modules/curso-comprado/services/curso-comprado.service';
 import { CursoComprado } from 'src/modules/curso-comprado/entities/curso-comprado.entity';
+import { UsuarioService } from 'src/modules/usuario/services/usuario.service';
 
 @Injectable()
 export class RespuestaCuestionarioService extends BaseService<
@@ -20,6 +21,7 @@ export class RespuestaCuestionarioService extends BaseService<
     private readonly respuestaCuestionarioModel: Model<RespuestaCuestionario>, // Mongoose Model para gestionar los documentos de RespuestaCuestionario.
     private readonly cursoService: CursoService, // Servicio para realizar operaciones relacionadas con Cursos.
     private readonly cursoCompradoService: CursoCompradoService, // Servicio para realizar operaciones relacionadas con Cursos comprados.
+    private readonly usuarioService: UsuarioService, // Servicio para realizar operaciones relacionadas con Usuarios.
   ) {
     super(respuestaCuestionarioModel); // Inicializa el servicio base con el modelo de RespuestaCuestionario.
   }
@@ -92,6 +94,9 @@ export class RespuestaCuestionarioService extends BaseService<
   async findByCursoId(
     cursoId: Types.ObjectId,
   ): Promise<RespuestaCuestionario[]> {
+    //verifica que el curso exista en la base de datos y lanza un mensaje si no existe
+    await this.cursoService.findById(cursoId);
+
     return this.respuestaCuestionarioModel.find({ cursoId }).exec();
   }
 
@@ -104,6 +109,7 @@ export class RespuestaCuestionarioService extends BaseService<
   async findByUsuarioId(
     usuarioId: Types.ObjectId,
   ): Promise<RespuestaCuestionario[]> {
+    await this.usuarioService.findById(usuarioId);
     return this.respuestaCuestionarioModel.find({ usuarioId }).exec();
   }
 }

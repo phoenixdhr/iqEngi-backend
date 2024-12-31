@@ -2,7 +2,6 @@ import { InputType, Field, ID } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsOptional,
-  IsString,
   IsMongoId,
   IsArray,
   ArrayNotEmpty,
@@ -22,10 +21,10 @@ export class CreateRespuestaPreguntaInput implements IRespuestaPreguntaInput {
   @IsArray()
   @ArrayNotEmpty()
   @IsMongoId({ each: true })
-  opcionIds?: Types.ObjectId[];
+  respuestaId?: Types.ObjectId[];
 
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  respuestaAbierta?: string;
+  //   @Field({ nullable: true })
+  //   @IsOptional()
+  //   @IsString()
+  //   respuestaAbierta?: string;
 }

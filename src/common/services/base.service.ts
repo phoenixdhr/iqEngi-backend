@@ -895,7 +895,7 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
       }
 
       throw new InternalServerErrorException(
-        `Error al restaurar el documento ${this.model.collection.name}`,
+        `Error al restaurar el documento ${this.model.collection.name}, tal vez ya se tenga un documento activo, no se puede tener dos cuestionarios de un mismo curso activos `,
         error.message,
       );
     }

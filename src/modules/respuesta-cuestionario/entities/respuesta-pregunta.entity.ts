@@ -7,6 +7,7 @@ import { IRespuestaPregunta } from '../interfaces/respuesta-pregunta.interface';
 
 import { AuditFields } from 'src/common/clases/audit-fields.class';
 import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
+import { OpcionOutput } from 'src/modules/respuesta-cuestionario/dtos/respuesta-pregunta-dtos/output-opcion';
 
 // 'Respuesta' detalla la respuesta dada por un usuario a una pregunta específica dentro de un cuestionario.
 @ObjectType()
@@ -22,9 +23,9 @@ export class RespuestaPregunta
   @Prop({ type: Types.ObjectId, ref: Pregunta.name, required: true })
   preguntaId: Types.ObjectId;
 
-  @Field(() => [Opcion], { nullable: true })
-  @Prop({ type: [Types.ObjectId], ref: Opcion.name })
-  opcionIds?: Types.ObjectId[];
+  @Field(() => [OpcionOutput], { nullable: true })
+  @Prop({ type: [Types.ObjectId], ref: Opcion.name, default: [] })
+  respuestaId?: Types.ObjectId[];
 
   @Field({ nullable: true })
   @Prop()

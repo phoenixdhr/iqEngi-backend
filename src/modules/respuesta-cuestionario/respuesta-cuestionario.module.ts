@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { RespuestaCuestionarioController } from './controllers/respuesta-cuestionario.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 
@@ -17,6 +17,8 @@ import { RespuestaPreguntaResolver } from './resolvers/respuesta-pregunta.resolv
 import { CursoModule } from '../curso/curso.module';
 import { CuestionarioModule } from '../cuestionario/cuestionario.module';
 import { CursoCompradoModule } from '../curso-comprado/curso-comprado.module';
+import { UsuarioModule } from '../usuario/usuario.module';
+import { Cuestionario } from '../cuestionario/entities/cuestionario.entity';
 
 @Module({
   imports: [
@@ -26,10 +28,12 @@ import { CursoCompradoModule } from '../curso-comprado/curso-comprado.module';
         schema: RespuestaCuestionarioSchema,
       },
       { name: RespuestaPregunta.name, schema: RespuestaPreguntaSchema },
+      { name: Cuestionario.name, schema: RespuestaPreguntaSchema },
     ]),
     CursoModule,
     CuestionarioModule,
     CursoCompradoModule,
+    forwardRef(() => UsuarioModule),
   ],
   providers: [
     RespuestaCuestionarioService,
