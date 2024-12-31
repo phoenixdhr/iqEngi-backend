@@ -489,7 +489,15 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    */
   async findAll(pagination?: PaginationArgs): Promise<T[]> {
     const { limit = 10, offset = 0 } = pagination || {};
-    return this.model.find({ deleted: false }).skip(offset).limit(limit).exec();
+    const data = await this.model
+      .find({ deleted: false })
+      .skip(offset)
+      .limit(limit)
+      .exec();
+
+    console.log(data);
+
+    return data;
   }
 
   /**
@@ -649,11 +657,11 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
     deleted: boolean = false,
   ): Promise<T> {
     // Validar que el subDocumentField existe en el esquema del modelo
-    if (!this.model.schema.paths[subDocumentField]) {
-      throw new InternalServerErrorException(
-        `El campo "${subDocumentField}" no existe en el esquema del modelo  cccc ${this.model.collection.name}`,
-      );
-    }
+    // if (!this.model.schema.paths[subDocumentField]) {
+    //   throw new InternalServerErrorException(
+    //     `El campo "${subDocumentField}" no existe en el esquema del modelo  cccc ${this.model.collection.name}`,
+    //   );
+    // }
 
     const result = await this.model
       .aggregate([
