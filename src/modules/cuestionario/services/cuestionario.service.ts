@@ -91,19 +91,22 @@ export class CuestionarioService extends BaseService<
     return cuestionario;
   }
 
-
   async findAll(pagination?: PaginationArgs): Promise<Cuestionario[]> {
+    const { limit , offset } = pagination;
+
     const query = { deleted: false };
     
     const cuestionarios = await this.cuestionarioModel
       .find(query)
+      .skip(offset)
+      .limit(limit)
       .lean()
       .exec();
+
+      console.log('cuestionarios:', cuestionarios); 
   
-    return cuestionarios.map(cuestionario => ({
-      ...cuestionario,
-      cursoId: new Types.ObjectId(cuestionario.cursoId) // Convertir string a ObjectId
-    }));
-  }
+    return cuestionarios;   
+
+}
 
 }

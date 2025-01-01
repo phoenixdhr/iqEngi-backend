@@ -63,12 +63,12 @@ export class CuestionarioResolver
     //return this.cuestionarioService.findAll(pagination);
     const cuestionarios = await this.cuestionarioService.findAll(pagination);
     // Verifica que los datos lleguen correctamente
-    console.log('Cuestionarios encontradosxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:', JSON.stringify(cuestionarios, null, 2));
+    console.log('Cuestionarios encontradosxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:', cuestionarios);
     return cuestionarios;
   }
 
 
-  
+
   /**
    * Obtiene un cuestionario por su ID único.
    *

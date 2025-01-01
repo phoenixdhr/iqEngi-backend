@@ -113,11 +113,11 @@ export abstract class BaseArrayWithNestedArrayService<
     deleted: boolean = false,
   ): Promise<ModeloGeneral> {
     // Validar que el campo de subdocumentos existe en el esquema
-    if (!this.modelo.schema.paths[subDocumentField]) {
-      throw new InternalServerErrorException(
-        `El campo "${subDocumentField}"no existe en el esquema del modelo ${this.modelo.collection.name}`,
-      );
-    }
+    //if (!this.modelo.schema.paths[subDocumentField]) {
+    //  throw new InternalServerErrorException(
+    //    `El campo "${subDocumentField}"no existe en el esquema del modelo ddd ${this.modelo.collection.name}`,
+    //  );
+    //}
 
     // Realizar una agregación para filtrar subdocumentos y subsubdocumentos
     const result = await this.modelo

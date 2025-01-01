@@ -489,10 +489,14 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    */
   async findAll(pagination?: PaginationArgs): Promise<T[]> {
     const { limit , offset } = pagination;
+
+    const query = { deleted: false };
+    
     const data = await this.model
-      .find()
+      .find(query)
       .skip(offset)
       .limit(limit)
+      //.lean()
       .exec();
 
     console.log(data);
