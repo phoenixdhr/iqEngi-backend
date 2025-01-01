@@ -80,7 +80,7 @@ type Cuestionario {
   cursoId: ID!
   cuestionarioTitle: String
   descripcion: String
-  preguntas: [Pregunta!]
+  preguntas: [Pregunta!]!
   numeroPreguntasPresentar: Int
   fechaCreacion: DateTime!
   deleted: Boolean!

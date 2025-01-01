@@ -25,6 +25,7 @@ export class CuestionarioResolver
       UpdateCuestionarioInput,
       CreateCuestionarioInput
     >
+    
 {
   constructor(private readonly cuestionarioService: CuestionarioService) {}
 
