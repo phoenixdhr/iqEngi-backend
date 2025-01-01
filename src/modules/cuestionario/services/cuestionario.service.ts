@@ -7,6 +7,7 @@ import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CursoService } from 'src/modules/curso/services/curso.service';
 import { UpdateCursoInput } from 'src/modules/curso/dtos/curso-dtos/update-curso.input';
+import { PaginationArgs } from 'src/common/dtos';
 
 @Injectable()
 export class CuestionarioService extends BaseService<
@@ -89,4 +90,20 @@ export class CuestionarioService extends BaseService<
 
     return cuestionario;
   }
+
+
+  async findAll(pagination?: PaginationArgs): Promise<Cuestionario[]> {
+    const query = { deleted: false };
+    
+    const cuestionarios = await this.cuestionarioModel
+      .find(query)
+      .lean()
+      .exec();
+  
+    return cuestionarios.map(cuestionario => ({
+      ...cuestionario,
+      cursoId: new Types.ObjectId(cuestionario.cursoId) // Convertir string a ObjectId
+    }));
+  }
+
 }

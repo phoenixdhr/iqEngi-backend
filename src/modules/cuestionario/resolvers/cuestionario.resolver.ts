@@ -60,9 +60,15 @@ export class CuestionarioResolver
   @Query(() => [Cuestionario], { name: 'Cuestionarios' })
   @RolesDec(...administradorUp)
   async findAll(@Args() pagination?: PaginationArgs): Promise<Cuestionario[]> {
-    return this.cuestionarioService.findAll(pagination);
+    //return this.cuestionarioService.findAll(pagination);
+    const cuestionarios = await this.cuestionarioService.findAll(pagination);
+    // Verifica que los datos lleguen correctamente
+    console.log('Cuestionarios encontradosxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:', JSON.stringify(cuestionarios, null, 2));
+    return cuestionarios;
   }
 
+
+  
   /**
    * Obtiene un cuestionario por su ID único.
    *
