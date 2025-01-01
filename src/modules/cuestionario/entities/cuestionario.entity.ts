@@ -15,7 +15,7 @@ export class Cuestionario extends AuditFields implements ICuestionario {
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Field(() => ID, { nullable: true })
+  @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: Coleccion.Curso, required: true })
   cursoId: Types.ObjectId;
 
@@ -35,7 +35,7 @@ export class Cuestionario extends AuditFields implements ICuestionario {
   @Prop()
   numeroPreguntasPresentar?: number;
 
-  @Field({ nullable: true })
+  @Field()
   @Prop({ default: Date.now })
   fechaCreacion: Date;
 
