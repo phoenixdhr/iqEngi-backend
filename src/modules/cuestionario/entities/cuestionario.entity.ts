@@ -27,7 +27,7 @@ export class Cuestionario extends AuditFields implements ICuestionario {
   @Prop()
   descripcion?: string;
 
-  @Field(() => [Pregunta], { nullable: true })
+  @Field(() => [Pregunta])
   @Prop({ type: [PreguntaSchema], default: [] })
   preguntas: Pregunta[];
 

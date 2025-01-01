@@ -77,12 +77,12 @@ enum TipoPregunta {
 
 type Cuestionario {
   _id: ID!
-  cursoId: ID
+  cursoId: ID!
   cuestionarioTitle: String
   descripcion: String
   preguntas: [Pregunta!]
   numeroPreguntasPresentar: Int
-  fechaCreacion: DateTime
+  fechaCreacion: DateTime!
   deleted: Boolean!
 }
 
