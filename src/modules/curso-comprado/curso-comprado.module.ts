@@ -8,12 +8,15 @@ import {
   CursoCompradoSchema,
 } from './entities/curso-comprado.entity';
 import { CursoModule } from '../curso/curso.module';
+import { RespuestaCuestionarioModule } from '../respuesta-cuestionario/respuesta-cuestionario.module';
+import { RespuestaCuestionarioService } from '../respuesta-cuestionario/services/respuesta-cuestionario.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: CursoComprado.name, schema: CursoCompradoSchema },
     ]),
+    forwardRef(() => RespuestaCuestionarioModule),
     forwardRef(() => CursoModule),
   ],
   providers: [CursoCompradoService, CursoCompradoResolver],

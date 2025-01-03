@@ -5,6 +5,24 @@ import {
 } from '@nestjs/common';
 import { IdInterface } from '../interfaces/id.interface';
 
+
+/* En el siguiente ejemplo el codigo permitiria agregar y modificar lecciones
+{
+  "_id": "1",
+  "nombre": "Curso de Programación",
+  "modulos": [
+    {
+      "_id": "101",
+      "titulo": "Introducción",
+      "lecciones": [
+        { "_id": "1001", "nombre": "Bienvenida", "deleted": false },
+        { "_id": "1002", "nombre": "Primeros pasos", "deleted": true }
+      ]
+    }
+  ]
+} */
+
+
 export abstract class BaseNestedArrayService<
   ModeloGeneral,
   DtoCrearSubSubModelo,

@@ -9,11 +9,12 @@
 // ] as const) {}
 
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Prop } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { IOpcion } from '../../../cuestionario/interfaces/opcion.interface';
+import { IOpcion } from '../../cuestionario/interfaces/opcion.interface';
 
 @ObjectType()
+@Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
 export class OpcionOutput implements IOpcion {
   @Field(() => ID, { nullable: true })
   _id: Types.ObjectId; // Ojo: _id en Mongoose se genera automático,
@@ -27,3 +28,5 @@ export class OpcionOutput implements IOpcion {
   @Prop({ required: false })
   orden?: number;
 }
+
+export const OpcionOutputSchema = SchemaFactory.createForClass(OpcionOutput);

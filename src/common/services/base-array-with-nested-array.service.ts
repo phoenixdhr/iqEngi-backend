@@ -4,6 +4,25 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IdInterface } from '../interfaces/id.interface';
+import { Preguntas } from 'src/modules/cuestionario/dtos/pregunta-dtos/preguntas.output';
+
+
+/* En el siguiente ejemplo, el codigo permite agregar y modificar Preguntas
+{
+  "_id": "1",
+  "titulo": "Encuesta de Satisfacción",
+  "preguntas": [
+    {
+      "_id": "101",
+      "texto": "¿Cómo calificaría el servicio?",
+      "opciones": [
+        { "_id": "1001", "texto": "Excelente", "deleted": false },
+        { "_id": "1002", "texto": "Bueno", "deleted": true }
+      ]
+    }
+  ]
+}
+ */
 
 export abstract class BaseArrayWithNestedArrayService<
   ModeloGeneral,
@@ -124,6 +143,8 @@ export abstract class BaseArrayWithNestedArrayService<
       .aggregate([
         // Filtrar el documento principal por ID y que no esté eliminado
         { $match: { _id: id, deleted: false } },
+
+        
         {
           // Filtrar los subdocumentos basados en el estado 'deleted'
           $addFields: {

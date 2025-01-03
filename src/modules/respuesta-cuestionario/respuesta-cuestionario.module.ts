@@ -32,7 +32,7 @@ import { Cuestionario } from '../cuestionario/entities/cuestionario.entity';
     ]),
     CursoModule,
     CuestionarioModule,
-    CursoCompradoModule,
+    forwardRef(() => CursoCompradoModule),
     forwardRef(() => UsuarioModule),
   ],
   providers: [

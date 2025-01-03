@@ -38,4 +38,9 @@ export class CreatePreguntaInput implements IPreguntaInput {
   @IsOptional()
   @IsMongoId()
   unidadId?: Types.ObjectId;
+
+  @Field(() => String, { nullable: true })
+  @IsOptional()
+  @IsString()
+  respuestaOrdenamiento?: string;
 }

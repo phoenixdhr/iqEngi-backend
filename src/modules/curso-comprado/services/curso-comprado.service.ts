@@ -6,6 +6,7 @@ import { CreateCursoCompradoInput } from '../dtos/create-curso-comprado.input';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CursoService } from 'src/modules/curso/services/curso.service';
+import { RespuestaCuestionarioService } from 'src/modules/respuesta-cuestionario/services/respuesta-cuestionario.service';
 
 @Injectable()
 export class CursoCompradoService extends BaseService<
@@ -17,6 +18,7 @@ export class CursoCompradoService extends BaseService<
     @InjectModel(CursoComprado.name)
     private readonly cursoCompradoModel: Model<CursoComprado>,
     private readonly cursoService: CursoService,
+    private readonly respuestaCuestionarioService: RespuestaCuestionarioService,
   ) {
     super(cursoCompradoModel);
   }
@@ -46,6 +48,14 @@ export class CursoCompradoService extends BaseService<
     };
 
     const newCursoComprado = await super.create({ ...data }, userid);
+
+    const respuestaCuestionario = await this.respuestaCuestionarioService._create(
+      {
+        cursoId: idCurso,
+
+      },
+      userid,
+    );
 
     return newCursoComprado;
   }

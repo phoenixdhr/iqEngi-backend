@@ -30,7 +30,7 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
     super(respuestaCuestionarioModel, respuestaPreguntaModel); // Inicializa la clase base con los modelos proporcionados.
   }
 
-  /**
+/*   *
    * Agrega una nueva respuesta a la lista de respuestas (`respuestas`) de un cuestionario.
    *
    * @param idRespuestaCuestionario ID del cuestionario donde se agregará la respuesta.
@@ -39,32 +39,46 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
    * @param arrayName Nombre del array donde se almacenan las respuestas (por defecto: 'respuestas').
    * @returns La respuesta agregada al cuestionario.
    */
-  async pushToArray(
-    idRespuestaCuestionario: Types.ObjectId,
+
+
+  async _pushToArray(
+    idCurso: Types.ObjectId,
     idUser: Types.ObjectId,
     element: CreateRespuestaPreguntaInput,
     arrayName: keyof RespuestaCuestionario = 'respuestas',
-    idCuestionario?: Types.ObjectId,
+    /* idCuestionario?: Types.ObjectId, */
   ): Promise<RespuestaPregunta> {
+
+    const { preguntaId, respuestaId } = element;
+
+    const respuestasCuestionarioUser = await this.respuestaCuestionarioService.findByUsuarioId(idUser);
+
+    const respuestaCuestionarioUser = respuestasCuestionarioUser.find(respuestaCuestionario => String(respuestaCuestionario.cursoId) === String(idCurso));
+
+    if(!respuestaCuestionarioUser){
+      throw new Error('El usuario no ha comprado el curso asociado al cuestionario');
+    }
+
+    const { cuestionarioId, _id:idRespuestaCuestionario } = respuestaCuestionarioUser;
+
+
     // Verifica si el cuestionario existe y está activo
     const cuestionario = (
-      await this.cuestionarioModel.findById(idCuestionario).exec()
+      await this.cuestionarioModel.findById(cuestionarioId).exec()
     ).toObject();
 
     console.log('preguntas:', cuestionario);
 
     if (!cuestionario) {
       throw new Error(
-        `No se encontró un cuestionario activo con ID: ${idCuestionario}.`,
+        `No se encontró un cuestionario activo con ID: ${cuestionarioId}.`,
       );
     }
 
-    const { preguntaId, respuestaId } = element;
+
 
     // Verifica si la pregunta y la respuesta existen y están activas
     const pregunta = cuestionario.preguntas.find((pregunta) => {
-      console.log('pregunta_1:', pregunta._id);
-      console.log('pregunta_1:', preguntaId);
       return String(pregunta._id) === String(preguntaId);
     });
 
@@ -75,7 +89,7 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
     }
 
     const respuesta = pregunta.opciones.find((opcion) =>
-      respuestaId.find((id) => id === opcion._id),
+      respuestaId.find((id) => String(id) === String(opcion._id)),
     );
 
     if (!respuesta) {
@@ -84,10 +98,31 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
       );
     }
 
+
+
+    // verifica que lapregunta no se reponda dos veces
+    /* const respuestas = await this.respuestaCuestionarioService.findByUsuarioId(idUser); */
+    const respuestasPregunta = respuestaCuestionarioUser.respuestas;
+    const preguntaRepetida = respuestasPregunta.some(respuesta => String(respuesta.preguntaId) === String(preguntaId));
+    if(preguntaRepetida){
+      throw new Error('La pregunta no se puede responder dos veces');
+    }
+
+
+    const preguntaIdTpyesObject = new Types.ObjectId(preguntaId);
+    const respuestaIdTpyesObject = respuestaId.map((id) =>id);
+    const repuestaArrayString = respuestaId.map(id => String(id));
+
+
+
+    const resultado = pregunta.opciones.filter(objOpcion => repuestaArrayString.includes(String(objOpcion._id)))
+    console.log('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY');
+    console.log('resultado', resultado);
+
     const nuevaRespuesta = await super.pushToArray(
       idRespuestaCuestionario,
       idUser,
-      element,
+      { preguntaId: preguntaIdTpyesObject, respuestaId: resultado },
       arrayName,
     );
 
@@ -103,9 +138,24 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
       .populate(`${arrayName}`) // Realiza el populate
       .exec();
 
+      respuestaCuestionario.populate(`${arrayName}.respuestaId`)  
     // cuestionario[arrayName][0] corresponde a la respuesta recién insertada con sus opcionIds populadas
+      const respuestass = await this.findById_WithNestedSubDocuments_ActiveOrInactive(idRespuestaCuestionario, arrayName, 'respuestaId', false);
+
+      console.log('===============================================');
+      console.log(respuestass); 
+
     return respuestaCuestionario[arrayName][0];
   }
+
+
+  
+
+
+
+
+
+  
 
   /**
    * Busca una respuesta específica dentro del array `respuestas` de un cuestionario.
@@ -129,6 +179,11 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
       arrayNestedName,
     );
   }
+
+
+
+
+
 
   /**
    * Actualiza una respuesta existente dentro del array `respuestas` de un cuestionario.

@@ -50,9 +50,9 @@ export class RespuestaCuestionario
   @Prop()
   nota?: number;
 
-  @Field()
-  @Prop({ enum: EstadoCuestionario, required: true })
-  estado: EstadoCuestionario;
+  @Field(() => EstadoCuestionario, { defaultValue: EstadoCuestionario.Sin_empezar })
+  @Prop({ enum: EstadoCuestionario, default: EstadoCuestionario.Sin_empezar })
+  estado: EstadoCuestionario = EstadoCuestionario.Sin_empezar;
 
   @Field()
   @Prop({ default: false })
@@ -72,6 +72,39 @@ RespuestaCuestionarioSchema.index(
   { usuarioId: 1, cursoId: 1, cuestionarioId: 1 },
   { unique: true, partialFilterExpression: { deleted: false } },
 );
+
+/* // Agregar este nuevo índice
+RespuestaCuestionarioSchema.index(
+  { 'respuestas.preguntaId': 1 },
+  { unique: true, partialFilterExpression: { deleted: false } }
+);
+ */
+
+/* 
+RespuestaCuestionarioSchema.index(
+  { cursoId: 1, 'respuestas.preguntaId': 1 },
+  { 
+    unique: true, 
+    partialFilterExpression: { 
+      deleted: false,
+      'respuestas.deleted': false 
+    } 
+  }
+); */
+
+/* // Agregar este middleware de validación
+RespuestaCuestionarioSchema.pre('save', function(next) {
+  const preguntaIds = this.respuestas.map(r => r.preguntaId.toString());
+  const uniquePreguntaIds = new Set(preguntaIds);
+  
+  if (preguntaIds.length !== uniquePreguntaIds.size) {
+    console.log('preguntaIdsXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', preguntaIds);
+    next(new Error('No se permiten preguntaId duplicados en las respuestas'));
+  }
+  
+  next();
+}); */
+
 
 RespuestaCuestionarioSchema.index({ deleted: 1 });
 

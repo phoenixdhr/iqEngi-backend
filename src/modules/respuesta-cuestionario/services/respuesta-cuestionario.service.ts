@@ -20,7 +20,7 @@ export class RespuestaCuestionarioService extends BaseService<
     @InjectModel(RespuestaCuestionario.name)
     private readonly respuestaCuestionarioModel: Model<RespuestaCuestionario>, // Mongoose Model para gestionar los documentos de RespuestaCuestionario.
     private readonly cursoService: CursoService, // Servicio para realizar operaciones relacionadas con Cursos.
-    private readonly cursoCompradoService: CursoCompradoService, // Servicio para realizar operaciones relacionadas con Cursos comprados.
+    /* private readonly cursoCompradoService: CursoCompradoService, // Servicio para realizar operaciones relacionadas con Cursos comprados. */
     private readonly usuarioService: UsuarioService, // Servicio para realizar operaciones relacionadas con Usuarios.
   ) {
     super(respuestaCuestionarioModel); // Inicializa el servicio base con el modelo de RespuestaCuestionario.
@@ -38,17 +38,18 @@ export class RespuestaCuestionarioService extends BaseService<
    * @returns La RespuestaCuestionario creada.
    * @throws Error si el usuario no ha comprado el curso o si el curso no tiene un cuestionario asociado.
    */
-  async create(
+  async _create(
     CreateRespuestaCuestionario: Partial<CreateRespuestaCuestionarioInput> & {
       cursoId: Types.ObjectId;
     },
     idUser: Types.ObjectId,
   ): Promise<RespuestaCuestionario> {
     // Obtiene todos los cursos comprados por el usuario
-    const arrayCursosComprados: CursoComprado[] =
+    const cursoId = new Types.ObjectId(CreateRespuestaCuestionario.cursoId);
+
+    /* const arrayCursosComprados: CursoComprado[] =
       await this.cursoCompradoService.findByUsuarioId(idUser);
 
-    const cursoId = new Types.ObjectId(CreateRespuestaCuestionario.cursoId);
 
     // Verifica si el usuario ha comprado el curso asociado al cuestionario
     const cursoComprado = arrayCursosComprados.find(
@@ -59,7 +60,7 @@ export class RespuestaCuestionarioService extends BaseService<
       throw new Error(
         `El usuario con ID: ${idUser} no ha comprado el curso con ID: ${cursoId}.`,
       );
-    }
+    } */
 
     // Busca el curso y verifica si tiene un cuestionario asociado
     const curso = await this.cursoService.findById(cursoId);

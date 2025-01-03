@@ -38,7 +38,7 @@ export class Cuestionario extends AuditFields implements ICuestionario {
   @Field()
   @Prop({ default: Date.now })
   fechaCreacion: Date;
-
+    
   @Field()
   @Prop({ default: false })
   deleted: boolean;

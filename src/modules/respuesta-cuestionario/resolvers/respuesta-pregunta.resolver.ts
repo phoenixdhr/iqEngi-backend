@@ -44,22 +44,23 @@ export class RespuestaPreguntaResolver
   @Mutation(() => RespuestaPregunta, { name: 'RespuestaPregunta_create' })
   @RolesDec(...administradorUp)
   async create(
-    @Args('idRespuestaCuestionario', { type: () => ID }, IdPipe)
-    idRespuestaCuestionario: Types.ObjectId,
+/*     @Args('idRespuestaCuestionario', { type: () => ID }, IdPipe)
+    idRespuestaCuestionario: Types.ObjectId, */
+    @Args('idCurso', { type: () => ID }, IdPipe)
+    idCurso: Types.ObjectId,
     @Args('createRespuestaPreguntaInput')
     createRespuestaPreguntaInput: CreateRespuestaPreguntaInput,
     @CurrentUser() user: UserRequest,
-    @Args('idCuestionario', { type: () => ID }, IdPipe)
-    idCuestionario: Types.ObjectId,
+    
   ): Promise<RespuestaPregunta> {
     const userId = new Types.ObjectId(user._id);
 
-    return await this.preguntaService.pushToArray(
-      idRespuestaCuestionario,
+    return await this.preguntaService._pushToArray(
+      idCurso,
       userId,
       createRespuestaPreguntaInput,
       'respuestas',
-      idCuestionario,
+      
     );
   }
   //#endregion

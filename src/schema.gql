@@ -200,16 +200,10 @@ enum EstadoAccesoCurso {
   Inactivo
 }
 
-type OpcionOutput {
-  _id: ID
-  textOpcion: String
-  orden: Int
-}
-
 type RespuestaPregunta {
   _id: ID!
   preguntaId: ID!
-  respuestaId: [OpcionOutput!]
+  respuestaId: [Opcion!]
   respuestaAbierta: String
   deleted: Boolean!
 }
@@ -222,8 +216,16 @@ type RespuestaCuestionario {
   respuestas: [RespuestaPregunta!]
   fecha: DateTime!
   nota: Float
-  estado: String!
+  estado: EstadoCuestionario!
   deleted: Boolean!
+}
+
+"""Estados de un cuestionario"""
+enum EstadoCuestionario {
+  Aprobado
+  Desaprobado
+  En_progreso
+  Sin_empezar
 }
 
 type UsuarioOutput {
@@ -360,7 +362,7 @@ type Mutation {
   RespuestaCuestionario_hardDelete(respuestaCuestionarioId: ID!): RespuestaCuestionario!
   RespuestaCuestionario_restore(respuestaCuestionarioId: ID!): RespuestaCuestionario!
   RespuestaCuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
-  RespuestaPregunta_create(idRespuestaCuestionario: ID!, createRespuestaPreguntaInput: CreateRespuestaPreguntaInput!, idCuestionario: ID!): RespuestaPregunta!
+  RespuestaPregunta_create(idCurso: ID!, createRespuestaPreguntaInput: CreateRespuestaPreguntaInput!): RespuestaPregunta!
   RespuestaPregunta_update(idRespuestaCuestionario: ID!, idPregunta: ID!, updatePreguntaInput: UpdateRespuestaPreguntaInput!): RespuestaPregunta!
   RespuestaPregunta_softDelete(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
   RespuestaPregunta_restore(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
@@ -519,14 +521,6 @@ input CreateRespuestaPreguntaInput {
   respuestaId: [ID!]
 }
 
-"""Estados de un cuestionario"""
-enum EstadoCuestionario {
-  Aprobado
-  Desaprobado
-  En_progreso
-  Sin_empezar
-}
-
 input UpdateRespuestaCuestionarioInput {
   usuarioId: ID
   cursoId: ID
@@ -571,6 +565,7 @@ input CreatePreguntaInput {
   tipoPregunta: TipoPregunta!
   moduloId: ID
   unidadId: ID
+  respuestaOrdenamiento: String
 }
 
 input UpdatePreguntaInput {
@@ -578,6 +573,7 @@ input UpdatePreguntaInput {
   tipoPregunta: TipoPregunta
   moduloId: ID
   unidadId: ID
+  respuestaOrdenamiento: String
 }
 
 input CreateCursoComprado_userInput {

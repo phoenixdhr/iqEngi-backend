@@ -13,6 +13,7 @@ export interface IPregunta extends IdInterface {
   opciones?: IOpcion[];
   moduloId?: Types.ObjectId;
   unidadId?: Types.ObjectId;
+  respuestaOrdenamiento?: string;
 }
 
 export type IPreguntaInput = Omit<IPregunta, '_id' | 'opciones'> & {

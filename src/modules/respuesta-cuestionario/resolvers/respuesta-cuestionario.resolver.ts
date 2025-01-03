@@ -53,7 +53,7 @@ export class RespuestaCuestionarioResolver
     @CurrentUser() currentUser: UserRequest,
   ): Promise<RespuestaCuestionario> {
     const creatorUserId = new Types.ObjectId(currentUser._id);
-    return this.respuestaCuestionarioService.create(
+    return this.respuestaCuestionarioService._create(
       createRespuestaCuestionarioInput,
       creatorUserId,
     );

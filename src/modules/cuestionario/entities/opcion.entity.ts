@@ -33,4 +33,5 @@ export const OpcionSchema = SchemaFactory.createForClass(Opcion);
 
 OpcionSchema.index({ deleted: 1 });
 
+
 addSoftDeleteMiddleware<Opcion, Opcion>(OpcionSchema);
