@@ -499,8 +499,6 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
       //.lean()
       .exec();
 
-    console.log(data);
-
     return data;
   }
 

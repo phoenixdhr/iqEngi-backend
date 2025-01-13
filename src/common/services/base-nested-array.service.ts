@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { IdInterface } from '../interfaces/id.interface';
 
-
 /* En el siguiente ejemplo el codigo permitiria agregar y modificar lecciones
 {
   "_id": "1",
@@ -21,7 +20,6 @@ import { IdInterface } from '../interfaces/id.interface';
     }
   ]
 } */
-
 
 export abstract class BaseNestedArrayService<
   ModeloGeneral,

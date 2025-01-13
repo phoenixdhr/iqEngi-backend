@@ -50,7 +50,9 @@ export class RespuestaCuestionario
   @Prop()
   nota?: number;
 
-  @Field(() => EstadoCuestionario, { defaultValue: EstadoCuestionario.Sin_empezar })
+  @Field(() => EstadoCuestionario, {
+    defaultValue: EstadoCuestionario.Sin_empezar,
+  })
   @Prop({ enum: EstadoCuestionario, default: EstadoCuestionario.Sin_empezar })
   estado: EstadoCuestionario = EstadoCuestionario.Sin_empezar;
 
@@ -80,15 +82,15 @@ RespuestaCuestionarioSchema.index(
 );
  */
 
-/* 
+/*
 RespuestaCuestionarioSchema.index(
   { cursoId: 1, 'respuestas.preguntaId': 1 },
-  { 
-    unique: true, 
-    partialFilterExpression: { 
+  {
+    unique: true,
+    partialFilterExpression: {
       deleted: false,
-      'respuestas.deleted': false 
-    } 
+      'respuestas.deleted': false
+    }
   }
 ); */
 
@@ -96,15 +98,13 @@ RespuestaCuestionarioSchema.index(
 RespuestaCuestionarioSchema.pre('save', function(next) {
   const preguntaIds = this.respuestas.map(r => r.preguntaId.toString());
   const uniquePreguntaIds = new Set(preguntaIds);
-  
+
   if (preguntaIds.length !== uniquePreguntaIds.size) {
-    console.log('preguntaIdsXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', preguntaIds);
     next(new Error('No se permiten preguntaId duplicados en las respuestas'));
   }
-  
+
   next();
 }); */
-
 
 RespuestaCuestionarioSchema.index({ deleted: 1 });
 

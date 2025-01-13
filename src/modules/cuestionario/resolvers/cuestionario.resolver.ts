@@ -25,7 +25,6 @@ export class CuestionarioResolver
       UpdateCuestionarioInput,
       CreateCuestionarioInput
     >
-    
 {
   constructor(private readonly cuestionarioService: CuestionarioService) {}
 
@@ -63,11 +62,8 @@ export class CuestionarioResolver
     //return this.cuestionarioService.findAll(pagination);
     const cuestionarios = await this.cuestionarioService.findAll(pagination);
     // Verifica que los datos lleguen correctamente
-    console.log('Cuestionarios encontradosxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:', cuestionarios);
     return cuestionarios;
   }
-
-
 
   /**
    * Obtiene un cuestionario por su ID único.

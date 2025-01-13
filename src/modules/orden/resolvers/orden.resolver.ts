@@ -25,11 +25,14 @@ export class OrdenResolver
   constructor(private readonly ordenService: OrdenService) {}
 
   /**
-   * Crea una nueva categoría.
+   * Crea una nueva orden.
    *
-   * @param createOrden_ListCursosInput Datos necesarios para crear la categoría.
+   * Este método crea una nueva orden asociada a una lista de cursos. Se valida
+   * que todos los cursos existan y no estén eliminados.
+   *
+   * @param createOrden_ListCursosInput Lista de IDs de los cursos para la orden.
    * @param user Usuario autenticado que realiza la creación.
-   * @returns La categoría creada.
+   * @returns La orden recién creada.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -40,16 +43,17 @@ export class OrdenResolver
     createOrden_ListCursosInput: Types.ObjectId[],
     @CurrentUser() user: UserRequest,
   ): Promise<Orden> {
-    console.log('Input recibido:', createOrden_ListCursosInput); // Verificación temporal
     const userId = new Types.ObjectId(new Types.ObjectId(user._id));
     return this.ordenService._create(createOrden_ListCursosInput, userId);
   }
 
   /**
-   * Obtiene todas las categorías con opciones de paginación.
+   * Obtiene todas las órdenes con opciones de paginación.
+   *
+   * Este método permite listar todas las órdenes activas, paginando los resultados.
    *
    * @param pagination Opcional. Opciones de paginación.
-   * @returns Un array de categorías.
+   * @returns Un array de órdenes.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -60,11 +64,14 @@ export class OrdenResolver
   }
 
   /**
-   * Obtiene todas las categorías con opciones de paginación y búsqueda.
+   * Obtiene las órdenes asociadas a un usuario.
    *
-   * @param usuarioId Objeto que contiene un campo "search" (texto que se usará para realizar búsquedas).
+   * Este método permite listar todas las órdenes asociadas a un usuario
+   * específico, con opciones de paginación.
+   *
+   * @param idUsuario ID del usuario.
    * @param pagination Opcional. Opciones de paginación.
-   * @returns Un array de categorías.
+   * @returns Un array de órdenes del usuario.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -77,6 +84,18 @@ export class OrdenResolver
     return this.ordenService.findByUsuarioId(idUsuario, pagination);
   }
 
+  /**
+   * Obtiene las órdenes asociadas a un curso.
+   *
+   * Este método permite listar todas las órdenes que contienen un curso
+   * específico, con opciones de paginación.
+   *
+   * @param idCurso ID del curso.
+   * @param pagination Opcional. Opciones de paginación.
+   * @returns Un array de órdenes que incluyen el curso.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
   @Query(() => [Orden], { name: 'Ordenes_findAllByCursoId' })
   @RolesDec(...administradorUp)
   async findByCursoId(
@@ -87,10 +106,10 @@ export class OrdenResolver
   }
 
   /**
-   * Obtiene una categoría específica por su ID.
+   * Obtiene una orden específica por su ID.
    *
-   * @param id ID único de la categoría.
-   * @returns La categoría encontrada.
+   * @param id ID único de la orden.
+   * @returns La orden encontrada.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -103,12 +122,12 @@ export class OrdenResolver
   }
 
   /**
-   * Actualiza una categoría existente por su ID.
+   * Actualiza una orden existente por su ID.
    *
-   * @param id ID de la categoría a actualizar.
-   * @param updateCategoriaInput Datos para actualizar la categoría.
+   * @param id ID de la orden a actualizar.
+   * @param updateOrdenInput Datos para actualizar la orden.
    * @param user Usuario autenticado que realiza la actualización.
-   * @returns La categoría actualizada.
+   * @returns La orden actualizada.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -116,19 +135,21 @@ export class OrdenResolver
   @RolesDec(...administradorUp)
   async update(
     @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
-    @Args('updateCategoriaInput') updateCategoriaInput: UpdateOrdenInput,
+    @Args('updateOrdenInput') updateOrdenInput: UpdateOrdenInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Orden> {
     const idUpdatedBy = new Types.ObjectId(user._id);
-    return this.ordenService.update(id, updateCategoriaInput, idUpdatedBy);
+    return this.ordenService.update(id, updateOrdenInput, idUpdatedBy);
   }
 
   /**
-   * Elimina lógicamente una categoría por su ID.
+   * Elimina lógicamente una orden por su ID.
    *
-   * @param idRemove ID de la categoría a eliminar.
+   * Este método marca la orden como eliminada sin eliminarla físicamente.
+   *
+   * @param idRemove ID de la orden a eliminar.
    * @param user Usuario autenticado que realiza la eliminación.
-   * @returns La categoría eliminada lógicamente.
+   * @returns La orden eliminada lógicamente.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -143,12 +164,12 @@ export class OrdenResolver
   }
 
   /**
-   * Elimina permanentemente una categoría por su ID.
+   * Elimina permanentemente una orden por su ID.
    *
-   * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
+   * Este método elimina completamente la orden de la base de datos.
    *
-   * @param id ID de la categoría a eliminar permanentemente.
-   * @returns La categoría eliminada definitivamente.
+   * @param id ID de la orden a eliminar permanentemente.
+   * @returns La orden eliminada definitivamente.
    *
    * @Roles: SUPERADMIN
    */
@@ -161,11 +182,9 @@ export class OrdenResolver
   }
 
   /**
-   * Elimina permanentemente todas las categorías que han sido eliminadas lógicamente.
+   * Elimina permanentemente todas las órdenes eliminadas lógicamente.
    *
-   * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
-   *
-   * @returns Un objeto que contiene el conteo de categorías eliminadas.
+   * @returns Un objeto que contiene el conteo de órdenes eliminadas.
    *
    * @Roles: SUPERADMIN
    */
@@ -178,10 +197,13 @@ export class OrdenResolver
   }
 
   /**
-   * Obtiene todas las categorías que han sido eliminadas lógicamente.
+   * Obtiene todas las órdenes que han sido eliminadas lógicamente.
+   *
+   * Este método permite listar las órdenes eliminadas lógicamente,
+   * con opciones de paginación.
    *
    * @param pagination Opcional. Opciones de paginación.
-   * @returns Un array de categorías eliminadas lógicamente.
+   * @returns Un array de órdenes eliminadas lógicamente.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
@@ -197,11 +219,11 @@ export class OrdenResolver
   }
 
   /**
-   * Restaura una categoría que ha sido eliminada lógicamente.
+   * Restaura una orden que ha sido eliminada lógicamente.
    *
-   * @param idRestore ID de la categoría a restaurar.
+   * @param idRestore ID de la orden a restaurar.
    * @param user Usuario autenticado que realiza la restauración.
-   * @returns La categoría restaurada.
+   * @returns La orden restaurada.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */

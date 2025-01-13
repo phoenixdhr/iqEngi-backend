@@ -10,58 +10,55 @@ import { Types } from 'mongoose';
 import { OrdenArrayCursoService } from '../services/ordenArrayCursoItem.service';
 
 @Resolver()
-@UseGuards(JwtGqlAuthGuard, RolesGuard)
+@UseGuards(JwtGqlAuthGuard, RolesGuard) // Aplica autenticación y verificación de roles para todos los métodos del resolver.
 export class OrdenArrayCursoResolver {
   constructor(
-    private readonly ordenArrayCursoService: OrdenArrayCursoService,
+    private readonly ordenArrayCursoService: OrdenArrayCursoService, // Servicio que gestiona las operaciones sobre el array de cursos en una orden.
   ) {}
 
   /**
-   * Crea una nueva categoría.
+   * Agrega uno o más cursos a una orden existente.
    *
-   * @param createOrden_ListCursosInput Datos necesarios para crear la categoría.
-   * @param user Usuario autenticado que realiza la creación.
-   * @returns La categoría creada.
+   * Este método permite agregar una lista de cursos a una orden. Antes de realizar la operación,
+   * verifica que los cursos no estén duplicados en la orden y que no hayan sido eliminados en la base de datos.
+   * También recalcula el monto total de la orden después de agregar los cursos.
    *
-   * @Roles: ADMINISTRADOR, SUPERADMIN
+   * @param ordenId ID de la orden a la que se agregarán los cursos.
+   * @param createOrden_ListCursosInput Lista de IDs de los cursos a agregar.
+   * @param user Usuario autenticado que realiza la operación.
+   * @returns La orden actualizada con los cursos añadidos.
    */
   @Mutation(() => Orden, { name: 'Ordenes_pushCurso' })
   async pushToArray(
-    @Args({ name: 'ordenId', type: () => ID })
-    ordenId: Types.ObjectId,
+    @Args({ name: 'ordenId', type: () => ID }) ordenId: Types.ObjectId, // ID de la orden.
     @Args({ name: 'arrayCursosIds', type: () => [ID] })
-    createOrden_ListCursosInput: Types.ObjectId[],
-    @CurrentUser() user: UserRequest,
+    createOrden_ListCursosInput: Types.ObjectId[], // Lista de IDs de los cursos a agregar.
+    @CurrentUser() user: UserRequest, // Información del usuario autenticado.
   ): Promise<Orden> {
-    console.log('Input recibido:', createOrden_ListCursosInput); // Verificación temporal
-    const userId = new Types.ObjectId(new Types.ObjectId(user._id));
-    return this.ordenArrayCursoService._pushToArray(
+    const userId = new Types.ObjectId(user._id); // Convertir el ID del usuario a ObjectId para usar en MongoDB.
+    return this.ordenArrayCursoService.pushToArray(
       ordenId,
       userId,
       createOrden_ListCursosInput,
-    );
+    ); // Llamada al servicio para agregar cursos a la orden.
   }
 
   /**
-   * Elimina permanentemente una categoría por su ID.
+   * Elimina uno o más cursos de una orden existente.
    *
-   * Este método solo puede ser ejecutado por usuarios con rol SUPERADMIN.
+   * Este método permite eliminar una lista de cursos de una orden. Después de la eliminación,
+   * recalcula el monto total de la orden basada en los cursos restantes.
    *
-   * @param id ID de la categoría a eliminar permanentemente.
-   * @returns La categoría eliminada definitivamente.
-   *
-   * @Roles: SUPERADMIN
+   * @param ordenId ID de la orden de la que se eliminarán los cursos.
+   * @param cursoId Lista de IDs de los cursos a eliminar.
+   * @returns La orden actualizada después de la eliminación de los cursos.
    */
   @Mutation(() => Orden, { name: 'Ordenes_pullCurso' })
-  async pullArray(
-    @Args({ name: 'ordenId', type: () => ID })
-    ordenId: Types.ObjectId,
+  async pullFromArray(
+    @Args({ name: 'ordenId', type: () => ID }) ordenId: Types.ObjectId, // ID de la orden.
     @Args('arrayCursosIds', { type: () => [ID] })
-    cursoId: Types.ObjectId[],
-    // @CurrentUser() user: UserRequest,
+    cursoId: Types.ObjectId[], // Lista de IDs de los cursos a eliminar.
   ): Promise<Orden> {
-    // const userId = new Types.ObjectId(new Types.ObjectId(user._id));
-    console.log('0000000000000000000000000000000'); // Verificación temporal
-    return this.ordenArrayCursoService._pullFromArray(ordenId, cursoId);
+    return this.ordenArrayCursoService.pullFromArray(ordenId, cursoId); // Llamada al servicio para eliminar cursos de la orden.
   }
 }

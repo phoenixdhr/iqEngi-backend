@@ -101,8 +101,6 @@ export class CuestionarioService extends BaseService<
       .lean()
       .exec();
 
-    console.log('cuestionarios:', cuestionarios);
-
     return cuestionarios;
   }
 }

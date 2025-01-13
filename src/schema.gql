@@ -380,7 +380,7 @@ type Mutation {
   Comentario_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Comentario_restore(idRestore: ID!): Comentario!
   Ordenes_create(arrayCursosIds: [ID!]!): Orden!
-  Ordenes_update(id: ID!, updateCategoriaInput: UpdateOrdenInput!): Orden!
+  Ordenes_update(id: ID!, updateOrdenInput: UpdateOrdenInput!): Orden!
   Ordenes_softDelete(idRemove: ID!): Orden!
   Ordenes_hardDelete(id: ID!): Orden!
   Ordenes_hardDeleteAllSoftDeleted: DeletedCountOutput!

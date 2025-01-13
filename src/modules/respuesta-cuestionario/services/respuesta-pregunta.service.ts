@@ -73,8 +73,6 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
       await this.cuestionarioModel.findById(cuestionarioId).exec()
     ).toObject();
 
-    console.log('preguntas:', cuestionario);
-
     if (!cuestionario) {
       throw new Error(
         `No se encontró un cuestionario activo con ID: ${cuestionarioId}.`,

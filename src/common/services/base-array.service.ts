@@ -140,25 +140,14 @@ export abstract class BaseArrayService<
 
     // Construir dinámicamente el objeto `$set`
     const updateFields: Record<string, string | Types.ObjectId | boolean> = {};
-    // console.log('updateFields 1:', updateFields);
 
     for (const [key, value] of Object.entries(updateData)) {
       // Agregar cada clave del updateData como parte del `$set`
       updateFields[`${arrayFieldName}.$[elem].${key}`] = value;
-      console.log(
-        'key:',
-        key,
-
-        `       ${arrayFieldName}.$[elem].${key}`,
-        '         value:',
-        value,
-      );
     }
-    // console.log('updateFields 2:', updateFields);
 
     // Agregar el campo de auditoría `updatedBy`
     updateFields[`${arrayFieldName}.$[elem].updatedBy`] = idUpdatedBy;
-    // console.log('updateFields 3:', updateFields);
 
     // // Definir la consulta de actualización con type assertion
     // const updateQuery: UpdateQuery<ModelGeneral> = {
@@ -194,7 +183,6 @@ export abstract class BaseArrayService<
     const subDocument = arraySubdocuments.find(
       (sudDoc) => String(sudDoc._id) === String(subDocId),
     );
-    console.log('document:                ', document);
     return subDocument;
   }
 
@@ -277,25 +265,14 @@ export abstract class BaseArrayService<
 
     // Construir dinámicamente el objeto `$set`
     const updateFields: Record<string, string | Types.ObjectId | boolean> = {};
-    // console.log('updateFields 1:', updateFields);
 
     for (const [key, value] of Object.entries(dtoUPdate)) {
       // Agregar cada clave del updateData como parte del `$set`
       updateFields[`${arrayFieldName}.$[elem].${key}`] = value;
-      console.log(
-        'key:',
-        key,
-
-        `       ${arrayFieldName}.$[elem].${key}`,
-        '         value:',
-        value,
-      );
     }
-    // console.log('updateFields 2:', updateFields);
 
     // Agregar el campo de auditoría `updatedBy`
     updateFields[`${arrayFieldName}.$[elem].updatedBy`] = updatedBy;
-    // console.log('updateFields 3:', updateFields);
 
     // // Definir la consulta de actualización con type assertion
     // const updateQuery: UpdateQuery<ModelGeneral> = {
@@ -331,7 +308,6 @@ export abstract class BaseArrayService<
     const subDocument = arraySubdocuments.find(
       (sudDoc) => String(sudDoc._id) === String(idSubDocRestore),
     );
-    console.log('document:                ', document);
     return subDocument;
   }
 
@@ -355,7 +331,6 @@ export abstract class BaseArrayService<
     const arrayFieldName = String(fieldArrayName);
 
     // Buscar el documento y validar si el elemento tiene `deleted: true`
-    console.log('CHIPI');
     const document = await this.model
       .findOne({
         _id: docId,
@@ -364,13 +339,11 @@ export abstract class BaseArrayService<
       })
       .exec();
 
-    console.log('CHAPA');
     if (!document) {
       throw new NotFoundException(
         `El elemento con ID "${elementId}" no se encuentra o no está marcado como eliminado en el documento con ID "${docId}"`,
       );
     }
-    console.log('document[arrayFieldName]       ', document[arrayFieldName]);
     // Realizar el `pull` del elemento marcado como eliminado
     const update = {
       $pull: {
@@ -394,8 +367,6 @@ export abstract class BaseArrayService<
     const subdocument = document[arrayFieldName].find(
       (subDocument) => String(subDocument._id) === String(elementId),
     );
-
-    console.log('subdocument:', subdocument);
 
     return subdocument;
   }

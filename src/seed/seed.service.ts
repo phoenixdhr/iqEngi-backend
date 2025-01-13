@@ -105,11 +105,8 @@
 //     // this.cleanDatabase();
 //     // Segundo : Crear usuarios
 //     const user = await this.loadUsers();
-//     console.log(user);
 
 //     // Tercero : Crear cursos, instructorres, etc
-//     console.log(this.configService.mongo.port);
-//     console.log(process.env.NODE_ENV);
 
 //     return true;
 //   }
