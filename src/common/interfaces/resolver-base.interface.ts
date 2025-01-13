@@ -20,7 +20,7 @@ export interface IResolverBase<OutputDocument, CreateInput, UpdateInput> {
    * @returns La entidad creada.
    */
   create(
-    createInput: CreateInput,
+    createInput: CreateInput | Types.ObjectId[],
     userId: UserRequest,
   ): Promise<OutputDocument>;
 

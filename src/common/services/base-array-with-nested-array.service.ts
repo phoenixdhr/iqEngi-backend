@@ -4,8 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IdInterface } from '../interfaces/id.interface';
-import { Preguntas } from 'src/modules/cuestionario/dtos/pregunta-dtos/preguntas.output';
-
 
 /* En el siguiente ejemplo, el codigo permite agregar y modificar Preguntas
 {
@@ -144,7 +142,6 @@ export abstract class BaseArrayWithNestedArrayService<
         // Filtrar el documento principal por ID y que no esté eliminado
         { $match: { _id: id, deleted: false } },
 
-        
         {
           // Filtrar los subdocumentos basados en el estado 'deleted'
           $addFields: {

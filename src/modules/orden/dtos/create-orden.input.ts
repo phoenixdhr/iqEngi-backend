@@ -9,36 +9,25 @@ import {
   IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ICursosOrden, IOrdenInput } from '../interfaces/orden.interface';
+import { IOrdenInput } from '../interfaces/orden.interface';
 import { Types } from 'mongoose';
 import { EstadoOrden } from 'src/common/enums/estado-orden.enum';
-
-@InputType()
-class CursoItemInput implements ICursosOrden {
-  @Field(() => ID)
-  @IsNotEmpty()
-  @IsMongoId()
-  cursoId: Types.ObjectId;
-
-  @Field(() => Float)
-  @IsNotEmpty()
-  @IsNumber()
-  precio: number;
-}
+import { CreateOrdenCursoItemDto } from './create-ordenCursoItem.input';
 
 @InputType()
 export class CreateOrdenDto implements IOrdenInput {
   @Field(() => ID)
   @IsNotEmpty()
   @IsMongoId()
-  usuarioId: Types.ObjectId;
+  @IsOptional()
+  usuarioId?: Types.ObjectId;
 
-  @Field(() => [CursoItemInput])
+  @Field(() => [CreateOrdenCursoItemDto])
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => CursoItemInput)
-  cursos: CursoItemInput[];
+  @Type(() => CreateOrdenCursoItemDto)
+  listaCursos: CreateOrdenCursoItemDto[];
 
   // Los campos fechaCreacion y montoTotal pueden ser gestionados automáticamente por el servicio
   @Field(() => EstadoOrden, { nullable: true })
@@ -61,3 +50,9 @@ export class CreateOrdenInput extends OmitType(CreateOrdenDto, [
   'montoTotal',
   'fechaActualizacion',
 ]) {}
+
+@InputType()
+export class CreateOrden_ListCursosInput {
+  @Field(() => [ID], { description: 'Lista de IDs de cursos a comprar' })
+  cursosIds: Types.ObjectId[];
+}

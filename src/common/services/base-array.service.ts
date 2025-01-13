@@ -6,7 +6,7 @@ import {
 import { IdInterface } from '../interfaces/id.interface';
 
 // import { IdInterface } from '../interfaces/id.interface';
-
+// El subdocumento debe contener un ID, osea tener su propia coleccion
 export abstract class BaseArrayService<
   ModelGeneral,
   Dto_Create_SubModel,

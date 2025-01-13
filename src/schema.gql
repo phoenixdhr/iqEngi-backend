@@ -200,6 +200,31 @@ enum EstadoAccesoCurso {
   Inactivo
 }
 
+type OrdenCursoItem {
+  cursoId: ID!
+  precio: Float!
+  courseTitle: String!
+  descuento: Float
+}
+
+type Orden {
+  _id: ID!
+  usuarioId: ID!
+  listaCursos: [OrdenCursoItem!]!
+  montoTotal: Float!
+  estado_orden: EstadoOrden!
+  deleted: Boolean!
+}
+
+"""Estados de una orden"""
+enum EstadoOrden {
+  Pendiente
+  Procesando
+  Completada
+  Cancelada
+  Reembolsada
+}
+
 type RespuestaPregunta {
   _id: ID!
   preguntaId: ID!
@@ -284,18 +309,22 @@ type Query {
   Comentario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Comentario!]!
   Comentarios_PorCurso(cursoId: ID!): [Comentario!]!
   Comentarios_PorUsuario(usuarioId: ID!): [Comentario!]!
-  Cursos(offset: Int = 0, limit: Int = 10): [Curso!]!
-  Curso_findAllByTitle(search: String, offset: Int = 0, limit: Int = 10): [Curso!]!
-  Curso(id: ID!): Curso!
-  Curso_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Curso!]!
+  Ordenes(offset: Int = 0, limit: Int = 10): [Orden!]!
+  Ordenes_findAllByUsuarioId(idUsuario: ID!, offset: Int = 0, limit: Int = 10): [Orden!]!
+  Ordenes_findAllByCursoId(idCurso: ID!, offset: Int = 0, limit: Int = 10): [Orden!]!
+  Orden(id: ID!): Orden!
+  Ordenes_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Orden!]!
   RespuestaCuestionarios(offset: Int = 0, limit: Int = 10): [RespuestaCuestionario!]!
   RespuestaCuestionario(respuestaCuestionarioId: ID!): RespuestaCuestionario!
   RespuestaCuestionario_byCursoId(cursoId: ID!): [RespuestaCuestionario!]!
   RespuestaCuestionario_byUsuarioId(usuarioId: ID!): [RespuestaCuestionario!]!
   RespuestaCuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [RespuestaCuestionario!]!
-  RespuestaPregunta(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
+  RespuestaPregunta(idCurso: ID!, idPregunta: ID!): RespuestaPregunta!
   RespuestaPreguntas(idRespuestaCuestionario: ID!): [RespuestaPregunta!]!
-  RespuestaPregunta_findSoftDeleted(idRespuestaCuestionario: ID!): [RespuestaPregunta!]!
+  Cursos(offset: Int = 0, limit: Int = 10): [Curso!]!
+  Curso_findAllByTitle(search: String, offset: Int = 0, limit: Int = 10): [Curso!]!
+  Curso(id: ID!): Curso!
+  Curso_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Curso!]!
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
   Cuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
@@ -350,12 +379,14 @@ type Mutation {
   Comentario_hardDelete(id: ID!): Comentario!
   Comentario_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Comentario_restore(idRestore: ID!): Comentario!
-  Curso_create(createCursoInput: CreateCursoInput!): Curso!
-  Curso_update(id: ID!, updateCursoInput: UpdateCursoInput!): Curso!
-  Curso_softDelete(idRemove: ID!): Curso!
-  Curso_hardDelete(id: ID!): Curso!
-  Curso_hardDeleteAllSoftDeleted: DeletedCountOutput!
-  Curso_restore(idRestore: ID!): Curso!
+  Ordenes_create(arrayCursosIds: [ID!]!): Orden!
+  Ordenes_update(id: ID!, updateCategoriaInput: UpdateOrdenInput!): Orden!
+  Ordenes_softDelete(idRemove: ID!): Orden!
+  Ordenes_hardDelete(id: ID!): Orden!
+  Ordenes_hardDeleteAllSoftDeleted: DeletedCountOutput!
+  Ordenes_restore(idRestore: ID!): Orden!
+  Ordenes_pushCurso(ordenId: ID!, arrayCursosIds: [ID!]!): Orden!
+  Ordenes_pullCurso(ordenId: ID!, arrayCursosIds: [ID!]!): Orden!
   RespuestaCuestionario_create(createRespuestaCuestionarioInput: CreateRespuestaCuestionarioInput!): RespuestaCuestionario!
   RespuestaCuestionario_update(respuestaCuestionarioUpdateId: ID!, updateRespuestaCuestionarioInput: UpdateRespuestaCuestionarioInput!): RespuestaCuestionario!
   RespuestaCuestionario_softDelete(respuestaCuestionarioId: ID!): RespuestaCuestionario!
@@ -363,11 +394,12 @@ type Mutation {
   RespuestaCuestionario_restore(respuestaCuestionarioId: ID!): RespuestaCuestionario!
   RespuestaCuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
   RespuestaPregunta_create(idCurso: ID!, createRespuestaPreguntaInput: CreateRespuestaPreguntaInput!): RespuestaPregunta!
-  RespuestaPregunta_update(idRespuestaCuestionario: ID!, idPregunta: ID!, updatePreguntaInput: UpdateRespuestaPreguntaInput!): RespuestaPregunta!
-  RespuestaPregunta_softDelete(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
-  RespuestaPregunta_restore(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
-  RespuestaPregunta_hardDelete(idRespuestaCuestionario: ID!, idPregunta: ID!): RespuestaPregunta!
-  RespuestaPregunta_hardDeleteAllSoftDeleted(idRespuestaCuestionario: ID!): [RespuestaPregunta!]!
+  Curso_create(createCursoInput: CreateCursoInput!): Curso!
+  Curso_update(id: ID!, updateCursoInput: UpdateCursoInput!): Curso!
+  Curso_softDelete(idRemove: ID!): Curso!
+  Curso_hardDelete(id: ID!): Curso!
+  Curso_hardDeleteAllSoftDeleted: DeletedCountOutput!
+  Curso_restore(idRestore: ID!): Curso!
   Cuestionario_create(createCuestionarioInput: CreateCuestionarioInput!): Cuestionario!
   Cuestionario_update(id: ID!, updateCuestionarioInput: UpdateCuestionarioInput!): Cuestionario!
   Cuestionario_softDelete(idRemove: ID!): Cuestionario!
@@ -467,6 +499,33 @@ input UpdateComentarioInput {
   comentario: String
 }
 
+input UpdateOrdenInput {
+  estado_orden: EstadoOrden!
+}
+
+input CreateRespuestaCuestionarioInput {
+  usuarioId: ID
+  cursoId: ID!
+  cuestionarioId: ID
+  respuestas: [CreateRespuestaPreguntaInput!]
+  nota: Float
+  estado: EstadoCuestionario = En_progreso
+}
+
+input CreateRespuestaPreguntaInput {
+  preguntaId: ID!
+  respuestaId: [ID!]
+}
+
+input UpdateRespuestaCuestionarioInput {
+  usuarioId: ID
+  cursoId: ID
+  cuestionarioId: ID
+  respuestas: [CreateRespuestaPreguntaInput!]
+  nota: Float
+  estado: EstadoCuestionario = En_progreso
+}
+
 input CreateCursoInput {
   courseTitle: String!
   descripcionCorta: String!
@@ -505,34 +564,6 @@ input UpdateCursoInput {
   fechaLanzamiento: DateTime
   categorias: [ID!]
   cuestionarioId: ID
-}
-
-input CreateRespuestaCuestionarioInput {
-  usuarioId: ID
-  cursoId: ID!
-  cuestionarioId: ID
-  respuestas: [CreateRespuestaPreguntaInput!]
-  nota: Float
-  estado: EstadoCuestionario = En_progreso
-}
-
-input CreateRespuestaPreguntaInput {
-  preguntaId: ID!
-  respuestaId: [ID!]
-}
-
-input UpdateRespuestaCuestionarioInput {
-  usuarioId: ID
-  cursoId: ID
-  cuestionarioId: ID
-  respuestas: [CreateRespuestaPreguntaInput!]
-  nota: Float
-  estado: EstadoCuestionario = En_progreso
-}
-
-input UpdateRespuestaPreguntaInput {
-  preguntaId: ID
-  respuestaId: [ID!]
 }
 
 input CreateCuestionarioInput {

@@ -45,7 +45,7 @@ export interface IResolver_SubDocument<Entity, CreateInput, UpdateInput> {
    * @param user Usuario autenticado que realiza la operación.
    * @returns La entidad actualizada.
    */
-  update(
+  update?(
     parentId: Types.ObjectId,
     entityId: Types.ObjectId,
     updateInput: UpdateInput,
@@ -59,7 +59,7 @@ export interface IResolver_SubDocument<Entity, CreateInput, UpdateInput> {
    * @param user Usuario autenticado que realiza la operación.
    * @returns La entidad eliminada lógicamente.
    */
-  softDelete(
+  softDelete?(
     parentId: Types.ObjectId,
     entityId: Types.ObjectId,
     user: UserRequest,
@@ -72,7 +72,7 @@ export interface IResolver_SubDocument<Entity, CreateInput, UpdateInput> {
    * @param user Usuario autenticado que realiza la operación.
    * @returns La entidad restaurada.
    */
-  restore(
+  restore?(
     parentId: Types.ObjectId,
     entityId: Types.ObjectId,
     user: UserRequest,
@@ -83,7 +83,7 @@ export interface IResolver_SubDocument<Entity, CreateInput, UpdateInput> {
    * @param parentId ID del documento principal.
    * @returns Una lista de entidades eliminadas lógicamente.
    */
-  findSoftDeleted(parentId: Types.ObjectId): Promise<Entity[]>;
+  findSoftDeleted?(parentId: Types.ObjectId): Promise<Entity[]>;
 
   /**
    * Elimina permanentemente una entidad marcada como eliminada lógicamente.
@@ -91,7 +91,7 @@ export interface IResolver_SubDocument<Entity, CreateInput, UpdateInput> {
    * @param entityId ID de la entidad a eliminar permanentemente.
    * @returns La entidad eliminada permanentemente.
    */
-  hardDelete(
+  hardDelete?(
     parentId: Types.ObjectId,
     entityId: Types.ObjectId,
   ): Promise<Entity>;
@@ -101,5 +101,5 @@ export interface IResolver_SubDocument<Entity, CreateInput, UpdateInput> {
    * @param parentId ID del documento principal.
    * @returns Una lista de entidades eliminadas permanentemente.
    */
-  hardDeleteAllSoftDeleted(parentId: Types.ObjectId): Promise<Entity[]>;
+  hardDeleteAllSoftDeleted?(parentId: Types.ObjectId): Promise<Entity[]>;
 }

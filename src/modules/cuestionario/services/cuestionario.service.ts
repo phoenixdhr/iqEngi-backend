@@ -86,16 +86,14 @@ export class CuestionarioService extends BaseService<
       false, // No filtrar por estado (se incluyen cuestionarios activos e inactivos).
     );
 
-    
-
     return cuestionario;
   }
 
   async findAll(pagination?: PaginationArgs): Promise<Cuestionario[]> {
-    const { limit , offset } = pagination;
+    const { limit, offset } = pagination;
 
     const query = { deleted: false };
-    
+
     const cuestionarios = await this.cuestionarioModel
       .find(query)
       .skip(offset)
@@ -103,10 +101,8 @@ export class CuestionarioService extends BaseService<
       .lean()
       .exec();
 
-      console.log('cuestionarios:', cuestionarios); 
-  
-    return cuestionarios;   
+    console.log('cuestionarios:', cuestionarios);
 
-}
-
+    return cuestionarios;
+  }
 }

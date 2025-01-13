@@ -6,8 +6,7 @@ import { CreateRespuestaCuestionarioInput } from '../dtos/respuesta-cuestionario
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CursoService } from 'src/modules/curso/services/curso.service';
-import { CursoCompradoService } from 'src/modules/curso-comprado/services/curso-comprado.service';
-import { CursoComprado } from 'src/modules/curso-comprado/entities/curso-comprado.entity';
+
 import { UsuarioService } from 'src/modules/usuario/services/usuario.service';
 
 @Injectable()

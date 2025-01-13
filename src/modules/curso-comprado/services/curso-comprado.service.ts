@@ -49,13 +49,13 @@ export class CursoCompradoService extends BaseService<
 
     const newCursoComprado = await super.create({ ...data }, userid);
 
-    const respuestaCuestionario = await this.respuestaCuestionarioService._create(
-      {
-        cursoId: idCurso,
-
-      },
-      userid,
-    );
+    // const respuestaCuestionario =
+    //   await this.respuestaCuestionarioService._create(
+    //     {
+    //       cursoId: idCurso,
+    //     },
+    //     userid,
+    //   );
 
     return newCursoComprado;
   }

@@ -488,10 +488,10 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @returns Una lista de documentos activos paginados.
    */
   async findAll(pagination?: PaginationArgs): Promise<T[]> {
-    const { limit , offset } = pagination;
+    const { limit, offset } = pagination;
 
     const query = { deleted: false };
-    
+
     const data = await this.model
       .find(query)
       .skip(offset)
