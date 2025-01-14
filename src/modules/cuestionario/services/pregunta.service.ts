@@ -51,13 +51,6 @@ export class PreguntaService extends BaseArrayWithNestedArrayService<
    * @param arrayName Nombre del array donde se encuentran las preguntas (por defecto: 'preguntas').
    * @returns La pregunta encontrada.
    */
-
-  async findAll(idCuestionario: Types.ObjectId): Promise<Pregunta[]> {
-    const cuestionario =
-      await this.cuestionarioService.findById(idCuestionario);
-    return cuestionario.preguntas;
-  }
-
   async findById(
     idCuestionario: Types.ObjectId,
     idPregunta: Types.ObjectId,

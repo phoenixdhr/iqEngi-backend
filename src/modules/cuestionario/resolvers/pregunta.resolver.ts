@@ -22,7 +22,7 @@ export class PreguntaResolver
     IResolver_SubDocument<Pregunta, CreatePreguntaInput, UpdatePreguntaInput>
 {
   constructor(
-    private readonly preguntaService: PreguntaService,
+    private readonly preguntaServiceCopy: PreguntaService,
     private readonly cuestionarioService: CuestionarioService,
   ) {}
 
@@ -46,7 +46,7 @@ export class PreguntaResolver
     @CurrentUser() user: UserRequest,
   ): Promise<Pregunta> {
     const userId = new Types.ObjectId(user._id);
-    return this.preguntaService.pushToArray(
+    return this.preguntaServiceCopy.pushToArray(
       idCuestionario,
       userId,
       createPreguntaInput,
@@ -71,7 +71,7 @@ export class PreguntaResolver
     idCuestionario: Types.ObjectId,
     @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
   ): Promise<Pregunta> {
-    return this.preguntaService.findById(idCuestionario, idPregunta);
+    return this.preguntaServiceCopy.findById(idCuestionario, idPregunta);
   }
 
   /**
@@ -88,7 +88,7 @@ export class PreguntaResolver
     @Args('idCuestionario', { type: () => ID }, IdPipe)
     idCuestionario: Types.ObjectId,
   ): Promise<Pregunta[]> {
-    return this.preguntaService.findAll(idCuestionario);
+    return (await this.cuestionarioService.findById(idCuestionario)).preguntas;
   }
   //#endregion
 
@@ -114,7 +114,7 @@ export class PreguntaResolver
     @CurrentUser() user: UserRequest,
   ): Promise<Pregunta> {
     const idUpdatedBy = new Types.ObjectId(user._id);
-    return this.preguntaService.updateInArray(
+    return this.preguntaServiceCopy.updateInArray(
       idCuestionario,
       idPregunta,
       idUpdatedBy,
@@ -143,7 +143,7 @@ export class PreguntaResolver
     @CurrentUser() user: UserRequest,
   ): Promise<Pregunta> {
     const idThanos = new Types.ObjectId(user._id);
-    return this.preguntaService.softDelete(
+    return this.preguntaServiceCopy.softDelete(
       idCuestionario,
       idPregunta,
       idThanos,
@@ -169,7 +169,7 @@ export class PreguntaResolver
     @CurrentUser() user: UserRequest,
   ): Promise<Pregunta> {
     const idUser = new Types.ObjectId(user._id);
-    return this.preguntaService.restore(idCuestionario, idPregunta, idUser);
+    return this.preguntaServiceCopy.restore(idCuestionario, idPregunta, idUser);
   }
 
   /**
@@ -186,7 +186,7 @@ export class PreguntaResolver
     @Args('idCuestionario', { type: () => ID }, IdPipe)
     idCuestionario: Types.ObjectId,
   ): Promise<Pregunta[]> {
-    return this.preguntaService.findSoftDeleted(idCuestionario);
+    return this.preguntaServiceCopy.findSoftDeleted(idCuestionario);
   }
   //#endregion
 
@@ -207,7 +207,7 @@ export class PreguntaResolver
     idCuestionario: Types.ObjectId,
     @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
   ): Promise<Pregunta> {
-    return this.preguntaService.pullIfDeleted(idCuestionario, idPregunta);
+    return this.preguntaServiceCopy.pullIfDeleted(idCuestionario, idPregunta);
   }
 
   /**
@@ -224,7 +224,7 @@ export class PreguntaResolver
     @Args('idCuestionario', { type: () => ID }, IdPipe)
     idCuestionario: Types.ObjectId,
   ): Promise<Pregunta[]> {
-    return this.preguntaService.pullAllDeleted(idCuestionario);
+    return this.preguntaServiceCopy.pullAllDeleted(idCuestionario);
   }
   //#endregion
 }
