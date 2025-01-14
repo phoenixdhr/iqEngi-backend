@@ -14,9 +14,8 @@ import { Types } from 'mongoose';
 
 @InputType()
 export class CreateModuloInput implements IModuloInput {
-  @Field(() => ID)
-  @IsNotEmpty()
-  cursoId: Types.ObjectId;
+  @Field(() => ID, { nullable: true })
+  cursoId?: Types.ObjectId;
 
   @Field(() => Int)
   @IsNotEmpty()

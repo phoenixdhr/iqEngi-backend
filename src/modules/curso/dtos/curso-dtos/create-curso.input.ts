@@ -16,6 +16,7 @@ import {
 import { Nivel } from 'src/common/enums/nivel.enum'; // Enum para niveles
 import { ICursoInput } from '../../interfaces/curso.interface';
 import { Types } from 'mongoose';
+import { Modulo } from '../../entities/modulo.entity';
 
 @InputType()
 export class CreateCursoInput implements ICursoInput {
@@ -97,7 +98,7 @@ export class CreateCursoInput implements ICursoInput {
   @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  modulos?: Types.ObjectId[];
+  modulos?: Modulo[];
 
   @Field({ nullable: true })
   @IsOptional()

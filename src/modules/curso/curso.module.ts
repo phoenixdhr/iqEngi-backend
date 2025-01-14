@@ -37,17 +37,18 @@ import {
     ),
     // forwardRef(() => CursoCompradoModule),
   ],
-  controllers: [CursoController],
   providers: [
     CursoService,
     CursoResolver,
-    ModuloResolver,
-    UnidadResolver,
-    MaterialResolver,
-    MaterialService,
-    UnidadService,
     ModuloService,
+    ModuloResolver,
+    UnidadService,
+    UnidadResolver,
+    MaterialService,
+    MaterialResolver,
   ],
+  controllers: [CursoController],
+
   exports: [CursoService],
 })
 export class CursoModule {}

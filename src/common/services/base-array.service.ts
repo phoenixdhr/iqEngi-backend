@@ -28,7 +28,7 @@ export abstract class BaseArrayService<
 
     if (!schemaPath) {
       throw new InternalServerErrorException(
-        `El campo "${String(fieldArrayName)}" no existe en el esquema.`,
+        `El campo "${String(fieldArrayName)}" no existe en el esquema. 2`,
       );
     }
 
@@ -374,7 +374,7 @@ export abstract class BaseArrayService<
   async pullAllDeleted<K extends keyof ModelGeneral>(
     docId: Types.ObjectId,
     fieldArrayName: K,
-  ): Promise<SubModel[]> {
+  ): Promise<number> {
     // Validar que el campo sea un array y que sus elementos tengan _id
     this.validateArrayField(fieldArrayName);
 
@@ -423,6 +423,6 @@ export abstract class BaseArrayService<
     }
 
     // Retornar los elementos eliminados
-    return deletedElements;
+    return deletedElements.length;
   }
 }

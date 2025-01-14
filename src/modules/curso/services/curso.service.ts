@@ -72,4 +72,19 @@ export class CursoService extends BaseService<
       Curso[]
     >;
   }
+
+  async findAll(pagination?: PaginationArgs): Promise<Curso[]> {
+    const { limit, offset } = pagination;
+
+    const query = { deleted: false };
+
+    const cursos = await this.cursoModel
+      .find(query)
+      .skip(offset)
+      .limit(limit)
+      .lean()
+      .exec();
+
+    return cursos;
+  }
 }

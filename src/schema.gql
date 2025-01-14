@@ -103,15 +103,16 @@ type Curso {
   precio: Float
   currency: String
   descuento: Float
-  calificacionPromedio: Float!
+  calificacionPromedio: Float
   numeroCalificaciones: Int!
   aprenderas: [String!]!
   objetivos: [String!]!
   dirigidoA: [String!]!
-  modulos: [Modulo!]!
+  modulos: [Modulo!]
   fechaLanzamiento: DateTime
   categorias: [Categoria!]!
   cuestionarioId: Cuestionario
+  slug: String
   deleted: Boolean!
 }
 
@@ -325,6 +326,9 @@ type Query {
   Curso_findAllByTitle(search: String, offset: Int = 0, limit: Int = 10): [Curso!]!
   Curso(id: ID!): Curso!
   Curso_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Curso!]!
+  Modulo(idCurso: ID!, idModulo: ID!): Modulo!
+  Modulos(idCurso: ID!): [Modulo!]!
+  Modulo_findSoftDeleted(idCurso: ID!): [Modulo!]!
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
   Cuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
@@ -400,6 +404,12 @@ type Mutation {
   Curso_hardDelete(id: ID!): Curso!
   Curso_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Curso_restore(idRestore: ID!): Curso!
+  Modulo_create(idCurso: ID!, createModuloInput: CreateModuloInput!): Modulo!
+  Modulo_update(idCurso: ID!, idModulo: ID!, updateModuloInput: UpdateModuloInput!): Modulo!
+  Modulo_softDelete(idCurso: ID!, idModulo: ID!): Modulo!
+  Modulo_restore(idCurso: ID!, idModulo: ID!): Modulo!
+  Modulo_hardDelete(idCurso: ID!, idModulo: ID!): Modulo!
+  Modulo_hardDeleteAllSoftDeleted(idCurso: ID!): [Modulo!]!
   Cuestionario_create(createCuestionarioInput: CreateCuestionarioInput!): Cuestionario!
   Cuestionario_update(id: ID!, updateCuestionarioInput: UpdateCuestionarioInput!): Cuestionario!
   Cuestionario_softDelete(idRemove: ID!): Cuestionario!
@@ -564,6 +574,22 @@ input UpdateCursoInput {
   fechaLanzamiento: DateTime
   categorias: [ID!]
   cuestionarioId: ID
+}
+
+input CreateModuloInput {
+  cursoId: ID
+  numeroModulo: Int!
+  moduloTitle: String!
+  descripcion: String
+  unidades: [ID!]
+}
+
+input UpdateModuloInput {
+  cursoId: ID
+  numeroModulo: Int
+  moduloTitle: String
+  descripcion: String
+  unidades: [ID!]
 }
 
 input CreateCuestionarioInput {

@@ -8,10 +8,11 @@ import { Unidad } from './unidad.entity';
 
 import { AuditFields } from 'src/common/clases/audit-fields.class';
 import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
+import { IdInterface } from 'src/common/interfaces/id.interface';
 
 @ObjectType()
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
-export class Modulo extends AuditFields implements IModulo {
+export class Modulo extends AuditFields implements IModulo, IdInterface {
   @Field(() => ID)
   _id: Types.ObjectId;
 

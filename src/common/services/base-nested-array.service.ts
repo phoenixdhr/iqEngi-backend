@@ -46,7 +46,7 @@ export abstract class BaseNestedArrayService<
 
     if (!rutaEsquema) {
       throw new InternalServerErrorException(
-        `El campo "${String(nombreCampoArreglo)}" no existe en el esquema.`,
+        `El campo "${String(nombreCampoArreglo)}" no existe en el esquema. 3`,
       );
     }
 

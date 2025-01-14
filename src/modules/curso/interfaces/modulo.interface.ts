@@ -6,7 +6,7 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 export interface IModulo extends IdInterface {
   _id: Types.ObjectId;
 
-  cursoId: Types.ObjectId;
+  cursoId?: Types.ObjectId;
   numeroModulo: number;
   moduloTitle: string;
   descripcion?: string;

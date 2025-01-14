@@ -42,10 +42,12 @@ export abstract class BaseArrayWithNestedArrayService<
     nombreCampoArreglo: CampoArregloGeneral,
   ): void {
     const rutaEsquema = this.modelo.schema.path(String(nombreCampoArreglo));
+    console.log('111111111111111111111111');
+    console.log(rutaEsquema);
 
     if (!rutaEsquema) {
       throw new InternalServerErrorException(
-        `El campo "${String(nombreCampoArreglo)}" no existe en el esquema.`,
+        `El campo "${String(nombreCampoArreglo)}" no existe en el esquema. 1`,
       );
     }
 
@@ -77,7 +79,6 @@ export abstract class BaseArrayWithNestedArrayService<
     this.validarCampoArreglo(nombreCampoArreglo);
 
     const nombreCampo = String(nombreCampoArreglo);
-
     // Definir la consulta de actualización
     const actualizacion: UpdateQuery<ModeloGeneral> = {
       $push: {
@@ -103,6 +104,8 @@ export abstract class BaseArrayWithNestedArrayService<
     const arregloDocumentos = documentoActualizado[nombreCampo] as SubModelo[];
     const nuevoElemento = arregloDocumentos[arregloDocumentos.length - 1];
 
+    console.log('222222222222222222222222');
+    console.log(arregloDocumentos);
     return nuevoElemento;
   }
 
@@ -353,7 +356,7 @@ export abstract class BaseArrayWithNestedArrayService<
       );
     }
 
-    this.validarCampoArreglo(nombreCampoArreglo);
+    // this.validarCampoArreglo(nombreCampoArreglo);
 
     const nombreCampo = String(nombreCampoArreglo);
 
@@ -369,7 +372,7 @@ export abstract class BaseArrayWithNestedArrayService<
     const consultaActualizacion: UpdateQuery<ModeloGeneral> = {
       $set: camposActualizacion,
     };
-
+    console.log('---------------33333333333333333333333');
     // Actualizar el subdocumento utilizando filtros de arreglo
     const documento = await this.modelo
       .findOneAndUpdate({ _id: idDocumento }, consultaActualizacion, {
@@ -377,6 +380,7 @@ export abstract class BaseArrayWithNestedArrayService<
         arrayFilters: [{ 'elem._id': idSubDocumentoEliminar }],
       })
       .exec();
+    console.log('33333333333333333333333');
 
     if (!documento) {
       throw new NotFoundException(
@@ -390,7 +394,6 @@ export abstract class BaseArrayWithNestedArrayService<
     const subDocumentoEliminado = arregloSubDocumentos.find(
       (subDoc) => String(subDoc._id) === String(idSubDocumentoEliminar),
     );
-
     return subDocumentoEliminado;
   }
 

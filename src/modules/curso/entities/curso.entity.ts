@@ -55,14 +55,14 @@ export class Curso extends AuditFields implements ICurso {
   precio?: number;
 
   @Field({ nullable: true })
-  @Prop()
+  @Prop({ default: 'USD' })
   currency?: string;
 
   @Field(() => Float, { nullable: true })
   @Prop({ default: 0 })
   descuento?: number;
 
-  @Field(() => Float)
+  @Field(() => Float, { nullable: true })
   @Prop({ nullable: true })
   calificacionPromedio?: number;
 
@@ -82,9 +82,9 @@ export class Curso extends AuditFields implements ICurso {
   @Prop({ default: [] })
   dirigidoA: string[];
 
-  @Field(() => [Modulo])
-  @Prop({ type: [Types.ObjectId], ref: Modulo.name, default: [] })
-  modulos: Types.ObjectId[];
+  @Field(() => [Modulo], { nullable: true })
+  @Prop({ type: [Modulo], ref: Modulo.name, default: [] })
+  modulos: Modulo[];
 
   @Field({ nullable: true })
   @Prop()
@@ -97,6 +97,11 @@ export class Curso extends AuditFields implements ICurso {
   @Field(() => Cuestionario, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: Cuestionario.name })
   cuestionarioId?: Types.ObjectId;
+
+  // CHANGE: Se agrega slug para SEO, búsquedas amigables, etc.
+  @Field({ nullable: true })
+  @Prop({ unique: true, sparse: true })
+  slug?: string;
 
   @Field()
   @Prop({ default: false })
@@ -113,6 +118,9 @@ CursoSchema.index({ categorias: 1 });
 CursoSchema.index({ instructor: 1 });
 CursoSchema.index({ cuestionarioId: 1 });
 CursoSchema.index({ deleted: 1 });
+
+// CHANGE: Se agrega índice en precio para facilitar búsquedas y filtros por rango.
+CursoSchema.index({ precio: 1 });
 
 //#region Middelwares
 addSoftDeleteMiddleware<Curso, Curso>(CursoSchema);
