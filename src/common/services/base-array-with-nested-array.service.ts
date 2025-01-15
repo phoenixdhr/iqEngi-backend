@@ -42,10 +42,8 @@ export abstract class BaseArrayWithNestedArrayService<
     nombreCampoArreglo: CampoArregloGeneral,
   ): void {
     const rutaEsquema = this.modelo.schema.path(String(nombreCampoArreglo));
-    console.log(nombreCampoArreglo);
     console.log('111111111111111111111111');
     console.log(rutaEsquema);
-    console.log('111111111111111111111111');
 
     if (!rutaEsquema) {
       throw new InternalServerErrorException(
@@ -358,7 +356,7 @@ export abstract class BaseArrayWithNestedArrayService<
       );
     }
 
-    this.validarCampoArreglo(nombreCampoArreglo);
+    // this.validarCampoArreglo(nombreCampoArreglo);
 
     const nombreCampo = String(nombreCampoArreglo);
 
