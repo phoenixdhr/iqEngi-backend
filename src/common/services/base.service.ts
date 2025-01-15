@@ -177,8 +177,9 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
     const result = await this.model
       .aggregate([
-        { $match: { _id: id, deleted: false } },
+        { $match: { _id: id, deleted: false } }, // Filtrar el documento principal
         {
+          // Añadir un campo con los subdocumentos filtrados
           $addFields: {
             [subDocumentField]: {
               $filter: {

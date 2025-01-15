@@ -44,14 +44,13 @@ export class RespuestaPreguntaResolver
   @Mutation(() => RespuestaPregunta, { name: 'RespuestaPregunta_create' })
   @RolesDec(...administradorUp)
   async create(
-/*     @Args('idRespuestaCuestionario', { type: () => ID }, IdPipe)
+    /*     @Args('idRespuestaCuestionario', { type: () => ID }, IdPipe)
     idRespuestaCuestionario: Types.ObjectId, */
     @Args('idCurso', { type: () => ID }, IdPipe)
     idCurso: Types.ObjectId,
     @Args('createRespuestaPreguntaInput')
     createRespuestaPreguntaInput: CreateRespuestaPreguntaInput,
     @CurrentUser() user: UserRequest,
-    
   ): Promise<RespuestaPregunta> {
     const userId = new Types.ObjectId(user._id);
 
@@ -60,7 +59,6 @@ export class RespuestaPreguntaResolver
       userId,
       createRespuestaPreguntaInput,
       'respuestas',
-      
     );
   }
   //#endregion
@@ -102,9 +100,8 @@ export class RespuestaPreguntaResolver
     @Args('idRespuestaCuestionario', { type: () => ID }, IdPipe)
     idRespuestaCuestionario: Types.ObjectId,
   ): Promise<RespuestaPregunta[]> {
-    return (
-      await this.preguntaService.findAll(idRespuestaCuestionario)
-    ).respuestas;
+    return (await this.preguntaService.findAll(idRespuestaCuestionario))
+      .respuestas;
   }
   //#endregion
 
@@ -139,7 +136,7 @@ export class RespuestaPreguntaResolver
   //  );
   //}
   ////#endregion
-//
+  //
   ////#region Soft Delete
   ///**
   // * Realiza una eliminación lógica de una pregunta específica en un cuestionario.
@@ -166,7 +163,7 @@ export class RespuestaPreguntaResolver
   //    idThanos,
   //  );
   //}
-//
+  //
   ///**
   // * Restaura una pregunta que ha sido eliminada lógicamente.
   // *
@@ -192,7 +189,7 @@ export class RespuestaPreguntaResolver
   //    idUser,
   //  );
   //}
-//
+  //
   ///**
   // * Obtiene una lista de preguntas eliminadas lógicamente de un cuestionario.
   // *
@@ -212,7 +209,7 @@ export class RespuestaPreguntaResolver
   //  return this.preguntaService.findSoftDeleted(idRespuestaCuestionario);
   //}
   ////#endregion
-//
+  //
   ////#region Hard Delete
   ///**
   // * Elimina permanentemente una pregunta específica marcada como eliminada lógicamente.
@@ -235,7 +232,7 @@ export class RespuestaPreguntaResolver
   //    idPregunta,
   //  );
   //}
-//
+  //
   ///**
   // * Elimina permanentemente todas las preguntas marcadas como eliminadas lógicamente en un cuestionario.
   // *
