@@ -732,8 +732,6 @@ export abstract class BaseNestedArrayService<
       },
     } as UpdateQuery<ModeloGeneral>;
 
-
-
     const documentoActualizado = await this.modelo
       .findOneAndUpdate({ _id: idDocumento }, actualizacion, {
         new: true,

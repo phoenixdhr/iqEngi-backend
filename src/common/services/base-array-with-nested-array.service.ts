@@ -372,21 +372,21 @@ export abstract class BaseArrayWithNestedArrayService<
     const consultaActualizacion: UpdateQuery<ModeloGeneral> = {
       $set: camposActualizacion,
     };
-    console.log('---------------33333333333333333333333');
+    // console.log('---------------33333333333333333333333');
 
-    const doc = await this.modelo.findById(idDocumento).exec();
-    console.log('444444444444444444444444');
-    console.log(doc);
+    // const doc = await this.modelo.findById(idDocumento).exec();
+    // console.log('444444444444444444444444');
+    // console.log(doc);
 
-    console.log('==============================================');
+    // console.log('==============================================');
 
-    const doc3 = await this.modelo.findByIdAndUpdate(
-      idDocumento,
-      consultaActualizacion,
-      { arrayFilters: [{ 'elem._id': idSubDocumentoEliminar }] },
-    );
-    console.log(doc3);
-    console.log('55555555555555555');
+    // const doc3 = await this.modelo.findByIdAndUpdate(
+    //   idDocumento,
+    //   consultaActualizacion,
+    //   { arrayFilters: [{ 'elem._id': idSubDocumentoEliminar }] },
+    // );
+    // console.log(doc3);
+    // console.log('55555555555555555');
 
     // Actualizar el subdocumento utilizando filtros de arreglo
     const documento = await this.modelo
