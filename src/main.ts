@@ -6,7 +6,6 @@ import { port } from './common/enviroments/configEnv';
 
 import { WsAdapter } from '@nestjs/platform-ws'; // Importamos el adaptador de WebSocket
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import mongoose from 'mongoose';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

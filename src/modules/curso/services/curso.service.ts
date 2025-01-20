@@ -84,7 +84,6 @@ export class CursoService extends BaseService<
       .limit(limit)
       .lean()
       .exec();
-
     return cursos;
   }
 }

@@ -15,7 +15,6 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
 export class Pregunta extends AuditFields implements IPregunta, IdInterface {
   @Field(() => ID)
-  @Prop({ type: Types.ObjectId, auto: true })
   _id: Types.ObjectId;
 
   @Field({ nullable: true })

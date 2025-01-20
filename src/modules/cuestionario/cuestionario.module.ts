@@ -34,6 +34,6 @@ import { PreguntaResolver } from './resolvers/pregunta.resolver';
     PreguntaService,
   ],
   controllers: [CuestionarioController],
-  exports: [CuestionarioService],
+  exports: [CuestionarioService, PreguntaService, OpcionService],
 })
 export class CuestionarioModule {}

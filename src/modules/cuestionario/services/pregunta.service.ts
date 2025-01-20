@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Pregunta } from '../entities/pregunta.entity';
 import { CreatePreguntaInput } from '../dtos/pregunta-dtos/create-pregunta.input';
 import { InjectModel } from '@nestjs/mongoose';
@@ -102,6 +102,85 @@ export class PreguntaService extends BaseArrayWithNestedArrayService<
    * @param arrayName Nombre del array donde se encuentran las preguntas (por defecto: 'preguntas').
    * @returns La pregunta eliminada lógicamente.
    */
+  async _softDelete(
+    idCuestionario: Types.ObjectId,
+    idPregunta: Types.ObjectId,
+    idUser: Types.ObjectId,
+    nombreCampoArreglo: keyof Cuestionario = 'preguntas',
+    nombreSubCampoNestedArreglo: keyof Pregunta = 'opciones',
+  ): Promise<Pregunta> {
+    //   return super.softDelete(
+    //     idCuestionario,
+    //     idPregunta,
+    //     idUser,
+    //     arrayName,
+    //     arrayNestedName,
+    //   );
+    const subDocumentoAntes: Pregunta = await super.findById(
+      idCuestionario,
+      idPregunta,
+      nombreCampoArreglo,
+      nombreSubCampoNestedArreglo,
+    );
+
+    console.log(subDocumentoAntes.tipoPregunta);
+    console.log(subDocumentoAntes.enunciado);
+    console.log(subDocumentoAntes);
+    console.log('11111111111111111111');
+    if (subDocumentoAntes.deleted) {
+      throw new NotFoundException(
+        `El subdocumento ya fue eliminado "${idPregunta}"`,
+      );
+    }
+    // const nombreCampo = String(nombreCampoArreglo);
+    console.log('222222222222222222222');
+    // const camposActualizacion = {
+    //   'preguntas.$[elem].deleted': true,
+    //   'preguntas.$[elem].deletedBy': idUser,
+    // };
+
+    // const consultaActualizacion = {
+    //   $set: camposActualizacion,
+    // };
+
+    console.log('333333333333333333333');
+    console.log('huevada');
+    // Actualizar el subdocumento utilizando filtros de arreglo
+
+    const documento = await this.cuestionarioModel
+      .findOneAndUpdate(
+        { _id: idCuestionario, 'preguntas._id': idPregunta },
+        {
+          $set: {
+            'preguntas.$[preguntas].deleted': true,
+            'preguntas.$[preguntas].deletedBy': idUser,
+          },
+        },
+        {
+          new: true,
+          arrayFilters: [{ 'preguntas._id': idPregunta }],
+        },
+      )
+      .exec();
+
+    console.log('444444444444444444444');
+    if (!documento) {
+      throw new NotFoundException(
+        `Documento ${this.subModelo.modelName} con ID ${idCuestionario} no encontrado`,
+      );
+    }
+
+    console.log('55555555555555555555');
+    const arregloSubDocumentos = documento.preguntas as Pregunta[];
+    console.log('66666666666666666666666');
+    // Obtener el subdocumento eliminado
+    const subDocumentoEliminado: Pregunta = arregloSubDocumentos.find(
+      (subDoc) => String(subDoc._id) === String(idPregunta),
+    );
+    console.log('777777777777777777777');
+    return subDocumentoEliminado;
+  }
+
   async softDelete(
     idCuestionario: Types.ObjectId,
     idPregunta: Types.ObjectId,

@@ -28,7 +28,7 @@ export class Usuario extends AuditFields implements IUsuario {
   lastName: string;
 
   @Field()
-  @Prop({ required: true, unique: true, lowercase: true })
+  @Prop({ required: true, lowercase: true })
   email: string;
 
   @Field()

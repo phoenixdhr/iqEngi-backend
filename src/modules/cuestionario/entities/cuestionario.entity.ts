@@ -13,7 +13,6 @@ import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.midd
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
 export class Cuestionario extends AuditFields implements ICuestionario {
   @Field(() => ID)
-  @Prop({ type: Types.ObjectId, auto: true })
   _id: Types.ObjectId;
 
   @Field(() => ID)
