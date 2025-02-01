@@ -18,7 +18,10 @@ import { CursoModule } from '../curso/curso.module';
 import { CuestionarioModule } from '../cuestionario/cuestionario.module';
 import { CursoCompradoModule } from '../curso-comprado/curso-comprado.module';
 import { UsuarioModule } from '../usuario/usuario.module';
-import { Cuestionario } from '../cuestionario/entities/cuestionario.entity';
+import {
+  Cuestionario,
+  CuestionarioSchema,
+} from '../cuestionario/entities/cuestionario.entity';
 
 @Module({
   imports: [
@@ -28,7 +31,7 @@ import { Cuestionario } from '../cuestionario/entities/cuestionario.entity';
         schema: RespuestaCuestionarioSchema,
       },
       { name: RespuestaPregunta.name, schema: RespuestaPreguntaSchema },
-      { name: Cuestionario.name, schema: RespuestaPreguntaSchema },
+      { name: Cuestionario.name, schema: CuestionarioSchema },
     ]),
     CursoModule,
     CuestionarioModule,

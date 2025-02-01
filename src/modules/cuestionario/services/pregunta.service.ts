@@ -152,13 +152,13 @@ export class PreguntaService extends BaseArrayWithNestedArrayService<
         { _id: idCuestionario, 'preguntas._id': idPregunta },
         {
           $set: {
-            'preguntas.$[preguntas].deleted': true,
-            'preguntas.$[preguntas].deletedBy': idUser,
+            'preguntas.$[elem].deleted': true,
+            'preguntas.$[elem].deletedBy': idUser,
           },
         },
         {
           new: true,
-          arrayFilters: [{ 'preguntas._id': idPregunta }],
+          arrayFilters: [{ 'elem._id': idPregunta }],
         },
       )
       .exec();
