@@ -10,7 +10,7 @@ import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.midd
 @Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
 export class Opcion extends AuditFields implements IOpcion {
   @Field(() => ID)
-  @Prop({ type: Types.ObjectId, auto: true })
+  @Prop({ type: Types.ObjectId, default: () => new Types.ObjectId() })
   _id: Types.ObjectId;
 
   @Field()
