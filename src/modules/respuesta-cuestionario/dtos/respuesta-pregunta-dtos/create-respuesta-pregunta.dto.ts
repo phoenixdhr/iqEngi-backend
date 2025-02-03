@@ -8,7 +8,6 @@ import {
 } from 'class-validator';
 import { Types } from 'mongoose';
 import { IRespuestaPreguntaInput } from '../../interfaces/respuesta-pregunta.interface';
-import { OpcionOutput } from '../../entities/output-opcion';
 import { Opcion } from 'src/modules/cuestionario/entities/opcion.entity';
 
 @InputType()
@@ -18,7 +17,11 @@ export class CreateRespuestaPreguntaInput implements IRespuestaPreguntaInput {
   @IsMongoId()
   preguntaId: Types.ObjectId;
 
-  @Field(() => [ID], { nullable: true })
+  @Field(() => [ID], {
+    nullable: true,
+    description:
+      'Respuestas seleccionadas a partir de las opciones de las preguntas',
+  })
   @IsOptional()
   @IsArray()
   @ArrayNotEmpty()

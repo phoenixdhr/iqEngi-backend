@@ -105,4 +105,14 @@ export class CuestionarioService extends BaseService<
 
     return cuestionarios;
   }
+
+  async findByCursoId(cursoId: Types.ObjectId): Promise<Cuestionario[]> {
+    await this.cursoService.findById(cursoId);
+
+    const query = { cursoId, deleted: false };
+
+    const cuestionarios = await this.cuestionarioModel.find(query).exec();
+
+    return cuestionarios;
+  }
 }

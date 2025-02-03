@@ -331,6 +331,7 @@ type Query {
   Modulo_findSoftDeleted(idCurso: ID!): [Modulo!]!
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
+  Cuestionario_findByCursoId(cursoId: ID!): [Cuestionario!]!
   Cuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Pregunta(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Preguntas(idCuestionario: ID!): [Pregunta!]!
@@ -524,6 +525,8 @@ input CreateRespuestaCuestionarioInput {
 
 input CreateRespuestaPreguntaInput {
   preguntaId: ID!
+
+  """Respuestas seleccionadas a partir de las opciones de las preguntas"""
   respuestaId: [ID!]
 }
 

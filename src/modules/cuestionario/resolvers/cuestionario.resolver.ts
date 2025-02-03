@@ -82,6 +82,23 @@ export class CuestionarioResolver
   }
 
   /**
+   * Obtiene un cuestionario por su ID único.
+   *
+   * @param id ID del cuestionario a buscar.
+   * @returns El cuestionario encontrado.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+
+  @Query(() => [Cuestionario], { name: 'Cuestionario_findByCursoId' })
+  @RolesDec(...administradorUp)
+  async findByCursoId(
+    @Args('cursoId', { type: () => ID }, IdPipe) cursoId: Types.ObjectId,
+  ): Promise<Cuestionario[]> {
+    return this.cuestionarioService.findByCursoId(cursoId);
+  }
+
+  /**
    * Actualiza los datos de un cuestionario existente.
    *
    * @param id ID del cuestionario a actualizar.
