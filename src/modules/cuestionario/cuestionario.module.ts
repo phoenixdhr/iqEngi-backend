@@ -28,10 +28,10 @@ import { PreguntaResolver } from './resolvers/pregunta.resolver';
   providers: [
     CuestionarioService,
     CuestionarioResolver,
-    OpcionService,
-    OpcionResolver,
     PreguntaResolver,
     PreguntaService,
+    OpcionService,
+    OpcionResolver,
   ],
   controllers: [CuestionarioController],
   exports: [CuestionarioService, PreguntaService, OpcionService],

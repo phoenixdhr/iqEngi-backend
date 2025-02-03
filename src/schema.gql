@@ -332,12 +332,12 @@ type Query {
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
   Cuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
-  Opcion(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
-  Opciones(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
-  Opcion_findSoftDeleted(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
   Pregunta(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Preguntas(idCuestionario: ID!): [Pregunta!]!
   Pregunta_findSoftDeleted(idCuestionario: ID!): [Pregunta!]!
+  Opcion(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
+  Opciones(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
+  Opcion_findSoftDeleted(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
   CursoComprados(offset: Int = 0, limit: Int = 10): [CursoComprado!]!
   CursoComprado(id: ID!): CursoComprado!
   CursoComprado_findSoftDeleted(offset: Int = 0, limit: Int = 10): [CursoComprado!]!
@@ -416,18 +416,18 @@ type Mutation {
   Cuestionario_hardDelete(id: ID!): Cuestionario!
   Cuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Cuestionario_restore(idRestore: ID!): Cuestionario!
-  Opcion_create(idCuestionario: ID!, idPregunta: ID!, createOpcionInput: CreateOpcionInput!): Opcion!
-  Opcion_update(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!, updateOpcionInput: UpdateOpcionInput!): Opcion!
-  Opcion_softDelete(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
-  Opcion_restore(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
-  Opcion_hardDelete(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
-  Opcion_hardDeleteAllSoftDeleted(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
   Pregunta_create(idCuestionario: ID!, createPreguntaInput: CreatePreguntaInput!): Pregunta!
   Pregunta_update(idCuestionario: ID!, idPregunta: ID!, updatePreguntaInput: UpdatePreguntaInput!): Pregunta!
   Pregunta_softDelete(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Pregunta_restore(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Pregunta_hardDelete(idCuestionario: ID!, idPregunta: ID!): Pregunta!
   Pregunta_hardDeleteAllSoftDeleted(idCuestionario: ID!): [Pregunta!]!
+  Opcion_create(idCuestionario: ID!, idPregunta: ID!, createOpcionInput: CreateOpcionInput!): Opcion!
+  Opcion_update(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!, updateOpcionInput: UpdateOpcionInput!): Opcion!
+  Opcion_softDelete(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
+  Opcion_restore(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
+  Opcion_hardDelete(idCuestionario: ID!, idPregunta: ID!, idOpcion: ID!): Opcion!
+  Opcion_hardDeleteAllSoftDeleted(idCuestionario: ID!, idPregunta: ID!): [Opcion!]!
   CursoComprado_create(createCursoCompradoInput: CreateCursoComprado_userInput!): CursoComprado!
   CursoComprado_softDelete(idRemove: ID!): CursoComprado!
   CursoComprado_hardDelete(id: ID!): CursoComprado!
@@ -605,18 +605,6 @@ input UpdateCuestionarioInput {
   numeroPreguntasPresentar: Int
 }
 
-input CreateOpcionInput {
-  textOpcion: String!
-  esCorrecta: Boolean!
-  orden: Int
-}
-
-input UpdateOpcionInput {
-  textOpcion: String
-  esCorrecta: Boolean
-  orden: Int
-}
-
 input CreatePreguntaInput {
   enunciado: String!
   tipoPregunta: TipoPregunta!
@@ -631,6 +619,18 @@ input UpdatePreguntaInput {
   moduloId: ID
   unidadId: ID
   respuestaOrdenamiento: String
+}
+
+input CreateOpcionInput {
+  textOpcion: String!
+  esCorrecta: Boolean!
+  orden: Int
+}
+
+input UpdateOpcionInput {
+  textOpcion: String
+  esCorrecta: Boolean
+  orden: Int
 }
 
 input CreateCursoComprado_userInput {
