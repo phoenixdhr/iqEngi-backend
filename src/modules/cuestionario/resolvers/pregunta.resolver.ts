@@ -71,7 +71,7 @@ export class PreguntaResolver
     idCuestionario: Types.ObjectId,
     @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
   ): Promise<Pregunta> {
-    return this.preguntaService.findById(idCuestionario, idPregunta);
+    return this.preguntaService._findById(idCuestionario, idPregunta);
   }
 
   /**

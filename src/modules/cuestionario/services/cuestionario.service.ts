@@ -83,7 +83,9 @@ export class CuestionarioService extends BaseService<
       cuestionarioId,
       'preguntas', // Subdocumento relacionado que se desea incluir.
       'opciones', // Subdocumento relacionado que se desea incluir.
-      false, // No filtrar por estado (se incluyen cuestionarios activos e inactivos).
+      false,
+      false,
+      false,
     );
 
     return cuestionario;

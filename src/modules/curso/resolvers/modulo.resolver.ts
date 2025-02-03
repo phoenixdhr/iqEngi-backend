@@ -68,7 +68,7 @@ export class ModuloResolver
     idCurso: Types.ObjectId,
     @Args('idModulo', { type: () => ID }, IdPipe) idModulo: Types.ObjectId,
   ): Promise<Modulo> {
-    return this.moduloService.findById(idCurso, idModulo);
+    return this.moduloService._findById(idCurso, idModulo);
   }
 
   /**

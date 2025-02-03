@@ -67,13 +67,21 @@ export class ModuloService extends BaseArrayWithNestedArrayService<
    * @param nestedArrayNombre Nombre del array anidado dentro del módulo (por defecto: 'unidades').
    * @returns El módulo encontrado.
    */
-  async findById(
+  async _findById(
     cursoId: Types.ObjectId,
     moduloId: Types.ObjectId,
     arrayNombre: keyof Curso = 'modulos',
     nestedArrayNombre: keyof Modulo = 'unidades',
   ): Promise<Modulo> {
-    return super.findById(cursoId, moduloId, arrayNombre, nestedArrayNombre);
+    return super.findById(
+      cursoId,
+      moduloId,
+      arrayNombre,
+      nestedArrayNombre,
+      false,
+      false,
+      false,
+    );
   }
 
   /**
@@ -154,6 +162,9 @@ export class ModuloService extends BaseArrayWithNestedArrayService<
       usuarioId,
       arrayNombre,
       nestedArrayNombre,
+      false,
+      true,
+      false,
     );
   }
 
@@ -169,7 +180,9 @@ export class ModuloService extends BaseArrayWithNestedArrayService<
         cursoId,
         'modulos',
         'unidades',
+        false,
         true,
+        false,
       );
 
     // const modulosIds = curso.modulos as Types.ObjectId[];

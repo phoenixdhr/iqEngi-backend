@@ -217,7 +217,9 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
     id: Types.ObjectId,
     subDocumentField: string,
     nestedSubDocumentField: string,
-    deleted: boolean = false,
+    deleted_mainDocument: boolean,
+    deleted_subDocument: boolean,
+    deleted_nestedDocument: boolean,
   ): Promise<T> {
     // Validar que el subDocumentField existe en el esquema del modelo
     // if (!this.model.schema.paths[subDocumentField]) {
@@ -228,14 +230,14 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
 
     const result = await this.model
       .aggregate([
-        { $match: { _id: id, deleted: false } },
+        { $match: { _id: id, deleted: deleted_mainDocument } },
         {
           $addFields: {
             [subDocumentField]: {
               $filter: {
                 input: `$${subDocumentField}`,
                 as: 'subDocument',
-                cond: { $eq: ['$$subDocument.deleted', deleted] },
+                cond: { $eq: ['$$subDocument.deleted', deleted_subDocument] },
               },
             },
           },
@@ -255,7 +257,10 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
                           input: `$$subDocument.${nestedSubDocumentField}`,
                           as: 'nestedSubDocument',
                           cond: {
-                            $eq: ['$$nestedSubDocument.deleted', deleted],
+                            $eq: [
+                              '$$nestedSubDocument.deleted',
+                              deleted_nestedDocument,
+                            ],
                           },
                         },
                       },

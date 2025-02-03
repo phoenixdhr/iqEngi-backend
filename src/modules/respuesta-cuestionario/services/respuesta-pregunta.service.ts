@@ -166,6 +166,9 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
       idRespuestaPregunta,
       arrayName,
       arrayNestedName,
+      false,
+      false,
+      false,
     );
   }
 
@@ -213,6 +216,9 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
         idRespuestaCuestionario,
         String(nombreCampoArreglo),
         String(nombreSubCampoNestedArreglo),
+        false,
+        false,
+        false,
       );
 
     const arregloSubDocumentos = documento[
@@ -311,6 +317,9 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
       idUser,
       arrayName,
       arrayNestedName,
+      false,
+      true,
+      false,
     );
   }
 
@@ -328,7 +337,9 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
         cuestionarioId,
         'preguntas',
         'opciones',
+        false,
         true,
+        false,
       );
 
     return (await cuestionario).respuestas;

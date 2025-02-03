@@ -41,9 +41,9 @@ export abstract class BaseArrayWithNestedArrayService<
   private validarCampoArreglo<CampoArregloGeneral extends keyof ModeloGeneral>(
     nombreCampoArreglo: CampoArregloGeneral,
   ): void {
+    // console.log('Claves del schema:', Object.keys(this.modelo.schema.paths));
+
     const rutaEsquema = this.modelo.schema.path(String(nombreCampoArreglo));
-    console.log('111111111111111111111111');
-    console.log(rutaEsquema);
 
     if (!rutaEsquema) {
       throw new InternalServerErrorException(
@@ -104,8 +104,6 @@ export abstract class BaseArrayWithNestedArrayService<
     const arregloDocumentos = documentoActualizado[nombreCampo] as SubModelo[];
     const nuevoElemento = arregloDocumentos[arregloDocumentos.length - 1];
 
-    console.log('222222222222222222222222');
-    console.log(arregloDocumentos);
     return nuevoElemento;
   }
 
@@ -130,50 +128,56 @@ export abstract class BaseArrayWithNestedArrayService<
     id: Types.ObjectId,
     subDocumentField: string,
     nestedSubDocumentField: string,
-    deleted: boolean = false,
+    deleted_mainDocument: boolean,
+    deleted_subDocument: boolean,
+    deleted_nestedDocument: boolean,
   ): Promise<ModeloGeneral> {
-    // Validar que el campo de subdocumentos existe en el esquema
-    //if (!this.modelo.schema.paths[subDocumentField]) {
-    //  throw new InternalServerErrorException(
-    //    `El campo "${subDocumentField}"no existe en el esquema del modelo ddd ${this.modelo.collection.name}`,
-    //  );
-    //}
+    // Verifica que el campo que contiene los subdocumentos exista en el esquema del modelo.
+    if (!this.modelo.schema.paths[subDocumentField]) {
+      throw new InternalServerErrorException(
+        `El campo "${subDocumentField}"no existe en el esquema del modelo ddd ${this.modelo.collection.name}`,
+      );
+    }
 
     // Realizar una agregación para filtrar subdocumentos y subsubdocumentos
     const result = await this.modelo
       .aggregate([
-        // Filtrar el documento principal por ID y que no esté eliminado
-        { $match: { _id: id, deleted: false } },
+        // Paso 1: Filtra el documento principal por su ID y estado de eliminación (deleted_mainDocument).
+        { $match: { _id: id, deleted: deleted_mainDocument } },
 
         {
-          // Filtrar los subdocumentos basados en el estado 'deleted'
+          // Paso 2: Modifica el campo de subdocumentos aplicando un filtro para mantener solo aquellos con el estado especificado.
           $addFields: {
             [subDocumentField]: {
               $filter: {
                 input: `$${subDocumentField}`,
                 as: 'subDocument',
-                cond: { $eq: ['$$subDocument.deleted', deleted] },
+                cond: { $eq: ['$$subDocument.deleted', deleted_subDocument] },
               },
             },
           },
         },
         {
-          // Filtrar los subsubdocumentos dentro de los subdocumentos
+          // Paso 3: Para cada subdocumento filtrado, utiliza $map para aplicar un filtro similar a su campo anidado.
           $addFields: {
             [subDocumentField]: {
               $map: {
-                input: `$${subDocumentField}`,
-                as: 'subDocument',
+                input: `$${subDocumentField}`, // Recorre cada subdocumento.
+                as: 'subDocument', // Alias para cada subdocumento.
+
                 in: {
                   $mergeObjects: [
-                    '$$subDocument',
+                    '$$subDocument', // Mantiene las propiedades originales del subdocumento.
                     {
                       [nestedSubDocumentField]: {
                         $filter: {
-                          input: `$$subDocument.${nestedSubDocumentField}`,
-                          as: 'nestedSubDocument',
+                          input: `$$subDocument.${nestedSubDocumentField}`, // Array de subsubdocumentos.
+                          as: 'nestedSubDocument', // Alias para cada subsubdocumento.
                           cond: {
-                            $eq: ['$$nestedSubDocument.deleted', deleted],
+                            $eq: [
+                              '$$nestedSubDocument.deleted',
+                              deleted_nestedDocument, // Filtra según el estado de eliminación.
+                            ],
                           },
                         },
                       },
@@ -213,6 +217,10 @@ export abstract class BaseArrayWithNestedArrayService<
     idSubModelo: Types.ObjectId,
     nombreCampoArreglo: keyof ModeloGeneral,
     nombreSubCampoNestedArreglo: keyof SubModelo,
+    deleted_mainDocument: boolean,
+    deleted_subDocument: boolean,
+    deleted_nestedDocument: boolean,
+    reason?: string,
   ): Promise<SubModelo> {
     // Obtener el documento con subdocumentos filtrados
     const documento =
@@ -220,6 +228,9 @@ export abstract class BaseArrayWithNestedArrayService<
         idModelo,
         String(nombreCampoArreglo),
         String(nombreSubCampoNestedArreglo),
+        deleted_mainDocument,
+        deleted_subDocument, //esto se esta cambiando por false cuando deberia ser true
+        deleted_nestedDocument,
       );
 
     const arregloSubDocumentos = documento[
@@ -233,7 +244,7 @@ export abstract class BaseArrayWithNestedArrayService<
 
     if (!subdocumento) {
       throw new NotFoundException(
-        `Subdocumento ${this.subModelo.collection.name} con ID "${idSubModelo}" no encontrado en el documento ${this.modelo.collection.name} con ID "${idModelo}"`,
+        `Subdocumento ${this.subModelo.collection.name} con ID "${idSubModelo}" no encontrado ${reason} en el documento ${this.modelo.collection.name} con ID "${idModelo}"`,
       );
     }
 
@@ -269,6 +280,9 @@ export abstract class BaseArrayWithNestedArrayService<
       idSubDocumento,
       nombreCampoArreglo,
       nombreSubCampoNestedArreglo,
+      false,
+      false,
+      false,
     );
     if (subDocumentoAntes.deleted) {
       throw new NotFoundException(
@@ -348,6 +362,10 @@ export abstract class BaseArrayWithNestedArrayService<
       idSubDocumentoEliminar,
       nombreCampoArreglo,
       nombreSubCampoNestedArreglo,
+      false,
+      false,
+      false,
+      'o ya ha sido eliminado',
     );
 
     if (subDocumentoAntes.deleted) {
@@ -366,10 +384,6 @@ export abstract class BaseArrayWithNestedArrayService<
       string | Types.ObjectId | boolean
     > = {};
 
-    const doc1 = await this.modelo.findOne({ _id: idDocumento }).exec();
-    console.log('3333333333111111111111111');
-    console.log(doc1);
-
     camposActualizacion[`${nombreCampo}.$[elem].deleted`] = true;
     camposActualizacion[`${nombreCampo}.$[elem].deletedBy`] = idEliminadoPor;
 
@@ -386,8 +400,6 @@ export abstract class BaseArrayWithNestedArrayService<
         ],
       })
       .exec();
-
-    console.log('6666666666666666666');
 
     if (!documento) {
       throw new NotFoundException(
@@ -420,6 +432,9 @@ export abstract class BaseArrayWithNestedArrayService<
     idRestauradoPor: Types.ObjectId,
     nombreCampoArreglo: K,
     nombreSubCampoNestedArreglo: keyof SubModelo,
+    deleted_mainDocument: boolean,
+    deleted_subDocument: boolean,
+    deleted_nestedDocument: boolean,
   ): Promise<SubModelo> {
     const dtoActualizacion = {
       deleted: false,
@@ -431,7 +446,12 @@ export abstract class BaseArrayWithNestedArrayService<
       idSubDocumentoRestaurar,
       nombreCampoArreglo,
       nombreSubCampoNestedArreglo,
+      deleted_mainDocument,
+      deleted_subDocument,
+      deleted_nestedDocument,
+      'o ya ha sido restaurado',
     );
+
     if (!subDocumentoAntes.deleted) {
       throw new NotFoundException(
         `El subdocumento ya fue restaurado "${idSubDocumentoRestaurar}"`,
@@ -502,6 +522,9 @@ export abstract class BaseArrayWithNestedArrayService<
       idElemento,
       nombreCampoArreglo,
       nombreSubCampoNestedArreglo,
+      false,
+      true,
+      false,
     );
 
     if (!subDocumentoAntes.deleted) {

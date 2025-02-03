@@ -312,7 +312,7 @@ export class UnidadService extends BaseNestedArrayService<
    * @param nombreSubArray Nombre del array secundario (por defecto: 'unidades').
    * @returns La unidad encontrada.
    */
-  async findById(
+  async _findById(
     cursoId: Types.ObjectId,
     moduloId: Types.ObjectId,
     unidadId: Types.ObjectId,

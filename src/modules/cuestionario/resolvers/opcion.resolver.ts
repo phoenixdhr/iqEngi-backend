@@ -95,7 +95,7 @@ export class OpcionResolver
     idCuestionario: Types.ObjectId,
     @Args('idPregunta', { type: () => ID }, IdPipe) idPregunta: Types.ObjectId,
   ): Promise<Opcion[]> {
-    const pregunta = await this.preguntaService.findById(
+    const pregunta = await this.preguntaService._findById(
       idCuestionario,
       idPregunta,
     );
