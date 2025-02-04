@@ -528,6 +528,7 @@ input CreateRespuestaPreguntaInput {
 
   """Respuestas seleccionadas a partir de las opciones de las preguntas"""
   respuestaId: [ID!]
+  respuestaAbierta: String
 }
 
 input UpdateRespuestaCuestionarioInput {

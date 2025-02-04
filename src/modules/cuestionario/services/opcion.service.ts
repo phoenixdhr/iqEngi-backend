@@ -64,7 +64,7 @@ export class OpcionService extends BaseNestedArrayService<
     }
 
     // Se valida la nueva opción según el tipo de pregunta
-    this.validarOpcionPorTipoPregunta(
+    await this.validarOpcionPorTipoPregunta(
       pregunta.tipoPregunta,
       pregunta.opciones,
       createOpcionInput,
@@ -79,6 +79,7 @@ export class OpcionService extends BaseNestedArrayService<
       subArrayName,
     );
   }
+
   async validarOpcionPorTipoPregunta(
     tipoPregunta: TipoPregunta,
     opcionesExistentes: Opcion[],

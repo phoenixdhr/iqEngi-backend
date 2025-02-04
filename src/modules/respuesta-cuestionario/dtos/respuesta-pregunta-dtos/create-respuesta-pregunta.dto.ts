@@ -5,6 +5,7 @@ import {
   IsMongoId,
   IsArray,
   ArrayNotEmpty,
+  IsString,
 } from 'class-validator';
 import { Types } from 'mongoose';
 import { IRespuestaPreguntaInput } from '../../interfaces/respuesta-pregunta.interface';
@@ -28,8 +29,8 @@ export class CreateRespuestaPreguntaInput implements IRespuestaPreguntaInput {
   @IsMongoId({ each: true })
   respuestaId?: Opcion[];
 
-  //   @Field({ nullable: true })
-  //   @IsOptional()
-  //   @IsString()
-  //   respuestaAbierta?: string;
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  respuestaAbierta?: string;
 }
