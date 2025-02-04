@@ -11,6 +11,7 @@ export interface ICuestionario extends IdInterface {
   cuestionarioTitle?: string;
   descripcion?: string;
   preguntas?: IPregunta[];
+  published: boolean;
   numeroPreguntasPresentar?: number; // numero de preguntas correctas con las que se aprueba el curso
   fechaCreacion: Date;
 }

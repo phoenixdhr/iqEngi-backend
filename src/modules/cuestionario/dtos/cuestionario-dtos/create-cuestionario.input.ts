@@ -6,6 +6,7 @@ import {
   IsInt,
   Min,
   IsMongoId,
+  IsBoolean,
 } from 'class-validator';
 
 import { ICuestionarioInput } from '../../interfaces/cuestionario.interface';
@@ -34,6 +35,11 @@ export class CreateCuestionarioInput implements ICuestionarioInput {
   // @ValidateNested({ each: true })
   // @Type(() => CreatePreguntaInput)
   // preguntas?: CreatePreguntaInput[];
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  published: boolean = false;
 
   @Field(() => Int, { nullable: true })
   @IsOptional()

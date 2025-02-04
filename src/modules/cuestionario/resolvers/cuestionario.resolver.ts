@@ -15,6 +15,7 @@ import { PaginationArgs } from 'src/common/dtos';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
+import { OpcionService } from '../services/opcion.service';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
@@ -26,7 +27,10 @@ export class CuestionarioResolver
       CreateCuestionarioInput
     >
 {
-  constructor(private readonly cuestionarioService: CuestionarioService) {}
+  constructor(
+    private readonly cuestionarioService: CuestionarioService,
+    private readonly opcionesService: OpcionService,
+  ) {}
 
   /**
    * Crea un nuevo cuestionario y lo asocia a un curso específico.
@@ -214,5 +218,15 @@ export class CuestionarioResolver
   ): Promise<Cuestionario> {
     const userId = new Types.ObjectId(user._id);
     return this.cuestionarioService.restore(idRestore, userId);
+  }
+
+  @Mutation(() => Cuestionario, { name: 'Cuestionario_restore' })
+  @RolesDec(...administradorUp)
+  async publish(
+    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
+    @CurrentUser() user: UserRequest,
+  ): Promise<Cuestionario> {
+    const userId = new Types.ObjectId(user._id);
+    return this.opcionesService.publish(idRestore, userId);
   }
 }

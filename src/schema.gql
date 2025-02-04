@@ -68,11 +68,10 @@ type Pregunta {
 
 """Tipos de preguntas"""
 enum TipoPregunta {
-  Abierta
-  Alternativa
-  Opcion_multiple
-  Verdadero_falso
-  Ordenamiento
+  ABIERTA
+  ALTERNATIVA
+  OPCION_MULTIPLE
+  ORDENAMIENTO
 }
 
 type Cuestionario {
@@ -81,6 +80,7 @@ type Cuestionario {
   cuestionarioTitle: String
   descripcion: String
   preguntas: [Pregunta!]!
+  published: Boolean!
   numeroPreguntasPresentar: Int
   fechaCreacion: DateTime!
   deleted: Boolean!
@@ -599,12 +599,14 @@ input CreateCuestionarioInput {
   cursoId: ID!
   cuestionarioTitle: String
   descripcion: String
+  published: Boolean = false
   numeroPreguntasPresentar: Int
 }
 
 input UpdateCuestionarioInput {
   cuestionarioTitle: String
   descripcion: String
+  published: Boolean = false
   numeroPreguntasPresentar: Int
 }
 

@@ -2,11 +2,10 @@ import { registerEnumType } from '@nestjs/graphql';
 
 // Tipo Enumerado para TipoPregunta
 export enum TipoPregunta {
-  Abierta = 'abierta',
-  Alternativa = 'alternativa',
-  Opcion_multiple = 'opcion_multiple',
-  Verdadero_falso = 'verdadero_falso',
-  Ordenamiento = 'ordenamiento',
+  ABIERTA = 'abierta',
+  ALTERNATIVA = 'alternativa',
+  OPCION_MULTIPLE = 'opcion_multiple', // INCLUYE VERDADERO O FALSO
+  ORDENAMIENTO = 'ordenamiento',
 }
 
 registerEnumType(TipoPregunta, {

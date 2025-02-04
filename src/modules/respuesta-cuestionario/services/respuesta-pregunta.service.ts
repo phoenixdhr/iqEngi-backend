@@ -47,7 +47,6 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
     arrayName: keyof RespuestaCuestionario = 'respuestas',
     /* idCuestionario?: Types.ObjectId, */
   ): Promise<RespuestaPregunta> {
-    console.log('element', element);
     const { preguntaId, respuestaId } = element;
 
     // Busca las respuestas asociadas al usuario
@@ -92,10 +91,6 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
     }
 
     // Verifica si las respuestas seleccionadas existen
-
-    console.log('pregunta.opciones', pregunta.opciones);
-
-    console.log('respuestaId', respuestaId);
 
     const respuesta = pregunta.opciones.find((opcion) =>
       respuestaId.find((id) => String(id) === String(opcion._id)),
