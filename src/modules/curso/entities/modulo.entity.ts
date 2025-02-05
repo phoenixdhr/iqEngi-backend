@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
 import { IModulo } from '../interfaces/modulo.interface';
 import { Coleccion } from 'src/common/enums';
-import { Unidad } from './unidad.entity';
+import { Unidad, UnidadSchema } from './unidad.entity';
 
 import { AuditFields } from 'src/common/clases/audit-fields.class';
 import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.middleware';
@@ -34,8 +34,8 @@ export class Modulo extends AuditFields implements IModulo, IdInterface {
 
   // Usamos IDs para las unidades y referenciamos como cadena de texto
   @Field(() => [Unidad], { nullable: true })
-  @Prop({ type: [Types.ObjectId], ref: Coleccion.Unidad, default: [] })
-  unidades?: Types.ObjectId[];
+  @Prop({ type: [UnidadSchema], ref: Coleccion.Unidad, default: [] }) // se ha eliminado la referencia a Unidad ref: Coleccion.Unidad,
+  unidades?: Unidad[];
 
   @Field()
   @Prop({ default: false })
@@ -44,7 +44,10 @@ export class Modulo extends AuditFields implements IModulo, IdInterface {
 
 export const ModuloSchema = SchemaFactory.createForClass(Modulo);
 
-ModuloSchema.index({ cursoId: 1, numeroModulo: 1 }, { unique: true });
+ModuloSchema.index(
+  { cursoId: 1, numeroModulo: 1 },
+  // , { unique: true }
+);
 ModuloSchema.index({ deleted: 1 });
 
 addSoftDeleteMiddleware<Modulo, Modulo>(ModuloSchema);

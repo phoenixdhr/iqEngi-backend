@@ -23,8 +23,8 @@ export class CuestionarioResolver
   implements
     IResolverBase<
       Cuestionario,
-      UpdateCuestionarioInput,
-      CreateCuestionarioInput
+      CreateCuestionarioInput,
+      UpdateCuestionarioInput
     >
 {
   constructor(

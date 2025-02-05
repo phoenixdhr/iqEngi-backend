@@ -108,7 +108,7 @@ type Curso {
   aprenderas: [String!]!
   objetivos: [String!]!
   dirigidoA: [String!]!
-  modulos: [Modulo!]
+  modulosIds: [Modulo!]
   fechaLanzamiento: DateTime
   categorias: [Categoria!]!
   cuestionarioId: Cuestionario
@@ -146,6 +146,31 @@ enum RolEnumGql {
 
 type DeletedCountOutput {
   deletedCount: Float!
+}
+
+type CursoOutput {
+  _id: ID!
+  courseTitle: String!
+  descripcionCorta: String!
+  descripcionLarga: String
+  nivel: Nivel
+  instructor: Instructor
+  duracionHoras: Float
+  imagenURL: String
+  precio: Float
+  currency: String
+  descuento: Float
+  calificacionPromedio: Float
+  numeroCalificaciones: Int!
+  aprenderas: [String!]!
+  objetivos: [String!]!
+  dirigidoA: [String!]!
+  modulosIds: [ID!]
+  fechaLanzamiento: DateTime
+  categorias: [Categoria!]!
+  cuestionarioId: Cuestionario
+  slug: String
+  deleted: Boolean!
 }
 
 type Perfil {
@@ -322,13 +347,14 @@ type Query {
   RespuestaCuestionario_findSoftDeleted(offset: Int = 0, limit: Int = 10): [RespuestaCuestionario!]!
   RespuestaPregunta(idCurso: ID!, idPregunta: ID!): RespuestaPregunta!
   RespuestaPreguntas(idRespuestaCuestionario: ID!): [RespuestaPregunta!]!
-  Cursos(offset: Int = 0, limit: Int = 10): [Curso!]!
-  Curso_findAllByTitle(search: String, offset: Int = 0, limit: Int = 10): [Curso!]!
-  Curso(id: ID!): Curso!
-  Curso_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Curso!]!
-  Modulo(idCurso: ID!, idModulo: ID!): Modulo!
-  Modulos(idCurso: ID!): [Modulo!]!
-  Modulo_findSoftDeleted(idCurso: ID!): [Modulo!]!
+  Cursos(offset: Int = 0, limit: Int = 10): [CursoOutput!]!
+  Curso_findAllByTitle(search: String, offset: Int = 0, limit: Int = 10): [CursoOutput!]!
+  Curso(id: ID!): CursoOutput!
+  Curso_findSoftDeleted(offset: Int = 0, limit: Int = 10): [CursoOutput!]!
+  Modulos(offset: Int = 0, limit: Int = 10): [Modulo!]!
+  Modulo(id: ID!): Modulo!
+  Modulo_findByCursoId(cursoId: ID!): [Modulo!]!
+  Modulo_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Modulo!]!
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
   Cuestionario_findByCursoId(cursoId: ID!): [Cuestionario!]!
@@ -399,18 +425,18 @@ type Mutation {
   RespuestaCuestionario_restore(respuestaCuestionarioId: ID!): RespuestaCuestionario!
   RespuestaCuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
   RespuestaPregunta_create(idCurso: ID!, createRespuestaPreguntaInput: CreateRespuestaPreguntaInput!): RespuestaPregunta!
-  Curso_create(createCursoInput: CreateCursoInput!): Curso!
-  Curso_update(id: ID!, updateCursoInput: UpdateCursoInput!): Curso!
-  Curso_softDelete(idRemove: ID!): Curso!
-  Curso_hardDelete(id: ID!): Curso!
+  Curso_create(createCursoInput: CreateCursoInput!): CursoOutput!
+  Curso_update(id: ID!, updateCursoInput: UpdateCursoInput!): CursoOutput!
+  Curso_softDelete(idRemove: ID!): CursoOutput!
+  Curso_hardDelete(id: ID!): CursoOutput!
   Curso_hardDeleteAllSoftDeleted: DeletedCountOutput!
-  Curso_restore(idRestore: ID!): Curso!
-  Modulo_create(idCurso: ID!, createModuloInput: CreateModuloInput!): Modulo!
-  Modulo_update(idCurso: ID!, idModulo: ID!, updateModuloInput: UpdateModuloInput!): Modulo!
-  Modulo_softDelete(idCurso: ID!, idModulo: ID!): Modulo!
-  Modulo_restore(idCurso: ID!, idModulo: ID!): Modulo!
-  Modulo_hardDelete(idCurso: ID!, idModulo: ID!): Modulo!
-  Modulo_hardDeleteAllSoftDeleted(idCurso: ID!): [Modulo!]!
+  Curso_restore(idRestore: ID!): CursoOutput!
+  Modulo_create(createModuloInput: CreateModuloInput!): Modulo!
+  Modulo_update(id: ID!, updateCuestionarioInput: UpdateModuloInput!): Modulo!
+  Modulo_softDelete(idRemove: ID!): Modulo!
+  Modulo_hardDelete(id: ID!): Modulo!
+  Modulo_hardDeleteAllSoftDeleted: DeletedCountOutput!
+  Modulo_restore(idRestore: ID!): Modulo!
   Cuestionario_create(createCuestionarioInput: CreateCuestionarioInput!): Cuestionario!
   Cuestionario_update(id: ID!, updateCuestionarioInput: UpdateCuestionarioInput!): Cuestionario!
   Cuestionario_softDelete(idRemove: ID!): Cuestionario!
@@ -554,7 +580,6 @@ input CreateCursoInput {
   aprenderas: [String!]
   objetivos: [String!]
   dirigidoA: [String!]
-  modulos: [ID!]
   fechaLanzamiento: DateTime
   categorias: [ID!]
   cuestionarioId: ID
@@ -574,26 +599,24 @@ input UpdateCursoInput {
   aprenderas: [String!]
   objetivos: [String!]
   dirigidoA: [String!]
-  modulos: [ID!]
   fechaLanzamiento: DateTime
   categorias: [ID!]
   cuestionarioId: ID
+  modulosIds: [ID!]
 }
 
 input CreateModuloInput {
-  cursoId: ID
+  cursoIdString: String!
   numeroModulo: Int!
   moduloTitle: String!
   descripcion: String
-  unidades: [ID!]
 }
 
 input UpdateModuloInput {
-  cursoId: ID
+  cursoIdString: String
   numeroModulo: Int
   moduloTitle: String
   descripcion: String
-  unidades: [ID!]
 }
 
 input CreateCuestionarioInput {

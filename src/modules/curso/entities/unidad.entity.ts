@@ -21,7 +21,7 @@ export class Unidad extends AuditFields implements IUnidad {
   moduloId: Types.ObjectId;
 
   @Field(() => Int)
-  @Prop({ required: true })
+  @Prop()
   numeroUnidad: number;
 
   @Field()
@@ -47,7 +47,10 @@ export class Unidad extends AuditFields implements IUnidad {
 
 export const UnidadSchema = SchemaFactory.createForClass(Unidad);
 
-UnidadSchema.index({ moduloId: 1, numeroUnidad: 1 }, { unique: true });
+UnidadSchema.index(
+  { moduloId: 1, numeroUnidad: 1 },
+  { unique: true, sparse: true },
+);
 UnidadSchema.index({ deleted: 1 });
 
 addSoftDeleteMiddleware<Unidad, Unidad>(UnidadSchema);

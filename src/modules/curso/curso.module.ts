@@ -35,6 +35,7 @@ import {
         { name: CursoComprado.name, schema: CursoCompradoSchema },
       ]),
     ),
+
     // forwardRef(() => CursoCompradoModule),
   ],
   providers: [

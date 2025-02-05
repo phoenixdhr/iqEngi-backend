@@ -2,6 +2,7 @@
 
 import { Types } from 'mongoose';
 import { IdInterface } from 'src/common/interfaces/id.interface';
+import { Unidad } from '../entities/unidad.entity';
 
 export interface IModulo extends IdInterface {
   _id: Types.ObjectId;
@@ -10,7 +11,7 @@ export interface IModulo extends IdInterface {
   numeroModulo: number;
   moduloTitle: string;
   descripcion?: string;
-  unidades?: Types.ObjectId[];
+  unidades?: Unidad[];
 }
 
 export type IModuloInput = Omit<IModulo, '_id'>;

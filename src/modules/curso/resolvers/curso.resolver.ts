@@ -15,6 +15,7 @@ import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-au
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
 import { Types } from 'mongoose';
 import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
+import { CursoOutput } from '../dtos/curso-dtos/curso.output';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
@@ -32,12 +33,12 @@ export class CursoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Curso, { name: 'Curso_create' })
+  @Mutation(() => CursoOutput, { name: 'Curso_create' })
   @RolesDec(...administradorUp)
   async create(
     @Args('createCursoInput') createCursoInput: CreateCursoInput,
     @CurrentUser() user: UserRequest,
-  ): Promise<Curso> {
+  ): Promise<CursoOutput> {
     const userId = new Types.ObjectId(user._id);
     return this.cursoService.create(createCursoInput, userId);
   }
@@ -50,9 +51,9 @@ export class CursoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Query(() => [Curso], { name: 'Cursos' })
+  @Query(() => [CursoOutput], { name: 'Cursos' })
   @RolesDec(...administradorUp)
-  async findAll(@Args() pagination?: PaginationArgs): Promise<Curso[]> {
+  async findAll(@Args() pagination?: PaginationArgs): Promise<CursoOutput[]> {
     return this.cursoService.findAll(pagination);
   }
 
@@ -64,12 +65,12 @@ export class CursoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Query(() => [Curso], { name: 'Curso_findAllByTitle' })
+  @Query(() => [CursoOutput], { name: 'Curso_findAllByTitle' })
   @RolesDec(...administradorUp)
   async findAllByTitle(
     @Args() searchArgs: SearchTextArgs,
     @Args() pagination?: PaginationArgs,
-  ): Promise<Curso[]> {
+  ): Promise<CursoOutput[]> {
     return this.cursoService.findAllByTitle(searchArgs, pagination);
   }
 
@@ -81,11 +82,11 @@ export class CursoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Query(() => Curso, { name: 'Curso' })
+  @Query(() => CursoOutput, { name: 'Curso' })
   @RolesDec(...administradorUp)
   async findById(
     @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
-  ): Promise<Curso> {
+  ): Promise<CursoOutput> {
     return this.cursoService.findById(id);
   }
 
@@ -99,13 +100,13 @@ export class CursoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Curso, { name: 'Curso_update' })
+  @Mutation(() => CursoOutput, { name: 'Curso_update' })
   @RolesDec(...administradorUp)
   async update(
     @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
     @Args('updateCursoInput') updateCursoInput: UpdateCursoInput,
     @CurrentUser() user: UserRequest,
-  ): Promise<Curso> {
+  ): Promise<CursoOutput> {
     const idUpdatedBy = new Types.ObjectId(user._id);
     return this.cursoService.update(id, updateCursoInput, idUpdatedBy);
   }
@@ -119,12 +120,12 @@ export class CursoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Curso, { name: 'Curso_softDelete' })
+  @Mutation(() => CursoOutput, { name: 'Curso_softDelete' })
   @RolesDec(...administradorUp)
   async softDelete(
     @Args('idRemove', { type: () => ID }, IdPipe) idRemove: Types.ObjectId,
     @CurrentUser() user: UserRequest,
-  ): Promise<Curso> {
+  ): Promise<CursoOutput> {
     const idThanos = new Types.ObjectId(user._id);
     return this.cursoService.softDelete(idRemove, idThanos);
   }
@@ -139,11 +140,11 @@ export class CursoResolver
    *
    * @Roles: SUPERADMIN
    */
-  @Mutation(() => Curso, { name: 'Curso_hardDelete' })
+  @Mutation(() => CursoOutput, { name: 'Curso_hardDelete' })
   @RolesDec(RolEnum.SUPERADMIN)
   async hardDelete(
     @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
-  ): Promise<Curso> {
+  ): Promise<CursoOutput> {
     return this.cursoService.hardDelete(id);
   }
 
@@ -172,14 +173,14 @@ export class CursoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Query(() => [Curso], {
+  @Query(() => [CursoOutput], {
     name: 'Curso_findSoftDeleted',
   })
   @RolesDec(...administradorUp)
   async findSoftDeleted(
     @Args({ type: () => PaginationArgs, nullable: true })
     pagination?: PaginationArgs,
-  ): Promise<Curso[]> {
+  ): Promise<CursoOutput[]> {
     return this.cursoService.findSoftDeleted(pagination);
   }
 
@@ -192,12 +193,12 @@ export class CursoResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Curso, { name: 'Curso_restore' })
+  @Mutation(() => CursoOutput, { name: 'Curso_restore' })
   @RolesDec(...administradorUp)
   async restore(
     @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
     @CurrentUser() user: UserRequest,
-  ): Promise<Curso> {
+  ): Promise<CursoOutput> {
     const userId = new Types.ObjectId(user._id);
     return this.cursoService.restore(idRestore, userId);
   }

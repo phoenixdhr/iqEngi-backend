@@ -1,223 +1,202 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { IResolver_SubDocument } from 'src/common/interfaces/resolver-base-subdoc.interface';
+import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
+
 import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-auth.guard';
 import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
 import { Modulo } from '../entities/modulo.entity';
-import { CreateModuloInput } from '../dtos/modulo-dtos/create-modulo.input';
 import { UpdateModuloInput } from '../dtos/modulo-dtos/update-modulo.input';
+import { CreateModuloInput } from '../dtos/modulo-dtos/create-modulo.input';
 import { ModuloService } from '../services/modulo.service';
 import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
 import { administradorUp, RolEnum } from 'src/common/enums/rol.enum';
-import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
-import { Types } from 'mongoose';
-import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
-import { CursoService } from '../services/curso.service';
+import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
+import { Types } from 'mongoose';
+import { PaginationArgs } from 'src/common/dtos';
+import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
+import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/deleted-count.output';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class ModuloResolver
-  implements
-    IResolver_SubDocument<Modulo, CreateModuloInput, UpdateModuloInput>
+  implements IResolverBase<Modulo, CreateModuloInput, UpdateModuloInput>
 {
-  constructor(
-    private readonly moduloService: ModuloService,
-    private readonly cursoService: CursoService,
-  ) {}
+  constructor(private readonly moduloService: ModuloService) {}
 
-  //#region Create
-  /**
-   * Crea una nueva modulo en un curso específico.
-   *
-   * @param idCurso ID del curso al que se agregará la modulo.
-   * @param createModuloInput Datos necesarios para crear la modulo.
-   * @param user Usuario autenticado que realiza la creación.
-   * @returns La modulo creada.
-   *
-   * @Roles: ADMINISTRADOR, SUPERADMIN
-   */
   @Mutation(() => Modulo, { name: 'Modulo_create' })
   @RolesDec(...administradorUp)
   async create(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-    @Args('createModuloInput') createModuloInput: CreateModuloInput,
+    @Args('createModuloInput')
+    createModuloInput: CreateModuloInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Modulo> {
+    console.log('createModuloInput', createModuloInput);
     const userId = new Types.ObjectId(user._id);
-    console.log('000');
-    return this.moduloService.pushToArray(idCurso, userId, createModuloInput);
+    return this.moduloService._create(createModuloInput, userId);
   }
-  //#endregion
 
-  //#region Read
   /**
-   * Obtiene una modulo específica dentro de un curso.
+   * Obtiene todos los cuestionarios, con soporte opcional para paginación.
    *
-   * @param idCurso ID del curso que contiene la modulo.
-   * @param idModulo ID de la modulo a buscar.
-   * @returns La modulo encontrada.
+   * @param pagination Opciones de paginación (opcional).
+   * @returns Una lista de cuestionarios.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Query(() => [Modulo], { name: 'Modulos' })
+  @RolesDec(...administradorUp)
+  async findAll(@Args() pagination?: PaginationArgs): Promise<Modulo[]> {
+    //return this.ModuloService.findAll(pagination);
+    const cuestionarios = await this.moduloService.findAll(pagination);
+    // Verifica que los datos lleguen correctamente
+    return cuestionarios;
+  }
+
+  /**
+   * Obtiene un cuestionario por su ID único.
+   *
+   * @param id ID del cuestionario a buscar.
+   * @returns El cuestionario encontrado.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => Modulo, { name: 'Modulo' })
   @RolesDec(...administradorUp)
   async findById(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-    @Args('idModulo', { type: () => ID }, IdPipe) idModulo: Types.ObjectId,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<Modulo> {
-    return this.moduloService._findById(idCurso, idModulo);
+    return this.moduloService.findById(id);
   }
 
   /**
-   * Obtiene todas las modulos de un curso.
+   * Obtiene un cuestionario por su ID único.
    *
-   * @param idCurso ID del curso.
-   * @returns Una lista de modulos.
+   * @param id ID del cuestionario a buscar.
+   * @returns El cuestionario encontrado.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Query(() => [Modulo], { name: 'Modulos' })
-  @RolesDec(...administradorUp)
-  async findAll(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-  ): Promise<Modulo[]> {
-    return this.moduloService.findAll(idCurso);
-  }
-  //#endregion
 
-  //#region Update
+  @Query(() => [Modulo], { name: 'Modulo_findByCursoId' })
+  @RolesDec(...administradorUp)
+  async findByCursoId(
+    @Args('cursoId', { type: () => ID }, IdPipe) cursoId: Types.ObjectId,
+  ): Promise<Modulo[]> {
+    return this.moduloService.findByCursoId(cursoId);
+  }
+
   /**
-   * Actualiza una modulo específica dentro de un curso.
+   * Actualiza los datos de un cuestionario existente.
    *
-   * @param idCurso ID del curso que contiene la modulo.
-   * @param idModulo ID de la modulo a actualizar.
-   * @param updateModuloInput Datos para actualizar la modulo.
+   * @param id ID del cuestionario a actualizar.
+   * @param updateCuestionarioInput Datos actualizados del cuestionario.
    * @param user Usuario autenticado que realiza la actualización.
-   * @returns La modulo actualizada.
+   * @returns El cuestionario actualizado.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Mutation(() => Modulo, { name: 'Modulo_update' })
   @RolesDec(...administradorUp)
   async update(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-    @Args('idModulo', { type: () => ID }, IdPipe) idModulo: Types.ObjectId,
-    @Args('updateModuloInput') updateModuloInput: UpdateModuloInput,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
+    @Args('updateCuestionarioInput')
+    updateCuestionarioInput: UpdateModuloInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Modulo> {
     const idUpdatedBy = new Types.ObjectId(user._id);
-    return this.moduloService.updateInArray(
-      idCurso,
-      idModulo,
-      idUpdatedBy,
-      updateModuloInput,
-    );
+    return this.moduloService.update(id, updateCuestionarioInput, idUpdatedBy);
   }
-  //#endregion
 
-  //#region Soft Delete
   /**
-   * Realiza una eliminación lógica de una modulo específica en un curso.
+   * Realiza una eliminación lógica de un cuestionario, marcándolo como eliminado.
    *
-   * @param idCurso ID del curso que contiene la modulo.
-   * @param idModulo ID de la modulo a eliminar.
-   * @param user Usuario autenticado que realiza la operación.
-   * @returns La modulo eliminada lógicamente.
+   * @param idRemove ID del cuestionario a eliminar.
+   * @param user Usuario autenticado que realiza la eliminación.
+   * @returns El cuestionario eliminado lógicamente.
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Mutation(() => Modulo, { name: 'Modulo_softDelete' })
   @RolesDec(...administradorUp)
   async softDelete(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-    @Args('idModulo', { type: () => ID }, IdPipe) idModulo: Types.ObjectId,
+    @Args('idRemove', { type: () => ID }, IdPipe) idRemove: Types.ObjectId,
     @CurrentUser() user: UserRequest,
   ): Promise<Modulo> {
     const idThanos = new Types.ObjectId(user._id);
-    return this.moduloService.softDelete(idCurso, idModulo, idThanos);
+    return this.moduloService.softDelete(idRemove, idThanos);
   }
 
   /**
-   * Restaura una modulo que ha sido eliminada lógicamente.
+   * Elimina permanentemente un cuestionario por su ID.
    *
-   * @param idCurso ID del curso que contiene la modulo.
-   * @param idModulo ID de la modulo a restaurar.
-   * @param user Usuario autenticado que realiza la restauración.
-   * @returns La modulo restaurada.
+   * Este método solo está disponible para usuarios con el rol SUPERADMIN.
    *
-   * @Roles: ADMINISTRADOR, SUPERADMIN
-   */
-  @Mutation(() => Modulo, { name: 'Modulo_restore' })
-  @RolesDec(...administradorUp)
-  async restore(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-    @Args('idModulo', { type: () => ID }, IdPipe) idModulo: Types.ObjectId,
-    @CurrentUser() user: UserRequest,
-  ): Promise<Modulo> {
-    const idUser = new Types.ObjectId(user._id);
-    return this.moduloService.restore(idCurso, idModulo, idUser);
-  }
-
-  /**
-   * Obtiene una lista de modulos eliminadas lógicamente de un curso.
-   *
-   * @param idCurso ID del curso.
-   * @returns Una lista de modulos eliminadas lógicamente.
-   *
-   * @Roles: ADMINISTRADOR, SUPERADMIN
-   */
-  @Query(() => [Modulo], { name: 'Modulo_findSoftDeleted' })
-  @RolesDec(...administradorUp)
-  async findSoftDeleted(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-  ): Promise<Modulo[]> {
-    return this.moduloService.findSoftDeleted(idCurso);
-  }
-  //#endregion
-
-  //#region Hard Delete
-  /**
-   * Elimina permanentemente una modulo específica marcada como eliminada lógicamente.
-   *
-   * @param idCurso ID del curso que contiene la modulo.
-   * @param idModulo ID de la modulo a eliminar definitivamente.
-   * @returns La modulo eliminada permanentemente.
+   * @param id ID del cuestionario a eliminar definitivamente.
+   * @returns El cuestionario eliminado de forma permanente.
    *
    * @Roles: SUPERADMIN
    */
   @Mutation(() => Modulo, { name: 'Modulo_hardDelete' })
   @RolesDec(RolEnum.SUPERADMIN)
   async hardDelete(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-    @Args('idModulo', { type: () => ID }, IdPipe) idModulo: Types.ObjectId,
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<Modulo> {
-    return this.moduloService.pullIfDeleted(idCurso, idModulo);
+    return this.moduloService.hardDelete(id);
   }
 
   /**
-   * Elimina permanentemente todas las modulos marcadas como eliminadas lógicamente en un curso.
+   * Elimina de forma permanente todos los cuestionarios marcados como eliminados lógicamente.
    *
-   * @param idCurso ID del curso.
-   * @returns Una lista de modulos eliminadas permanentemente.
+   * Este método solo puede ser ejecutado por usuarios con el rol SUPERADMIN.
+   *
+   * @returns Un objeto con el conteo de los cuestionarios eliminados.
    *
    * @Roles: SUPERADMIN
    */
-  @Mutation(() => [Modulo], { name: 'Modulo_hardDeleteAllSoftDeleted' })
+  @Mutation(() => DeletedCountOutput, {
+    name: 'Modulo_hardDeleteAllSoftDeleted',
+  })
   @RolesDec(RolEnum.SUPERADMIN)
-  async hardDeleteAllSoftDeleted(
-    @Args('idCurso', { type: () => ID }, IdPipe)
-    idCurso: Types.ObjectId,
-  ): Promise<Modulo[]> {
-    return this.moduloService.pullAllDeleted(idCurso);
+  async hardDeleteAllSoftDeleted(): Promise<DeletedCountOutput> {
+    return this.moduloService.hardDeleteAllSoftDeleted();
   }
-  //#endregion
+
+  /**
+   * Obtiene una lista de cuestionarios eliminados lógicamente.
+   *
+   * @param pagination Opciones de paginación (opcional).
+   * @returns Una lista de cuestionarios marcados como eliminados.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Query(() => [Modulo], {
+    name: 'Modulo_findSoftDeleted',
+  })
+  @RolesDec(...administradorUp)
+  async findSoftDeleted(
+    @Args({ type: () => PaginationArgs, nullable: true })
+    pagination?: PaginationArgs,
+  ): Promise<Modulo[]> {
+    return this.moduloService.findSoftDeleted(pagination);
+  }
+
+  /**
+   * Restaura un cuestionario previamente eliminado lógicamente.
+   *
+   * @param idRestore ID del cuestionario a restaurar.
+   * @param user Usuario autenticado que realiza la restauración.
+   * @returns El cuestionario restaurado.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Mutation(() => Modulo, { name: 'Modulo_restore' })
+  @RolesDec(...administradorUp)
+  async restore(
+    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
+    @CurrentUser() user: UserRequest,
+  ): Promise<Modulo> {
+    const userId = new Types.ObjectId(user._id);
+    return this.moduloService.restore(idRestore, userId);
+  }
 }

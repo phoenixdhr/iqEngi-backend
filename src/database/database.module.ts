@@ -12,6 +12,7 @@ import { MongooseModule } from '@nestjs/mongoose';
         return {
           uri: configEnvService.mongo.uri,
           dbName: configEnvService.mongo.dbName,
+          autoIndex: true,
         };
       },
       inject: [configEnv.KEY],

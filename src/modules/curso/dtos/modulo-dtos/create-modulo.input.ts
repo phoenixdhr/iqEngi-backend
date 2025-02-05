@@ -1,21 +1,20 @@
-import { InputType, Field, Int, ID } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsString,
   IsInt,
   Min,
   IsOptional,
-  IsArray,
   IsMongoId,
-  ArrayUnique,
 } from 'class-validator';
 import { IModuloInput } from '../../interfaces/modulo.interface';
-import { Types } from 'mongoose';
 
 @InputType()
 export class CreateModuloInput implements IModuloInput {
-  @Field(() => ID, { nullable: true })
-  cursoId?: Types.ObjectId;
+  @Field(() => String)
+  @IsNotEmpty()
+  @IsMongoId()
+  cursoIdString: string;
 
   @Field(() => Int)
   @IsNotEmpty()
@@ -33,10 +32,10 @@ export class CreateModuloInput implements IModuloInput {
   @IsString()
   descripcion?: string;
 
-  @Field(() => [ID], { nullable: true })
-  @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true })
-  @ArrayUnique()
-  unidades?: Types.ObjectId[];
+  // @Field(() => [ID], { nullable: true })
+  // @IsOptional()
+  // @IsArray()
+  // @IsMongoId({ each: true })
+  // @ArrayUnique()
+  // unidades?: Unidad[];
 }

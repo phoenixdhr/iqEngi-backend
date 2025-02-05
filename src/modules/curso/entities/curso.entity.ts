@@ -83,8 +83,8 @@ export class Curso extends AuditFields implements ICurso {
   dirigidoA: string[];
 
   @Field(() => [Modulo], { nullable: true })
-  @Prop({ type: [Modulo], ref: Modulo.name, default: [] })
-  modulos: Modulo[];
+  @Prop({ type: [Types.ObjectId], ref: Modulo.name, default: [] })
+  modulosIds: Types.ObjectId[];
 
   @Field({ nullable: true })
   @Prop()

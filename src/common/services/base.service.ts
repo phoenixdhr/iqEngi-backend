@@ -408,7 +408,11 @@ export abstract class BaseService<T extends CreatedUpdatedDeletedBy, W, U = T> {
    * @throws InternalServerErrorException en caso de error durante la búsqueda.
    */
   async findSoftDeleted(pagination?: PaginationArgs): Promise<T[]> {
-    const { limit, offset } = pagination || {};
+    // const { limit, offset } = pagination || {};
+
+    const offset = pagination?.offset ?? 0; // Si `pagination.offset` es null/undefined, usa 0
+    const limit = pagination?.limit ?? 10; // Si `pagination.limit` es null/undefined, usa 10
+
     try {
       return this.model
         .aggregate([{ $match: { deleted: true } }])
