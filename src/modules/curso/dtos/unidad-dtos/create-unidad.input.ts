@@ -1,4 +1,4 @@
-import { InputType, Field, Int, ID } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsString,
@@ -8,6 +8,7 @@ import {
   IsUrl,
   ValidateNested,
   IsArray,
+  IsMongoId,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateMaterialInput } from '../material-dtos/create-material.input';
@@ -16,9 +17,9 @@ import { Types } from 'mongoose';
 
 @InputType()
 export class CreateUnidadInput implements IUnidadInput {
-  @Field(() => ID)
-  @IsNotEmpty()
-  moduloId: Types.ObjectId;
+  @IsMongoId()
+  @IsOptional()
+  moduloId?: Types.ObjectId;
 
   @Field(() => Int)
   @IsNotEmpty()

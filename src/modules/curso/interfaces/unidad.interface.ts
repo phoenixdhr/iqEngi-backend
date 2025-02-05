@@ -8,7 +8,7 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 export interface IUnidad extends IdInterface {
   _id: Types.ObjectId;
 
-  moduloId: Types.ObjectId;
+  moduloId?: Types.ObjectId;
   numeroUnidad: number;
   unidadTitle: string;
   descripcion?: string;

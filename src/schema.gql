@@ -355,6 +355,9 @@ type Query {
   Modulo(id: ID!): Modulo!
   Modulo_findByCursoId(cursoId: ID!): [Modulo!]!
   Modulo_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Modulo!]!
+  Unidad(idModulo: ID!, idUnidad: ID!): Unidad!
+  Unidades(idModulo: ID!): [Unidad!]!
+  Unidad_findSoftDeleted(idModulo: ID!): [Unidad!]!
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
   Cuestionario_findByCursoId(cursoId: ID!): [Cuestionario!]!
@@ -437,6 +440,12 @@ type Mutation {
   Modulo_hardDelete(id: ID!): Modulo!
   Modulo_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Modulo_restore(idRestore: ID!): Modulo!
+  Unidad_create(idModulo: ID!, createUnidadInput: CreateUnidadInput!): Unidad!
+  Unidad_update(idModulo: ID!, idUnidad: ID!, updateUnidadInput: UpdateUnidadInput!): Unidad!
+  Unidad_softDelete(idModulo: ID!, idUnidad: ID!): Unidad!
+  Unidad_restore(idModulo: ID!, idUnidad: ID!): Unidad!
+  Unidad_hardDelete(idModulo: ID!, idUnidad: ID!): Unidad!
+  Unidad_hardDeleteAllSoftDeleted(idModulo: ID!): [Unidad!]!
   Cuestionario_create(createCuestionarioInput: CreateCuestionarioInput!): Cuestionario!
   Cuestionario_update(id: ID!, updateCuestionarioInput: UpdateCuestionarioInput!): Cuestionario!
   Cuestionario_softDelete(idRemove: ID!): Cuestionario!
@@ -617,6 +626,28 @@ input UpdateModuloInput {
   numeroModulo: Int
   moduloTitle: String
   descripcion: String
+}
+
+input CreateUnidadInput {
+  numeroUnidad: Int!
+  unidadTitle: String!
+  descripcion: String
+  urlVideo: String
+  materiales: [CreateMaterialInput!]
+}
+
+input CreateMaterialInput {
+  materialTitle: String!
+  descripcion: String
+  url: String!
+}
+
+input UpdateUnidadInput {
+  numeroUnidad: Int
+  unidadTitle: String
+  descripcion: String
+  urlVideo: String
+  materiales: [CreateMaterialInput!]
 }
 
 input CreateCuestionarioInput {

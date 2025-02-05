@@ -158,7 +158,7 @@ export class PreguntaService extends BaseArrayWithNestedArrayService<
    */
   async findSoftDeleted(cuestionarioId: Types.ObjectId): Promise<Pregunta[]> {
     const cuestionario =
-      this.cuestionarioService.findById_WithNestedSubDocuments_ActiveOrInactive(
+      await this.cuestionarioService.findById_WithNestedSubDocuments_ActiveOrInactive(
         cuestionarioId,
         'preguntas',
         'opciones',
@@ -167,7 +167,7 @@ export class PreguntaService extends BaseArrayWithNestedArrayService<
         false,
       );
 
-    return (await cuestionario).preguntas;
+    return cuestionario.preguntas;
   }
 
   /**
