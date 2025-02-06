@@ -25,6 +25,7 @@ type Material {
   materialTitle: String!
   descripcion: String
   url: String!
+  deleted: Boolean!
 }
 
 type Unidad {
@@ -358,6 +359,9 @@ type Query {
   Unidad(idModulo: ID!, idUnidad: ID!): Unidad!
   Unidades(idModulo: ID!): [Unidad!]!
   Unidad_findSoftDeleted(idModulo: ID!): [Unidad!]!
+  Material(idModulo: ID!, idUnidad: ID!, idMaterial: ID!): Material!
+  Materiales(idModulo: ID!, idUnidad: ID!): [Material!]!
+  Material_findSoftDeleted(idModulo: ID!, idUnidad: ID!): [Material!]!
   Cuestionarios(offset: Int = 0, limit: Int = 10): [Cuestionario!]!
   Cuestionario(id: ID!): Cuestionario!
   Cuestionario_findByCursoId(cursoId: ID!): [Cuestionario!]!
@@ -446,6 +450,12 @@ type Mutation {
   Unidad_restore(idModulo: ID!, idUnidad: ID!): Unidad!
   Unidad_hardDelete(idModulo: ID!, idUnidad: ID!): Unidad!
   Unidad_hardDeleteAllSoftDeleted(idModulo: ID!): [Unidad!]!
+  Material_create(idModulo: ID!, idUnidad: ID!, createOpcionInput: CreateMaterialInput!): Material!
+  Material_update(idModulo: ID!, idUnidad: ID!, idMaterial: ID!, updateOpcionInput: UpdateMaterialInput!): Material!
+  Material_softDelete(idModulo: ID!, idUnidad: ID!, idMaterial: ID!): Material!
+  Material_restore(idModulo: ID!, idUnidad: ID!, idMaterial: ID!): Material!
+  Material_hardDelete(idModulo: ID!, idUnidad: ID!, idMaterial: ID!): Material!
+  Material_hardDeleteAllSoftDeleted(idModulo: ID!, idUnidad: ID!): [Material!]!
   Cuestionario_create(createCuestionarioInput: CreateCuestionarioInput!): Cuestionario!
   Cuestionario_update(id: ID!, updateCuestionarioInput: UpdateCuestionarioInput!): Cuestionario!
   Cuestionario_softDelete(idRemove: ID!): Cuestionario!
@@ -648,6 +658,12 @@ input UpdateUnidadInput {
   descripcion: String
   urlVideo: String
   materiales: [CreateMaterialInput!]
+}
+
+input UpdateMaterialInput {
+  materialTitle: String
+  descripcion: String
+  url: String
 }
 
 input CreateCuestionarioInput {

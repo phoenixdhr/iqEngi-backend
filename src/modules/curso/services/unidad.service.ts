@@ -85,14 +85,12 @@ export class UnidadService extends BaseArrayWithNestedArrayService<
   async _findById(
     moduloId: Types.ObjectId,
     unidadId: Types.ObjectId,
-    nombreArray: keyof Modulo = 'unidades',
-    arrayNestedName: keyof Unidad = 'materiales',
   ): Promise<Unidad> {
     return super.findById(
       moduloId,
       unidadId,
-      nombreArray,
-      arrayNestedName,
+      'unidades',
+      'materiales',
       false,
       false,
       false,

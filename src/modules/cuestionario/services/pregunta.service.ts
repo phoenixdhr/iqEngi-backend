@@ -54,14 +54,12 @@ export class PreguntaService extends BaseArrayWithNestedArrayService<
   async _findById(
     idCuestionario: Types.ObjectId,
     idPregunta: Types.ObjectId,
-    arrayName: keyof Cuestionario = 'preguntas',
-    arrayNestedName: keyof Pregunta = 'opciones',
   ): Promise<Pregunta> {
     return super.findById(
       idCuestionario,
       idPregunta,
-      arrayName,
-      arrayNestedName,
+      'preguntas',
+      'opciones',
       false,
       false,
       false,
