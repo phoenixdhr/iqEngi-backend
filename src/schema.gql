@@ -81,7 +81,7 @@ type Cuestionario {
   cuestionarioTitle: String
   descripcion: String
   preguntas: [Pregunta!]!
-  published: Boolean!
+  published: Boolean
   numeroPreguntasPresentar: Int
   fechaCreacion: DateTime!
   deleted: Boolean!
@@ -462,6 +462,7 @@ type Mutation {
   Cuestionario_hardDelete(id: ID!): Cuestionario!
   Cuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Cuestionario_restore(idRestore: ID!): Cuestionario!
+  Cuestionario_publish(idCuestionario: ID!): Cuestionario!
   Pregunta_create(idCuestionario: ID!, createPreguntaInput: CreatePreguntaInput!): Pregunta!
   Pregunta_update(idCuestionario: ID!, idPregunta: ID!, updatePreguntaInput: UpdatePreguntaInput!): Pregunta!
   Pregunta_softDelete(idCuestionario: ID!, idPregunta: ID!): Pregunta!

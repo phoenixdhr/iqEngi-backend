@@ -391,9 +391,11 @@ export class OpcionService extends BaseNestedArrayService<
             );
           }
           const ordenSet = new Set(opciones.map((o) => o.orden));
-          if (ordenSet.size !== opciones.length) {
+          const esSecuencial = this.esSecuencial(ordenSet, opciones.length);
+
+          if (!esSecuencial) {
             throw new BadRequestException(
-              `La pregunta ${pregunta._id} de ordenamiento tiene opciones con números de orden duplicados.`,
+              `La pregunta ${pregunta._id} de ordenamiento tiene opciones con números de orden no secuenciales.`,
             );
           }
           break;
@@ -407,11 +409,29 @@ export class OpcionService extends BaseNestedArrayService<
     }
 
     // Si todas las preguntas son válidas, se marca el cuestionario como publicado.
-    await this.cuestionarioService.update(
+    const cuestionarioUpdated = await this.cuestionarioService.update(
       idCuestionario,
       { published: true },
       idUser,
     );
-    return cuestionario;
+    return cuestionarioUpdated;
+  }
+
+  esSecuencial(ordenSet: Set<number>, length: number): boolean {
+    console.log('ordenSet', ordenSet);
+    const ordenArray = Array.from(ordenSet).sort((a, b) => a - b); // Convertimos el Set a un array ordenado
+    console.log('ordenArray', ordenArray);
+
+    if (ordenArray.length !== length) {
+      return false; // Si la cantidad de elementos en el Set no coincide con length, hay números repetidos o faltantes
+    }
+    console.log('lengt= ', ordenArray.length);
+    // Verificamos que los números sean secuenciales de 0 a length - 1
+    const result = ordenArray.every((num, index) => {
+      console.log(num - 1, index);
+      return Number(num) - 1 === Number(index);
+    });
+    console.log('result=  ', result);
+    return result;
   }
 }

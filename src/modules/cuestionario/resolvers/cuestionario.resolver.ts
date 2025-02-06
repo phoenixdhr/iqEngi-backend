@@ -220,13 +220,14 @@ export class CuestionarioResolver
     return this.cuestionarioService.restore(idRestore, userId);
   }
 
-  @Mutation(() => Cuestionario, { name: 'Cuestionario_restore' })
+  @Mutation(() => Cuestionario, { name: 'Cuestionario_publish' })
   @RolesDec(...administradorUp)
   async publish(
-    @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
+    @Args('idCuestionario', { type: () => ID }, IdPipe)
+    idCuestionario: Types.ObjectId,
     @CurrentUser() user: UserRequest,
   ): Promise<Cuestionario> {
     const userId = new Types.ObjectId(user._id);
-    return this.opcionesService.publish(idRestore, userId);
+    return this.opcionesService.publish(idCuestionario, userId);
   }
 }

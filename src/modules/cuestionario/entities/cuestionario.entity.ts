@@ -31,7 +31,7 @@ export class Cuestionario extends AuditFields implements ICuestionario {
   @Prop({ type: [PreguntaSchema], default: [] })
   preguntas: Pregunta[];
 
-  @Field()
+  @Field(() => Boolean, { nullable: true })
   @Prop({ default: false })
   published: boolean;
 
