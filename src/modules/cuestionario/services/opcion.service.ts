@@ -406,6 +406,9 @@ export class OpcionService extends BaseNestedArrayService<
             `Tipo de pregunta no reconocido en la pregunta ${pregunta._id}.`,
           );
       }
+      this.preguntaService.updateInArray(idCuestionario, pregunta._id, idUser, {
+        published: true,
+      });
     }
 
     // Si todas las preguntas son válidas, se marca el cuestionario como publicado.
@@ -418,20 +421,15 @@ export class OpcionService extends BaseNestedArrayService<
   }
 
   esSecuencial(ordenSet: Set<number>, length: number): boolean {
-    console.log('ordenSet', ordenSet);
     const ordenArray = Array.from(ordenSet).sort((a, b) => a - b); // Convertimos el Set a un array ordenado
-    console.log('ordenArray', ordenArray);
 
     if (ordenArray.length !== length) {
       return false; // Si la cantidad de elementos en el Set no coincide con length, hay números repetidos o faltantes
     }
-    console.log('lengt= ', ordenArray.length);
     // Verificamos que los números sean secuenciales de 0 a length - 1
     const result = ordenArray.every((num, index) => {
-      console.log(num - 1, index);
       return Number(num) - 1 === Number(index);
     });
-    console.log('result=  ', result);
     return result;
   }
 }

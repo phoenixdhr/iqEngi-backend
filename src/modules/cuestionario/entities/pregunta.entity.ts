@@ -40,6 +40,10 @@ export class Pregunta extends AuditFields implements IPregunta, IdInterface {
   @Field()
   @Prop({ default: false })
   deleted: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  @Prop({ default: false })
+  published: boolean;
 }
 
 export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);

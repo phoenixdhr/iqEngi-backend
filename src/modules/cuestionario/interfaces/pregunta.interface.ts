@@ -14,6 +14,7 @@ export interface IPregunta extends IdInterface {
   moduloId?: Types.ObjectId;
   unidadId?: Types.ObjectId;
   respuestaOrdenamiento?: string;
+  published?: boolean;
 }
 
 export type IPreguntaInput = Omit<IPregunta, '_id' | 'opciones'> & {

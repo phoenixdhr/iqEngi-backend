@@ -81,16 +81,14 @@ export class PreguntaService extends BaseArrayWithNestedArrayService<
     idPregunta: Types.ObjectId,
     idUser: Types.ObjectId,
     updatePreguntaInput: UpdatePreguntaInput,
-    arrayName: keyof Cuestionario = 'preguntas',
-    arrayNestedName: keyof Pregunta = 'opciones',
   ): Promise<Pregunta> {
     return super.updateInArray(
       idCuestionario,
       idPregunta,
       idUser,
       updatePreguntaInput,
-      arrayName,
-      arrayNestedName,
+      'preguntas',
+      'opciones',
     );
   }
 

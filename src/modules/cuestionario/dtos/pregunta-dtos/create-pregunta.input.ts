@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsOptional,
   IsMongoId,
+  IsBoolean,
 } from 'class-validator';
 import { TipoPregunta } from 'src/common/enums/tipo-pregunta.enum';
 
@@ -43,4 +44,9 @@ export class CreatePreguntaInput implements IPreguntaInput {
   @IsOptional()
   @IsString()
   respuestaOrdenamiento?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  published: boolean = false;
 }
