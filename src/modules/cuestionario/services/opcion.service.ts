@@ -343,6 +343,9 @@ export class OpcionService extends BaseNestedArrayService<
       throw new NotFoundException('Cuestionario no encontrado.');
     }
 
+    let notaMaxima = 0;
+    let notaMinimaAprobar = 0;
+
     // Se recorre cada pregunta para validar según su tipo
     for (const pregunta of cuestionario.preguntas || []) {
       const opciones = pregunta.opciones || [];
@@ -409,12 +412,23 @@ export class OpcionService extends BaseNestedArrayService<
       this.preguntaService.updateInArray(idCuestionario, pregunta._id, idUser, {
         published: true,
       });
+
+      notaMaxima = notaMaxima + (pregunta.puntos ?? 1);
+      notaMinimaAprobar = Math.ceil(notaMinimaAprobar * 0.8);
     }
 
+    // ✅ Mover el cálculo de `notaMinimaAprobar` después del bucle
+    notaMinimaAprobar = Math.ceil(notaMaxima * 0.8);
+
+    if (isNaN(notaMaxima) || isNaN(notaMinimaAprobar)) {
+      throw new BadRequestException(
+        'Error en el cálculo de las notas. Verifique los valores de puntos en las preguntas.',
+      );
+    }
     // Si todas las preguntas son válidas, se marca el cuestionario como publicado.
     const cuestionarioUpdated = await this.cuestionarioService.update(
       idCuestionario,
-      { published: true },
+      { published: true, notaMaxima, notaMinimaAprobar },
       idUser,
     );
     return cuestionarioUpdated;

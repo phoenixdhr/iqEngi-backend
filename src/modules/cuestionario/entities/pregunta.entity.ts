@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { TipoPregunta } from 'src/common/enums/tipo-pregunta.enum';
 import { Opcion, OpcionSchema } from './opcion.entity';
@@ -44,6 +44,10 @@ export class Pregunta extends AuditFields implements IPregunta, IdInterface {
   @Field(() => Boolean, { nullable: true })
   @Prop({ default: false })
   published: boolean;
+
+  @Field(() => Float, { nullable: true })
+  @Prop()
+  puntos: number;
 }
 
 export const PreguntaSchema = SchemaFactory.createForClass(Pregunta);

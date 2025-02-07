@@ -37,7 +37,11 @@ export class Cuestionario extends AuditFields implements ICuestionario {
 
   @Field(() => Int, { nullable: true })
   @Prop()
-  numeroPreguntasPresentar?: number;
+  notaMaxima?: number;
+
+  @Field(() => Int, { nullable: true })
+  @Prop()
+  notaMinimaAprobar?: number;
 
   @Field()
   @Prop({ default: Date.now })

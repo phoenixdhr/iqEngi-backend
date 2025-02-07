@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { BaseArrayWithNestedArrayService } from 'src/common/services/base-array-with-nested-array.service';
@@ -9,6 +14,9 @@ import { RespuestaPregunta } from '../entities/respuesta-pregunta.entity';
 import { RespuestaCuestionarioService } from './respuesta-cuestionario.service';
 // import { CuestionarioService } from 'src/modules/cuestionario/services/cuestionario.service';
 import { Cuestionario } from 'src/modules/cuestionario/entities/cuestionario.entity';
+import { CuestionarioService } from 'src/modules/cuestionario/services/cuestionario.service';
+import { TipoPregunta } from 'src/common/enums';
+import { RespuestaDataInput } from '../dtos/respuesta-pregunta-dtos/create-respuestaData.dto';
 
 @Injectable()
 export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
@@ -24,8 +32,9 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
     private readonly respuestaPreguntaModel: Model<RespuestaPregunta>, // Modelo Mongoose para RespuestaPregunta.
     @InjectModel(Cuestionario.name)
     private readonly cuestionarioModel: Model<Cuestionario>, // Modelo Mongoose para Cuestionario.
+    @Inject(forwardRef(() => RespuestaCuestionarioService)) // 🔥 SOLUCIÓN
     private readonly respuestaCuestionarioService: RespuestaCuestionarioService, // Servicio para operaciones relacionadas con RespuestaCuestionario.
-    // private readonly cuestionarioService: CuestionarioService, // Servicio para operaciones relacionadas con Cuestionario.
+    private readonly cuestionarioService: CuestionarioService, // Servicio para operaciones relacionadas con Cuestionario.
   ) {
     super(respuestaCuestionarioModel, respuestaPreguntaModel); // Inicializa la clase base con los modelos proporcionados.
   }
@@ -45,143 +54,164 @@ export class RespuestaPreguntaService extends BaseArrayWithNestedArrayService<
     idUser: Types.ObjectId,
     element: CreateRespuestaPreguntaInput,
     arrayName: keyof RespuestaCuestionario = 'respuestas',
-    /* idCuestionario?: Types.ObjectId, */
   ): Promise<RespuestaPregunta> {
     const { preguntaId, respuestaId, respuestaAbierta } = element;
 
-    if (!respuestaAbierta) {
-      // Busca las respuestas asociadas al usuario
-      const respuestasCuestionarioUser =
-        await this.respuestaCuestionarioService.findByUsuarioId(idUser);
+    // 1️⃣ Buscar la respuesta del usuario en el cuestionario
+    const respuestasCuestionarioUser =
+      await this.respuestaCuestionarioService.findByUsuarioId(idUser);
 
-      // Encuentra la respuesta del cuestionario asociada al curso
-      const respuestaCuestionarioUser = respuestasCuestionarioUser.find(
-        (respuestaCuestionario) =>
-          String(respuestaCuestionario.cursoId) === String(idCurso),
+    const respuestaCuestionarioUser = respuestasCuestionarioUser.find(
+      (respuestaCuestionario) =>
+        String(respuestaCuestionario.cursoId) === String(idCurso),
+    );
+
+    if (!respuestaCuestionarioUser) {
+      throw new Error(
+        'El usuario no ha comprado el curso asociado al cuestionario.',
       );
-
-      if (!respuestaCuestionarioUser) {
-        throw new Error(
-          'El usuario no ha comprado el curso asociado al cuestionario.',
-        );
-      }
-
-      const { cuestionarioId, _id: idRespuestaCuestionario } =
-        respuestaCuestionarioUser;
-
-      // Verifica si el cuestionario existe
-      const cuestionario = (
-        await this.cuestionarioModel.findById(cuestionarioId).exec()
-      ).toObject();
-
-      if (!cuestionario) {
-        throw new Error(
-          `No se encontró un cuestionario activo con ID: ${cuestionarioId}.`,
-        );
-      }
-
-      // Verifica si la pregunta existen
-      const pregunta = cuestionario.preguntas.find((pregunta) => {
-        return String(pregunta._id) === String(preguntaId);
-      });
-
-      if (!pregunta) {
-        throw new Error(
-          `No se encontró una pregunta activa con ID: ${preguntaId}.`,
-        );
-      }
-
-      // Verifica si las respuestas seleccionadas existen
-
-      const respuesta = pregunta.opciones.find((opcion) =>
-        respuestaId.find((id) => String(id) === String(opcion._id)),
-      );
-
-      if (!respuesta) {
-        throw new Error(
-          `No se encontró una respuesta activa con ID: ${respuestaId}.`,
-        );
-      }
-
-      // Verifica que la pregunta no haya sido respondida previamente
-      const respuestasPregunta = respuestaCuestionarioUser.respuestas;
-      const preguntaRepetida = respuestasPregunta.some(
-        (respuesta) => String(respuesta.preguntaId) === String(preguntaId),
-      );
-      if (preguntaRepetida) {
-        throw new Error('La pregunta no se puede responder dos veces.');
-      }
-
-      // Prepara los IDs para la nueva respuesta
-      const preguntaIdTyesObject = new Types.ObjectId(preguntaId);
-      const repuestaArrayString = respuestaId.map((id) => String(id));
-
-      // Filtra las opciones válidas para la respuesta
-      const resultado = pregunta.opciones.filter((objOpcion) =>
-        repuestaArrayString.includes(String(objOpcion._id)),
-      );
-
-      // Agrega la nueva respuesta al arreglo del documento
-
-      const nuevaRespuesta = await super.pushToArray(
-        idRespuestaCuestionario,
-        idUser,
-        { preguntaId: preguntaIdTyesObject, respuestaId: resultado },
-        arrayName,
-      );
-
-      // Recupera la respuesta recién agregada con populate
-      const respuestaCuestionario = await this.respuestaCuestionarioModel
-        .findOne(
-          {
-            _id: idRespuestaCuestionario,
-            [`${arrayName}._id`]: nuevaRespuesta._id,
-          },
-          { [`${arrayName}.$`]: 1 }, // Proyección: solo retorna la respuesta agregada
-        )
-        .populate(`${arrayName}`) // Realiza el populate
-        .exec();
-
-      respuestaCuestionario.populate(`${arrayName}.respuestaId`);
-
-      return respuestaCuestionario[arrayName][0];
-    } else {
-      // Busca las respuestas asociadas al usuario
-      const respuestasCuestionarioUser =
-        await this.respuestaCuestionarioService.findByUsuarioId(idUser);
-
-      // Encuentra la respuesta del cuestionario asociada al curso
-      const respuestaCuestionarioUser = respuestasCuestionarioUser.find(
-        (respuestaCuestionario) =>
-          String(respuestaCuestionario.cursoId) === String(idCurso),
-      );
-
-      const { _id: idRespuestaCuestionario } = respuestaCuestionarioUser;
-      const preguntaIdTyesObject = new Types.ObjectId(preguntaId);
-
-      const nuevaRespuesta = await super.pushToArray(
-        idRespuestaCuestionario,
-        idUser,
-        { preguntaId: preguntaIdTyesObject, respuestaAbierta },
-        arrayName,
-      );
-
-      // Recupera la respuesta recién agregada con populate
-      const respuestaCuestionario = await this.respuestaCuestionarioModel
-        .findOne(
-          {
-            _id: idRespuestaCuestionario,
-            [`${arrayName}._id`]: nuevaRespuesta._id,
-          },
-          { [`${arrayName}.$`]: 1 }, // Proyección: solo retorna la respuesta agregada
-        )
-        .populate(`${arrayName}`) // Realiza el populate
-        .exec();
-
-      respuestaCuestionario.populate(`${arrayName}.respuestaId`);
-
-      return respuestaCuestionario[arrayName][0];
     }
+
+    const { cuestionarioId, _id: idRespuestaCuestionario } =
+      respuestaCuestionarioUser;
+
+    // 2️⃣ Buscar el cuestionario asociado
+    const cuestionario = await this.cuestionarioModel
+      .findById(cuestionarioId)
+      .exec();
+
+    if (!cuestionario) {
+      throw new Error(
+        `No se encontró un cuestionario activo con ID: ${cuestionarioId}.`,
+      );
+    }
+
+    // 3️⃣ Buscar la pregunta en el cuestionario
+    const pregunta = cuestionario.preguntas.find(
+      (p) => String(p._id) === String(preguntaId),
+    );
+
+    const tipoPregunta = pregunta.tipoPregunta;
+
+    if (!pregunta) {
+      throw new Error(`No se encontró una pregunta con ID: ${preguntaId}.`);
+    }
+
+    // 4️⃣ Verificar que la pregunta no haya sido respondida previamente
+    const preguntaYaRespondida = respuestaCuestionarioUser.respuestas.some(
+      (respuesta) => String(respuesta.preguntaId) === String(preguntaId),
+    );
+
+    if (preguntaYaRespondida) {
+      throw new Error('La pregunta ya ha sido respondida.');
+    }
+
+    // 5️⃣ Validar la respuesta según el tipo de pregunta
+    let nuevaRespuesta: RespuestaPregunta;
+
+    switch (tipoPregunta) {
+      case TipoPregunta.ABIERTA:
+        if (!respuestaAbierta) {
+          throw new Error('Debe proporcionar una respuesta escrita.');
+        }
+        nuevaRespuesta = await super.pushToArray(
+          idRespuestaCuestionario,
+          idUser,
+          {
+            preguntaId: new Types.ObjectId(preguntaId),
+            tipoPregunta,
+            respuestaAbierta,
+          },
+          arrayName,
+        );
+        break;
+
+      case TipoPregunta.ALTERNATIVA:
+        if (!respuestaId || respuestaId.length !== 1) {
+          throw new Error(
+            'Debe seleccionar una única opción para preguntas de tipo alternativa.',
+          );
+        }
+        nuevaRespuesta = await this.guardarRespuesta(
+          idRespuestaCuestionario,
+          idUser,
+          preguntaId,
+          respuestaId,
+          tipoPregunta,
+          arrayName,
+        );
+        break;
+
+      case TipoPregunta.OPCION_MULTIPLE:
+        if (!respuestaId || respuestaId.length === 0) {
+          throw new Error(
+            'Debe seleccionar al menos una opción en preguntas de opción múltiple.',
+          );
+        }
+        nuevaRespuesta = await this.guardarRespuesta(
+          idRespuestaCuestionario,
+          idUser,
+          preguntaId,
+          respuestaId,
+          tipoPregunta,
+          arrayName,
+        );
+        break;
+
+      case TipoPregunta.ORDENAMIENTO:
+        if (!respuestaId || respuestaId.length < 2) {
+          throw new Error(
+            `Debe proporcionar un orden válido de opciones para preguntas de ordenamiento con ID ${preguntaId}.`,
+          );
+        }
+        nuevaRespuesta = await this.guardarRespuesta(
+          idRespuestaCuestionario,
+          idUser,
+          preguntaId,
+          respuestaId,
+          tipoPregunta,
+          arrayName,
+        );
+        break;
+
+      default:
+        throw new Error('Tipo de pregunta no reconocido.');
+    }
+
+    // 6️⃣ Recuperar la respuesta recién agregada con `populate`
+    const respuestaCuestionario = await this.respuestaCuestionarioModel
+      .findOne(
+        {
+          _id: idRespuestaCuestionario,
+          [`${arrayName}._id`]: nuevaRespuesta._id,
+        },
+        { [`${arrayName}.$`]: 1 },
+      )
+      .populate(`${arrayName}`)
+      .exec();
+
+    respuestaCuestionario.populate(`${arrayName}.respuestaId`);
+
+    return respuestaCuestionario[arrayName][0];
+  }
+
+  /**
+   * Método auxiliar para evitar código duplicado al guardar respuestas.
+   */
+  private async guardarRespuesta(
+    idRespuestaCuestionario: Types.ObjectId,
+    idUser: Types.ObjectId,
+    preguntaId: Types.ObjectId,
+    respuestaId: RespuestaDataInput[],
+    tipoPregunta: TipoPregunta,
+    arrayName: keyof RespuestaCuestionario,
+  ): Promise<RespuestaPregunta> {
+    return await super.pushToArray(
+      idRespuestaCuestionario,
+      idUser,
+      { preguntaId: new Types.ObjectId(preguntaId), tipoPregunta, respuestaId },
+      arrayName,
+    );
   }
 
   /**

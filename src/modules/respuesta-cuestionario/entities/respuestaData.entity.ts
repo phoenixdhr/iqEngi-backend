@@ -14,8 +14,8 @@ import { Types } from 'mongoose';
 import { IOpcion } from '../../cuestionario/interfaces/opcion.interface';
 
 @ObjectType()
-@Schema({ timestamps: true }) // Mantiene los timestamps para createdAt y updatedAt
-export class OpcionOutput implements IOpcion {
+@Schema()
+export class RespuestaData implements IOpcion {
   @Field(() => ID, { nullable: true })
   _id: Types.ObjectId; // Ojo: _id en Mongoose se genera automático,
   // pero en GraphQL así lo haces opcional
@@ -29,4 +29,4 @@ export class OpcionOutput implements IOpcion {
   orden?: number;
 }
 
-export const OpcionOutputSchema = SchemaFactory.createForClass(OpcionOutput);
+export const RespuestaDataSchema = SchemaFactory.createForClass(RespuestaData);

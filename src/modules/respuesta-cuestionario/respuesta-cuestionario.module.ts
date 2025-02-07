@@ -45,6 +45,6 @@ import {
     RespuestaPreguntaResolver,
   ],
   controllers: [RespuestaCuestionarioController],
-  exports: [RespuestaCuestionarioService],
+  exports: [RespuestaCuestionarioService, RespuestaPreguntaService],
 })
 export class RespuestaCuestionarioModule {}

@@ -12,7 +12,8 @@ export interface ICuestionario extends IdInterface {
   descripcion?: string;
   preguntas?: IPregunta[];
   published: boolean;
-  numeroPreguntasPresentar?: number; // numero de preguntas correctas con las que se aprueba el curso
+  notaMaxima?: number; // numero de preguntas correctas con las que se aprueba el curso
+  notaMinimaAprobar?: number; // numero de preguntas correctas con las que se aprueba el curso
   fechaCreacion: Date;
 }
 

@@ -93,7 +93,6 @@ export class CreateCursoInput implements ICursoInput {
   @IsString({ each: true })
   dirigidoA?: string[];
 
-
   @Field({ nullable: true })
   @IsOptional()
   @IsDate()

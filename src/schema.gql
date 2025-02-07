@@ -66,6 +66,7 @@ type Pregunta {
   unidadId: ID
   deleted: Boolean!
   published: Boolean
+  puntos: Float
 }
 
 """Tipos de preguntas"""
@@ -83,7 +84,8 @@ type Cuestionario {
   descripcion: String
   preguntas: [Pregunta!]!
   published: Boolean
-  numeroPreguntasPresentar: Int
+  notaMaxima: Int
+  notaMinimaAprobar: Int
   fechaCreacion: DateTime!
   deleted: Boolean!
 }
@@ -253,12 +255,20 @@ enum EstadoOrden {
   Reembolsada
 }
 
+type RespuestaData {
+  _id: ID
+  textOpcion: String
+  orden: Int
+}
+
 type RespuestaPregunta {
   _id: ID!
   preguntaId: ID!
-  respuestaId: [Opcion!]
+  respuestaId: [RespuestaData!]
+  tipoPregunta: TipoPregunta
   respuestaAbierta: String
   deleted: Boolean!
+  esCorrecto: Boolean!
 }
 
 type RespuestaCuestionario {
@@ -432,7 +442,8 @@ type Mutation {
   RespuestaCuestionario_hardDelete(respuestaCuestionarioId: ID!): RespuestaCuestionario!
   RespuestaCuestionario_restore(respuestaCuestionarioId: ID!): RespuestaCuestionario!
   RespuestaCuestionario_hardDeleteAllSoftDeleted: DeletedCountOutput!
-  RespuestaPregunta_create(idCurso: ID!, createRespuestaPreguntaInput: CreateRespuestaPreguntaInput!): RespuestaPregunta!
+  RespuestaCuestionario_calcularNota(idRespuestaCuestionario: ID!): Float!
+  RespuestaPregunta_create(idCurso: ID!, createRespuestaPregunta_ResolverInput: CreateRespuestaPregunta_ResolverInput!): RespuestaPregunta!
   Curso_create(createCursoInput: CreateCursoInput!): CursoOutput!
   Curso_update(id: ID!, updateCursoInput: UpdateCursoInput!): CursoOutput!
   Curso_softDelete(idRemove: ID!): CursoOutput!
@@ -574,8 +585,16 @@ input CreateRespuestaPreguntaInput {
   preguntaId: ID!
 
   """Respuestas seleccionadas a partir de las opciones de las preguntas"""
-  respuestaId: [ID!]
+  respuestaId: [RespuestaDataInput!]
+  tipoPregunta: TipoPregunta
   respuestaAbierta: String
+  esCorrecto: Boolean!
+}
+
+input RespuestaDataInput {
+  _id: ID!
+  textOpcion: String!
+  orden: Int
 }
 
 input UpdateRespuestaCuestionarioInput {
@@ -585,6 +604,14 @@ input UpdateRespuestaCuestionarioInput {
   respuestas: [CreateRespuestaPreguntaInput!]
   nota: Float
   estado: EstadoCuestionario = En_progreso
+}
+
+input CreateRespuestaPregunta_ResolverInput {
+  preguntaId: ID!
+
+  """Respuestas seleccionadas a partir de las opciones de las preguntas"""
+  respuestaId: [RespuestaDataInput!]
+  respuestaAbierta: String
 }
 
 input CreateCursoInput {
@@ -681,6 +708,8 @@ input UpdateCuestionarioInput {
   descripcion: String
   published: Boolean = false
   numeroPreguntasPresentar: Int
+  notaMaxima: Float
+  notaMinimaAprobar: Float
 }
 
 input CreatePreguntaInput {
@@ -690,6 +719,7 @@ input CreatePreguntaInput {
   unidadId: ID
   respuestaOrdenamiento: String
   published: Boolean = false
+  puntos: Float = 1
 }
 
 input UpdatePreguntaInput {
@@ -699,6 +729,7 @@ input UpdatePreguntaInput {
   unidadId: ID
   respuestaOrdenamiento: String
   published: Boolean = false
+  puntos: Float = 1
 }
 
 input CreateOpcionInput {

@@ -261,4 +261,20 @@ export class RespuestaCuestionarioResolver
   ): Promise<RespuestaCuestionario[]> {
     return this.respuestaCuestionarioService.findSoftDeleted(paginationArgs);
   }
+
+  @Mutation(() => Number, {
+    name: 'RespuestaCuestionario_calcularNota',
+  })
+  @RolesDec(...administradorUp)
+  async calcularNota(
+    @Args('idRespuestaCuestionario', { type: () => ID }, IdPipe)
+    idRespuestaCuestionario: Types.ObjectId,
+    @CurrentUser() currentUser: UserRequest,
+  ): Promise<number> {
+    const userId = new Types.ObjectId(currentUser._id);
+    return this.respuestaCuestionarioService.calcularNota(
+      idRespuestaCuestionario,
+      userId,
+    );
+  }
 }

@@ -31,7 +31,6 @@ export class ModuloResolver
     createModuloInput: CreateModuloInput,
     @CurrentUser() user: UserRequest,
   ): Promise<Modulo> {
-    console.log('createModuloInput', createModuloInput);
     const userId = new Types.ObjectId(user._id);
     return this.moduloService._create(createModuloInput, userId);
   }

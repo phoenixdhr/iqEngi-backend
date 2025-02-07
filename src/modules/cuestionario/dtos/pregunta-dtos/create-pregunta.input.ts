@@ -1,4 +1,4 @@
-import { InputType, Field, ID } from '@nestjs/graphql';
+import { InputType, Field, ID, Float } from '@nestjs/graphql';
 import {
   IsNotEmpty,
   IsString,
@@ -6,6 +6,8 @@ import {
   IsOptional,
   IsMongoId,
   IsBoolean,
+  IsNumber,
+  Max,
 } from 'class-validator';
 import { TipoPregunta } from 'src/common/enums/tipo-pregunta.enum';
 
@@ -49,4 +51,10 @@ export class CreatePreguntaInput implements IPreguntaInput {
   @IsOptional()
   @IsBoolean()
   published: boolean = false;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  @Max(5)
+  puntos: number = 1;
 }

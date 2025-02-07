@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
 import { AuditFields } from 'src/common/clases/audit-fields.class';
 import { IPregunta } from '../../interfaces/pregunta.interface';
 import { IdInterface } from 'src/common/interfaces/id.interface';
@@ -38,4 +38,8 @@ export class Preguntas extends AuditFields implements IPregunta, IdInterface {
   @Field()
   @Prop({ default: false })
   deleted: boolean;
+
+  @Field(() => Float, { nullable: true, defaultValue: 1 })
+  @Prop({ default: 1 })
+  puntos: number;
 }

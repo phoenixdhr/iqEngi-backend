@@ -10,10 +10,11 @@ import { Types } from 'mongoose';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
 import { administradorUp } from 'src/common/enums/rol.enum';
-import { CreateRespuestaPreguntaInput } from '../dtos/respuesta-pregunta-dtos/create-respuesta-pregunta.dto';
+
 import { UpdateRespuestaPreguntaInput } from '../dtos/respuesta-pregunta-dtos/update-respuesta-pregunta.dto';
 import { RespuestaPreguntaService } from '../services/respuesta-pregunta.service';
 import { RespuestaCuestionarioService } from '../services/respuesta-cuestionario.service';
+import { CreateRespuestaPregunta_ResolverInput } from '../dtos/respuesta-pregunta-dtos/create-respuesta-pregunta.dto';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
@@ -21,7 +22,7 @@ export class RespuestaPreguntaResolver
   implements
     IResolver_SubDocument<
       RespuestaPregunta,
-      CreateRespuestaPreguntaInput,
+      CreateRespuestaPregunta_ResolverInput,
       UpdateRespuestaPreguntaInput
     >
 {
@@ -35,7 +36,7 @@ export class RespuestaPreguntaResolver
    * Crea una nueva pregunta en un cuestionario específico.
    *
    * @param idRespuestaCuestionario ID del cuestionario al que se agregará la pregunta.
-   * @param createRespuestaPreguntaInput Datos necesarios para crear la pregunta.
+   * @param createRespuestaPregunta_ResolverInput Datos necesarios para crear la pregunta.
    * @param user Usuario autenticado que realiza la creación.
    * @returns La pregunta creada.
    *
@@ -48,8 +49,8 @@ export class RespuestaPreguntaResolver
     idRespuestaCuestionario: Types.ObjectId, */
     @Args('idCurso', { type: () => ID }, IdPipe)
     idCurso: Types.ObjectId,
-    @Args('createRespuestaPreguntaInput')
-    createRespuestaPreguntaInput: CreateRespuestaPreguntaInput,
+    @Args('createRespuestaPregunta_ResolverInput')
+    createRespuestaPregunta_ResolverInput: CreateRespuestaPregunta_ResolverInput,
     @CurrentUser() user: UserRequest,
   ): Promise<RespuestaPregunta> {
     const userId = new Types.ObjectId(user._id);
@@ -57,7 +58,7 @@ export class RespuestaPreguntaResolver
     return await this.preguntaService._pushToArray(
       idCurso,
       userId,
-      createRespuestaPreguntaInput,
+      createRespuestaPregunta_ResolverInput,
       'respuestas',
     );
   }
