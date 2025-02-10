@@ -142,7 +142,7 @@ export class MailService {
       user.email_verified = true;
       await user.save();
 
-      return 'http://localhost:3000/email/verification-success';
+      return `${this.configService.dominioURL}/email/verification-success`;
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
         throw new BadRequestException('El token ha expirado.');

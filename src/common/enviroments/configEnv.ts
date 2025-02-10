@@ -19,7 +19,7 @@ export default registerAs('configEnv', () => {
   // Configuracion de google oauth
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
   const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const googleCallbackUrl = process.env.REDIRECT_URI;
+  const googleCallbackUrl = process.env.GOOGLE_REDIRECT_URI;
 
   // Configuracion de nodemailer
   const eHost = process.env.EMAIL_HOST;

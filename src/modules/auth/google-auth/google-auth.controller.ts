@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Inject,
   Req,
   Res,
   UnauthorizedException,
@@ -13,12 +14,15 @@ import { AuthService } from '../auth.service';
 import { UserRequest } from '../entities/user-request.entity';
 import { UserRequestGoogle } from '../interfaces/google-user.interface';
 import { JwtGqlAuthGuard } from '../jwt-auth/jwt-auth.guard/jwt-auth.guard';
+import configEnv from 'src/common/enviroments/configEnv';
+import { ConfigType } from '@nestjs/config';
 
 @Controller('auth') // Prefijo de las rutas del controlador: 'auth'
 export class GoogleAuthController {
   constructor(
     private googleAuthService: GoogleAuthService, // Servicio de autenticación con Google
     private authService: AuthService, // Servicio de autenticación general
+    @Inject(configEnv.KEY) readonly configService: ConfigType<typeof configEnv>,
   ) {}
 
   /**
@@ -59,7 +63,7 @@ export class GoogleAuthController {
     );
 
     // Redirige al usuario a la página de perfil
-    res.redirect('http://localhost:3000/auth/profile');
+    res.redirect(`${this.configService.dominioURL}/auth/profile`);
   }
 
   /**
@@ -100,6 +104,6 @@ export class GoogleAuthController {
     res.clearCookie('jwt_token');
 
     // Redirige al usuario a la página principal después de cerrar sesión
-    res.redirect('http://localhost:3000');
+    res.redirect(`${this.configService.dominioURL}`);
   }
 }
