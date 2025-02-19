@@ -86,6 +86,7 @@ export class CursoResolver
    */
   @Query(() => CursoOutput, { name: 'Curso' })
   @RolesDec(...administradorUp)
+  @IsPublic()
   async findById(
     @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<CursoOutput> {
