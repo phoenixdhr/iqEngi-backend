@@ -95,6 +95,11 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type ImageObjectType {
+  url: String!
+  alt: String!
+}
+
 type Curso {
   _id: ID!
   courseTitle: String!
@@ -103,7 +108,7 @@ type Curso {
   nivel: Nivel
   instructor: Instructor
   duracionHoras: Float
-  imagenURL: String
+  imagenURL: ImageObjectType
   precio: Float
   currency: String
   descuento: Float
@@ -160,7 +165,7 @@ type CursoOutput {
   nivel: Nivel
   instructor: Instructor
   duracionHoras: Float
-  imagenURL: String
+  imagenURL: ImageObjectType
   precio: Float
   currency: String
   descuento: Float
@@ -621,7 +626,7 @@ input CreateCursoInput {
   nivel: Nivel
   instructor: ID
   duracionHoras: Float
-  imagenURL: String
+  imagenURL: ImageInput
   precio: Float
   currency: String
   descuento: Float
@@ -633,6 +638,11 @@ input CreateCursoInput {
   cuestionarioId: ID
 }
 
+input ImageInput {
+  url: String!
+  alt: String!
+}
+
 input UpdateCursoInput {
   courseTitle: String
   descripcionCorta: String
@@ -640,7 +650,7 @@ input UpdateCursoInput {
   nivel: Nivel
   instructor: ID
   duracionHoras: Float
-  imagenURL: String
+  imagenURL: ImageInput
   precio: Float
   currency: String
   descuento: Float

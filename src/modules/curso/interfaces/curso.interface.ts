@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import { Nivel } from 'src/common/enums/nivel.enum';
 import { IdInterface } from 'src/common/interfaces/id.interface';
+import { IImage } from 'src/common/interfaces/iImage';
 
 export interface ICurso extends IdInterface {
   _id: Types.ObjectId;
@@ -10,7 +11,7 @@ export interface ICurso extends IdInterface {
   nivel?: Nivel;
   instructor?: Types.ObjectId;
   duracionHoras?: number;
-  imagenURL?: string;
+  imagenURL?: IImage;
   precio?: number;
   currency?: string;
   descuentos?: number;

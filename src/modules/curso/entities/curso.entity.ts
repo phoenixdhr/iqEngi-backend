@@ -14,6 +14,8 @@ import { addSoftDeleteMiddleware } from 'src/common/middlewares/soft-delete.midd
 import { CursoComprado } from 'src/modules/curso-comprado/entities/curso-comprado.entity';
 import { Coleccion } from 'src/common/enums';
 import { addPreUpdateSyncMiddleware } from 'src/common/middlewares/pre-update-campo.middleware';
+import { IImage } from 'src/common/interfaces/iImage';
+import { ImageObjectType } from 'src/common/dtos/image.objectType';
 
 // #region Curso
 @ObjectType()
@@ -46,9 +48,9 @@ export class Curso extends AuditFields implements ICurso {
   @Prop()
   duracionHoras?: number;
 
-  @Field({ nullable: true })
-  @Prop()
-  imagenURL?: string;
+  @Field(() => ImageObjectType, { nullable: true })
+  @Prop({ type: { url: String, alt: String } })
+  imagenURL: IImage;
 
   @Field(() => Float, { nullable: true })
   @Prop()

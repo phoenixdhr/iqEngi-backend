@@ -8,14 +8,16 @@ import {
   Min,
   IsArray,
   IsMongoId,
-  IsUrl,
   Max,
   IsDate,
   IsCurrency,
+  ValidateNested,
 } from 'class-validator';
 import { Nivel } from 'src/common/enums/nivel.enum'; // Enum para niveles
 import { ICursoInput } from '../../interfaces/curso.interface';
 import { Types } from 'mongoose';
+import { Type } from 'class-transformer';
+import { ImageInput } from 'src/common/dtos/imageInput';
 
 @InputType()
 export class CreateCursoInput implements ICursoInput {
@@ -50,11 +52,11 @@ export class CreateCursoInput implements ICursoInput {
   @Min(0)
   duracionHoras?: number;
 
-  @Field({ nullable: true })
+  @Field(() => ImageInput, { nullable: true })
   @IsOptional()
-  @IsString()
-  @IsUrl()
-  imagenURL?: string;
+  @ValidateNested()
+  @Type(() => ImageInput)
+  imagenURL?: ImageInput;
 
   @Field(() => Float, { nullable: true })
   @IsNumber()

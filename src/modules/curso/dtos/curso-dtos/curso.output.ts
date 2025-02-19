@@ -11,6 +11,7 @@ import { ICurso } from '../../interfaces/curso.interface';
 import { Instructor } from 'src/modules/instructor/entities/instructor.entity';
 import { Modulo } from '../../entities/modulo.entity';
 import { Categoria } from 'src/modules/categoria/entities/categoria.entity';
+import { ImageObjectType } from 'src/common/dtos/image.objectType';
 
 // #region Curso
 @ObjectType()
@@ -43,9 +44,9 @@ export class CursoOutput extends AuditFields implements ICurso {
   @Prop()
   duracionHoras?: number;
 
-  @Field({ nullable: true })
-  @Prop()
-  imagenURL?: string;
+  @Field(() => ImageObjectType, { nullable: true })
+  @Prop({ type: { url: String, alt: String } })
+  imagenURL: ImageObjectType;
 
   @Field(() => Float, { nullable: true })
   @Prop()
