@@ -114,7 +114,7 @@ export const CursoSchema = SchemaFactory.createForClass(Curso);
 
 //#region indexaciones
 // permite realizar busquedas por titulo
-CursoSchema.index({ courseTitle: 'text' }, { unique: true });
+CursoSchema.index({ courseTitle: 'text' });
 
 CursoSchema.index({ categorias: 1 });
 CursoSchema.index({ instructor: 1 });
