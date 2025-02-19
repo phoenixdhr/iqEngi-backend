@@ -16,6 +16,7 @@ import { RolesGuard } from 'src/modules/auth/roles-guards/roles.guard';
 import { Types } from 'mongoose';
 import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 import { CursoOutput } from '../dtos/curso-dtos/curso.output';
+import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
@@ -52,7 +53,8 @@ export class CursoResolver
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => [CursoOutput], { name: 'Cursos' })
-  @RolesDec(...administradorUp)
+  // @RolesDec(...administradorUp)
+  @IsPublic()
   async findAll(@Args() pagination?: PaginationArgs): Promise<CursoOutput[]> {
     return this.cursoService.findAll(pagination);
   }
