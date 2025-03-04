@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { PaginationArgs, SearchTextArgs } from 'src/common/dtos';
 import SearchField from 'src/common/clases/search-field.class';
+import { generateSlug } from 'src/common/utils/generate-slug';
 
 @Injectable()
 export class CursoService extends BaseService<
@@ -46,7 +47,26 @@ export class CursoService extends BaseService<
       }
     }
 
+    const slug = generateSlug(titulo);
+    createCursoInput.slug = slug;
+
     return super.create(createCursoInput, userid);
+  }
+
+  async update(
+    id: Types.ObjectId,
+    updateCursoInput: UpdateCursoInput,
+    userId: Types.ObjectId,
+  ): Promise<Curso> {
+    const titulo = updateCursoInput.courseTitle;
+
+    if (titulo) {
+      const slug = generateSlug(titulo);
+      updateCursoInput.slug = slug;
+      return super.update(id, updateCursoInput, userId);
+    }
+
+    return super.update(id, updateCursoInput, userId);
   }
 
   /**

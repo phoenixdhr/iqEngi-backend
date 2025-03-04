@@ -26,6 +26,7 @@ export interface ICurso extends IdInterface {
   calificacionPromedio?: number;
   numeroCalificaciones?: number;
   cuestionarioId?: Types.ObjectId;
+  slug?: string;
 }
 
 export type ICursoInput = Omit<

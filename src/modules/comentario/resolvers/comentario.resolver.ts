@@ -26,11 +26,7 @@ import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 @Resolver(() => Comentario)
 export class ComentarioResolver
   implements
-    IResolverBase<
-      Comentario,
-      CreateComentario_userInput,
-      UpdateComentarioInput
-    >
+    IResolverBase<Comentario, CreateComentario_userInput, UpdateComentarioInput>
 {
   constructor(private readonly comentarioService: ComentarioService) {}
 

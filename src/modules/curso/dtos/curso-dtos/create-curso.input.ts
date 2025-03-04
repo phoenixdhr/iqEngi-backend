@@ -110,4 +110,9 @@ export class CreateCursoInput implements ICursoInput {
   @IsOptional()
   @IsMongoId()
   cuestionarioId?: Types.ObjectId;
+
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  slug?: string;
 }
