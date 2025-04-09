@@ -38,6 +38,7 @@ export class Usuario extends AuditFields implements IUsuario {
   @Prop({ nullable: true })
   hashPassword?: string;
 
+  @Field()
   @Prop({ default: false })
   isGoogleAuth?: boolean;
 
