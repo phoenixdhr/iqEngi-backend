@@ -194,10 +194,11 @@ type Perfil {
 
 type Usuario {
   _id: ID!
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   email: String!
   email_verified: Boolean!
+  isGoogleAuth: Boolean!
   roles: [RolEnumGql!]!
   picture: String
   perfil: Perfil
@@ -298,10 +299,11 @@ enum EstadoCuestionario {
 
 type UsuarioOutput {
   _id: ID!
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   email: String!
   email_verified: Boolean!
+  isGoogleAuth: Boolean!
   roles: [RolEnumGql!]!
   picture: String
   perfil: Perfil
@@ -518,8 +520,8 @@ type Mutation {
 }
 
 input CreateUsuarioInput {
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   email: String!
   password: String!
   picture: String

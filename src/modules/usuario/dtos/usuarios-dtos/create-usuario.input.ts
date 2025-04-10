@@ -16,12 +16,12 @@ import { UserGoogle } from 'src/modules/auth/interfaces/google-user.interface';
 
 @InputType()
 export class CreateUsuarioInput implements IUsuarioInput {
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   firstName?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   lastName?: string;
