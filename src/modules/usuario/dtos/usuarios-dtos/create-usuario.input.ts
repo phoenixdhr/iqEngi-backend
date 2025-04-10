@@ -17,14 +17,14 @@ import { UserGoogle } from 'src/modules/auth/interfaces/google-user.interface';
 @InputType()
 export class CreateUsuarioInput implements IUsuarioInput {
   @Field()
-  @IsNotEmpty()
   @IsString()
-  firstName: string;
+  @IsOptional()
+  firstName?: string;
 
   @Field()
-  @IsNotEmpty()
   @IsString()
-  lastName: string;
+  @IsOptional()
+  lastName?: string;
 
   @Field()
   @IsNotEmpty()

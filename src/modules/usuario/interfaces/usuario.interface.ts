@@ -8,8 +8,8 @@ import { IdInterface } from 'src/common/interfaces/id.interface';
 
 export interface IUsuario extends UserAuth, IdInterface {
   _id: Types.ObjectId;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   email_verified?: boolean;
   hashPassword?: string;

@@ -19,13 +19,13 @@ export class Usuario extends AuditFields implements IUsuario {
   @Field(() => ID)
   _id: Types.ObjectId;
 
-  @Field()
-  @Prop({ required: true })
-  firstName: string;
+  @Field({ nullable: true })
+  @Prop()
+  firstName?: string;
 
-  @Field()
-  @Prop({ required: true })
-  lastName: string;
+  @Field({ nullable: true })
+  @Prop()
+  lastName?: string;
 
   @Field()
   @Prop({ required: true, lowercase: true })
