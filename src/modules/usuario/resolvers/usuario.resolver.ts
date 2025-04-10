@@ -20,6 +20,7 @@ import { CreateUsuarioInput } from '../dtos/usuarios-dtos/create-usuario.input';
 import SearchField from 'src/common/clases/search-field.class';
 import SearchFieldArgs from 'src/common/dtos/search-field.args';
 import { Types } from 'mongoose';
+import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
 
 /**
  * Resolver para manejar las operaciones de Usuario.
@@ -154,7 +155,8 @@ export class UsuarioResolver {
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => UsuarioOutput, { name: 'usuario_findByEmail' })
-  @RolesDec(...administradorUp)
+  // @RolesDec(...administradorUp)
+  @IsPublic()
   async findByEmail(@Args('email') email: string): Promise<UsuarioOutput> {
     return this.usuarioService.findByEmail(email);
   }
