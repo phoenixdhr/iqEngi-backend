@@ -66,7 +66,7 @@ export class JwtAuthResolver {
    * @param user - Datos del usuario actual.
    * @returns El resultado del envío de correo.
    */
-  @Mutation(() => UserJwtOutput)
+  @Mutation(() => UserJwtOutput, { name: 'jwt_sendVerificationEmail' })
   @UseGuards(JwtGqlAuthGuard) // Requiere autenticación JWT
   async sendVerificationEmailAgain(@CurrentUser() user: UserRequest) {
     return this.mailService.sendVerificationEmailAgain(user);
@@ -81,7 +81,7 @@ export class JwtAuthResolver {
    * @throws NotFoundException si el usuario no existe.
    * @throws ConflictException si la contraseña antigua es incorrecta.
    */
-  @Mutation(() => UsuarioOutput)
+  @Mutation(() => UsuarioOutput, { name: 'jwt_updatePassword' })
   @UseGuards(JwtGqlAuthGuard) // Requiere autenticación JWT
   async updatePassword(
     @Args('updatePasswordInput') updatePasswordInput: UpdatePasswordInput,
@@ -96,7 +96,7 @@ export class JwtAuthResolver {
    * @param requestPasswordResetInput - Contiene el correo electrónico del usuario.
    * @returns Un mensaje de éxito.
    */
-  @Mutation(() => String)
+  @Mutation(() => String, { name: 'jwt_requestPasswordReset' })
   @IsPublic()
   async requestPasswordReset(
     @Args('requestPasswordResetInput')
@@ -112,7 +112,7 @@ export class JwtAuthResolver {
    * @param resetPasswordInput - Contiene el token y la nueva contraseña.
    * @returns Un mensaje de éxito.
    */
-  @Mutation(() => String)
+  @Mutation(() => String, { name: 'jwt_resetPassword' })
   @IsPublic()
   async resetPassword(
     @Args('resetPasswordInput') resetPasswordInput: ResetPasswordInput,
