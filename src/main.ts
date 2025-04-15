@@ -47,8 +47,8 @@ async function bootstrap() {
   app.enableCors({
     origin: isProduction
       ? 'https://iqengi-front-production.up.railway.app'
-      : 'http://localhost:3000', // Ajusta esto al dominio de tu frontend
-    credentials: true,
+      : 'http://localhost:3000', // Cambia este valor por el dominio de tu front-end
+    credentials: true, // Permite que se envíen credenciales (cookies, cabeceras de autenticación, etc.)
   });
   app.use(cookieParser());
 
