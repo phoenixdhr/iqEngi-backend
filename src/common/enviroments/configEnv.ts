@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('configEnv', () => {
-  const environment = process.env.NODE_ENV || 'development';
+  const environment = process.env.ENVIRONMENT;
 
   // Configuracion de mongo
   const dbName = process.env.MONGO_DB;

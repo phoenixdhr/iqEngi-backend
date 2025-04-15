@@ -49,7 +49,7 @@ export class JwtAuthService {
   }
 
   /**
-   * Inicia sesión de usuario y genera un token JWT.
+   * Inicia sesión con usuario y contraseña, se genera un token JWT.
    * @param user - Información del usuario.
    * @returns Un objeto que contiene el token JWT y los datos del usuario.
    */
@@ -71,6 +71,7 @@ export class JwtAuthService {
    * @returns Los datos del usuario si las credenciales son correctas.
    * @throws UnauthorizedException - Si el usuario o la contraseña no son válidos.
    */
+
   async validatePassword(
     userPasswordInput: LoginUserInput,
   ): Promise<UserRequest> {
