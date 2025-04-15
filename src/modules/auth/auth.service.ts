@@ -56,7 +56,7 @@ export class AuthService {
     res.cookie('jwt_token', jwtToken, {
       httpOnly: true,
       secure: isProduction, // this.configService.environment === 'production',
-      sameSite: isProduction ? 'strict' : 'lax', // Cambiado a 'strict' para mayor seguridad  antes era :        this.configService.environment === 'production' ? 'none' : 'lax',
+      sameSite: isProduction ? 'none' : 'lax', // Cambiado a 'strict' para mayor seguridad  antes era :        this.configService.environment === 'production' ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -65,7 +65,7 @@ export class AuthService {
       res.cookie('access_token', googleToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict', // Cambiado a 'strict' para mayor seguridad
+        sameSite: 'none', // Cambiado a 'strict' para mayor seguridad
         // sameSite: 'none', // Cambiado a 'strict' para mayor seguridad
         maxAge: 24 * 60 * 60 * 1000,
       });
@@ -75,7 +75,7 @@ export class AuthService {
       res.cookie('refresh_token', googleRefreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict', // Cambiado a 'strict' para mayor seguridad
+        sameSite: 'none', // Cambiado a 'strict' para mayor seguridad
         // sameSite: 'none', // Cambiado a 'strict' para mayor seguridad
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
