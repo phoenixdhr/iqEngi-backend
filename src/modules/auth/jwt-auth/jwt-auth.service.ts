@@ -61,7 +61,7 @@ export class JwtAuthService {
 
     const user = await this.validatePassword(loginUserInput);
 
-    const userRequest = this.authService.handleLogin(res, user);
+    const userRequest = await this.authService.handleLogin(res, user);
     return userRequest;
   }
 
