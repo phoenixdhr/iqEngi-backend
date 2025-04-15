@@ -7,7 +7,17 @@ import { port } from './common/enviroments/configEnv';
 import { WsAdapter } from '@nestjs/platform-ws'; // Importamos el adaptador de WebSocket
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+// En el archivo main.ts o en un script de arranque previo:
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 async function bootstrap() {
+  const environment = process.env.ENVIRONMENT;
+  // https://iqengi-backend-production.up.railway.app
+  const dominio = process.env.DOMINIO_URL;
+
+  const isProduction = environment === 'production';
+
   const app = await NestFactory.create(AppModule);
 
   app.useWebSocketAdapter(new WsAdapter(app)); // (NUEVO) Configuramos el adaptador de WebSocket
@@ -35,8 +45,10 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   app.enableCors({
-    // origin: 'http://localhost:3000', // Ajusta esto al dominio de tu frontend
-    // credentials: true,
+    origin: isProduction
+      ? 'https://iqengi-front-production.up.railway.app'
+      : 'http://localhost:3000', // Ajusta esto al dominio de tu frontend
+    credentials: true,
   });
   app.use(cookieParser());
 
