@@ -44,12 +44,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  app.enableCors({
-    origin: isProduction
-      ? 'https://iqengi-front-production.up.railway.app'
-      : 'http://localhost:3000', // Cambia este valor por el dominio de tu front-end
-    credentials: true, // Permite que se envíen credenciales (cookies, cabeceras de autenticación, etc.)
-  });
+  // app.enableCors({
+  //   origin: isProduction
+  //     ? 'https://iqengi-front-production.up.railway.app'
+  //     : 'http://localhost:3000', // Cambia este valor por el dominio de tu front-end
+  //   credentials: true, // Permite que se envíen credenciales (cookies, cabeceras de autenticación, etc.)
+  // });
   app.use(cookieParser());
 
   await app.listen(port);
