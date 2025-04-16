@@ -14,7 +14,9 @@ dotenv.config();
 async function bootstrap() {
   const environment = process.env.ENVIRONMENT;
   // https://iqengi-backend-production.up.railway.app
-  const dominio = process.env.DOMINIO_URL;
+  const dominioFrontend = process.env.DOMINIO_URL_FRONTEND;
+  const dominioBackend = process.env.DOMINIO_URL_API;
+  const dominioLocalHost = process.env.DOMINIO_LOCALHOST;
 
   const isProduction = environment === 'production';
 
@@ -45,9 +47,8 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   app.enableCors({
-    // origin: isProduction
-    //   ? 'https://iqengi-front-production.up.railway.app'
-    //   : 'http://localhost:3000', // Cambia este valor por el dominio de tu front-end
+    origin: isProduction ? [dominioFrontend, dominioBackend] : dominioLocalHost, // Permite el acceso desde el dominio de tu front-end]
+
     credentials: true, // Permite que se envíen credenciales (cookies, cabeceras de autenticación, etc.)
   });
   app.use(cookieParser());

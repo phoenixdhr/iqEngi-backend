@@ -63,7 +63,7 @@ export class GoogleAuthController {
     );
 
     // Redirige al usuario a la página de perfil
-    res.redirect(`${this.configService.dominioURL}/auth/profile`);
+    res.redirect(`${this.configService.dominioAPI}/auth/profile`);
   }
 
   /**
@@ -104,6 +104,6 @@ export class GoogleAuthController {
     res.clearCookie('jwt_token');
 
     // Redirige al usuario a la página principal después de cerrar sesión
-    res.redirect(`${this.configService.dominioURL}`);
+    res.redirect(`${this.configService.dominioAPI}`);
   }
 }

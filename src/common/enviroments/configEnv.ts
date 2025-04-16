@@ -2,6 +2,7 @@ import { registerAs } from '@nestjs/config';
 
 export default registerAs('configEnv', () => {
   const environment = process.env.ENVIRONMENT;
+  const isProduction = environment === 'production';
 
   // Configuracion de mongo
   const dbName = process.env.MONGO_DB;
@@ -27,11 +28,16 @@ export default registerAs('configEnv', () => {
   const eSecure: boolean = process.env.EMAIL_SECURE === 'true';
   const eUser = process.env.EMAIL_USER;
   const ePass = process.env.EMAIL_PASS;
-  const dominioURL = process.env.DOMINIO_URL;
+  const dominioAPI = process.env.DOMINIO_URL_API;
+  const dominioFrontend = process.env.DOMINIO_URL_FRONTEND;
+  const dominioLocalHost = process.env.DOMINIO_LOCALHOST;
 
   return {
     environment,
-    dominioURL,
+    dominioAPI,
+    dominioFrontend,
+    dominioLocalHost,
+    isProduction,
     mongo: {
       dbName,
       user,
@@ -54,7 +60,7 @@ export default registerAs('configEnv', () => {
       eSecure,
       eUser,
       ePass,
-      dominioURL,
+      dominioAPI,
     },
   };
 });

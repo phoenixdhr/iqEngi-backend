@@ -45,7 +45,7 @@ export class MailService {
    * @throws InternalServerErrorException - Si falla el envío del correo.
    */
   async sendVerificationEmail(user: Usuario, token: string): Promise<void> {
-    const verificationUrl = `${this.configService.email.dominioURL}/email/verify-email?token=${token}`;
+    const verificationUrl = `${this.configService.email.dominioAPI}/email/verify-email?token=${token}`;
 
     const mailOptions: SendMailOptions = {
       from: `IQEngi <${this.configService.email.eUser}>`, // Remitente.
@@ -142,7 +142,7 @@ export class MailService {
       user.email_verified = true;
       await user.save();
 
-      return `${this.configService.dominioURL}/email/verification-success`;
+      return `${this.configService.dominioAPI}/email/verification-success`;
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
         throw new BadRequestException('El token ha expirado.');
@@ -161,7 +161,7 @@ export class MailService {
    * @param token - El token de restablecimiento.
    */
   async sendPasswordResetEmail(user: Usuario, token: string): Promise<void> {
-    const resetUrl = `${this.configService.email.dominioURL}/reset-password?token=${token}`;
+    const resetUrl = `${this.configService.email.dominioAPI}/reset-password?token=${token}`;
 
     const mailOptions: SendMailOptions = {
       from: `IQEngi <${this.configService.email.eUser}>`,
