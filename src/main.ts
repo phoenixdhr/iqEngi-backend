@@ -48,7 +48,6 @@ async function bootstrap() {
 
   app.enableCors({
     origin: isProduction ? [dominioFrontend, dominioBackend] : dominioLocalHost, // Permite el acceso desde el dominio de tu front-end]
-
     credentials: true, // Permite que se envíen credenciales (cookies, cabeceras de autenticación, etc.)
   });
   app.use(cookieParser());
