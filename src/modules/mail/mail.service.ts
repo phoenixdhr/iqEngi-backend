@@ -161,7 +161,7 @@ export class MailService {
    * @param token - El token de restablecimiento.
    */
   async sendPasswordResetEmail(user: Usuario, token: string): Promise<void> {
-    const resetUrl = `${this.configService.email.dominioAPI}/reset-password?token=${token}`;
+    const resetUrl = `${this.configService.email.dominioFrontend}/reset-password?token=${token}`;
 
     const mailOptions: SendMailOptions = {
       from: `IQEngi <${this.configService.email.eUser}>`,

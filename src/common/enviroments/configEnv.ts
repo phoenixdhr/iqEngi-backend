@@ -61,6 +61,7 @@ export default registerAs('configEnv', () => {
       eUser,
       ePass,
       dominioAPI,
+      dominioFrontend,
     },
   };
 });
