@@ -47,7 +47,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   app.enableCors({
-    origin: isProduction ? [dominioFrontend, dominioBackend] : dominioLocalHost, // Permite el acceso desde el dominio de tu front-end]
+    origin: true, // isProduction ? [dominioFrontend, dominioBackend] : dominioLocalHost, // Permite el acceso desde el dominio de tu front-end, actualemnte se permite acceso a todos los dominios para trabajar incluso desde localhost
     credentials: true, // Permite que se envíen credenciales (cookies, cabeceras de autenticación, etc.)
   });
   app.use(cookieParser());
