@@ -91,11 +91,17 @@ export class UsuarioService extends BaseService<
         },
       );
 
-      // Enviar correo electrónico de verificación con el token
-      await this.mailService.sendVerificationEmail(
-        savedUser,
-        verificationToken,
-      );
+      // Intentar enviar correo electrónico de verificación con el token
+      // Si falla, no debe afectar la creación del usuario
+      try {
+        await this.mailService.sendVerificationEmail(
+          savedUser,
+          verificationToken,
+        );
+      } catch (emailError) {
+        console.error('Error al enviar correo de verificación:', emailError);
+        // El error del correo no debe bloquear la creación del usuario
+      }
 
       // Retornar el usuario guardado como salida del método
       return savedUser;
