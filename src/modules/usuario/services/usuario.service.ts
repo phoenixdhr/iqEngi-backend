@@ -102,7 +102,7 @@ export class UsuarioService extends BaseService<
     } catch (error) {
       // Manejar posibles errores durante la creación del usuario
       throw new InternalServerErrorException(
-        'Error al crear el usuario',
+        'Error al crear el usuario backend',
         error.message,
       );
     }
@@ -154,7 +154,7 @@ export class UsuarioService extends BaseService<
       return await newUser.save();
     } catch (error) {
       throw new InternalServerErrorException(
-        'Error al crear el usuario OAuth',
+        'Error al crear el usuario OAuth backend',
         error.message,
       );
     }
