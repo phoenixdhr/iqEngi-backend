@@ -9,12 +9,3 @@ services:
       - 27017:27017
     volumes:
       - ./mongo_data:/data/db
-  mongo_bk:
-    image: mongo:6.0
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: RNOOkZJeETpDGJWgKgXMpjBRbamtJtnZ
-    ports:
-      - "viaduct.proxy.rlwy.net:30779"
-    volumes:
-      - ./mongo_b_data:/data/db
