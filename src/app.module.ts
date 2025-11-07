@@ -26,6 +26,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { CalificacionModule } from './modules/calificacion/calificacion.module';
 import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.module';
 import { MailModule } from './modules/mail/mail.module';
+import { ContactoModule } from './modules/contacto/contacto.module';
 import mongoose from 'mongoose';
 // import * as cookieParser from 'cookie-parser';
 
@@ -66,6 +67,7 @@ import mongoose from 'mongoose';
     MailModule,
     // SeedModule,
     CursoModule,
+    ContactoModule,
   ],
   controllers: [],
   providers: [],
