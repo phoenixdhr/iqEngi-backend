@@ -16,14 +16,14 @@ import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/delet
 import { UpdateCategoriaInput } from '../dtos/update-categoria.input';
 import { CreateCategoriaInput } from '../dtos/create-categoria.input';
 import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
+import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
 
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 @Resolver(() => Categoria)
 export class CategoriaResolver
   implements
-    IResolverBase<Categoria, CreateCategoriaInput, UpdateCategoriaInput>
-{
-  constructor(private readonly categoriaService: CategoriaService) {}
+  IResolverBase<Categoria, CreateCategoriaInput, UpdateCategoriaInput> {
+  constructor(private readonly categoriaService: CategoriaService) { }
 
   /**
    * Crea una nueva categoría.
@@ -50,10 +50,10 @@ export class CategoriaResolver
    * @param pagination Opcional. Opciones de paginación.
    * @returns Un array de categorías.
    *
-   * @Roles: ADMINISTRADOR, SUPERADMIN
+   * @Roles: PUBLIC
    */
   @Query(() => [Categoria], { name: 'Categorias' })
-  @RolesDec(...administradorUp)
+  @IsPublic()
   async findAll(@Args() pagination?: PaginationArgs): Promise<Categoria[]> {
     return this.categoriaService.findAll(pagination);
   }
@@ -195,8 +195,6 @@ export class CategoriaResolver
    *
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
-  @Mutation(() => Categoria, { name: 'Categorias_restore' })
-  @RolesDec(...administradorUp)
   async restore(
     @Args('idRestore', { type: () => ID }, IdPipe) idRestore: Types.ObjectId,
     @CurrentUser() user: UserRequest,
@@ -205,3 +203,4 @@ export class CategoriaResolver
     return this.categoriaService.restore(idRestore, userId);
   }
 }
+
