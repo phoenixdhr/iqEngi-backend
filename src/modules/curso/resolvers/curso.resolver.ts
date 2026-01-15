@@ -203,4 +203,49 @@ export class CursoResolver
     const userId = new Types.ObjectId(user._id);
     return this.cursoService.restore(idRestore, userId);
   }
+
+  /**
+   * Agrega una o más categorías a un curso existente.
+   *
+   * @param cursoId ID del curso al que se agregarán las categorías.
+   * @param categoriaIds Array de IDs de categorías a agregar.
+   * @param user Usuario autenticado que realiza la operación.
+   * @returns El curso actualizado con las categorías populadas.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Mutation(() => CursoOutput, { name: 'Curso_addCategorias' })
+  @RolesDec(...administradorUp)
+  async addCategorias(
+    @Args('cursoId', { type: () => ID }, IdPipe) cursoId: Types.ObjectId,
+    @Args('categoriaIds', { type: () => [ID] }) categoriaIds: string[],
+    @CurrentUser() user: UserRequest,
+  ): Promise<CursoOutput> {
+    const userId = new Types.ObjectId(user._id);
+    const categoriaObjectIds = categoriaIds.map((id) => new Types.ObjectId(id));
+    return this.cursoService.addCategorias(cursoId, categoriaObjectIds, userId);
+  }
+
+  /**
+   * Elimina una o más categorías de un curso existente.
+   *
+   * @param cursoId ID del curso del que se eliminarán las categorías.
+   * @param categoriaIds Array de IDs de categorías a eliminar.
+   * @param user Usuario autenticado que realiza la operación.
+   * @returns El curso actualizado con las categorías populadas.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Mutation(() => CursoOutput, { name: 'Curso_removeCategorias' })
+  @RolesDec(...administradorUp)
+  async removeCategorias(
+    @Args('cursoId', { type: () => ID }, IdPipe) cursoId: Types.ObjectId,
+    @Args('categoriaIds', { type: () => [ID] }) categoriaIds: string[],
+    @CurrentUser() user: UserRequest,
+  ): Promise<CursoOutput> {
+    const userId = new Types.ObjectId(user._id);
+    const categoriaObjectIds = categoriaIds.map((id) => new Types.ObjectId(id));
+    return this.cursoService.removeCategorias(cursoId, categoriaObjectIds, userId);
+  }
 }
+

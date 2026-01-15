@@ -458,6 +458,8 @@ type Mutation {
   Curso_hardDelete(id: ID!): CursoOutput!
   Curso_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Curso_restore(idRestore: ID!): CursoOutput!
+  Curso_addCategorias(cursoId: ID!, categoriaIds: [ID!]!): CursoOutput!
+  Curso_removeCategorias(cursoId: ID!, categoriaIds: [ID!]!): CursoOutput!
   Modulo_create(createModuloInput: CreateModuloInput!): Modulo!
   Modulo_update(id: ID!, updateCuestionarioInput: UpdateModuloInput!): Modulo!
   Modulo_softDelete(idRemove: ID!): Modulo!
