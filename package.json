@@ -57,6 +57,7 @@
     "@nestjs/testing": "^10.4.4",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.7.5",
     "@types/nodemailer": "^6.4.16",
     "@types/passport-google-oauth20": "^2.0.16",

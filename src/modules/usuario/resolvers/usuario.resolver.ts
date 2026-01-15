@@ -8,6 +8,7 @@ import { JwtGqlAuthGuard } from 'src/modules/auth/jwt-auth/jwt-auth.guard/jwt-au
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UsuarioService } from '../services/usuario.service';
 import { UpdateUsuarioInput } from '../dtos/usuarios-dtos/update-usuario.input';
+import { UpdateRolesInput } from '../dtos/usuarios-dtos/update-roles.input';
 import { PaginationArgs, RolesInput, SearchTextArgs } from 'src/common/dtos';
 import { administradorUp, RolEnum } from 'src/common/enums/rol.enum';
 import { IdPipe } from 'src/common/pipes/mongo-id/mongo-id.pipe';
@@ -33,7 +34,7 @@ import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
 // implements
 //   IBaseResolver<UsuarioOutput, CreateUsuarioInput, UpdateUsuarioInput>
 export class UsuarioResolver {
-  constructor(private readonly usuarioService: UsuarioService) {}
+  constructor(private readonly usuarioService: UsuarioService) { }
 
   /**
    * Crea un nuevo usuario.
@@ -193,6 +194,26 @@ export class UsuarioResolver {
   ): Promise<UsuarioOutput> {
     const idUpdatedBy = new Types.ObjectId(user._id);
     return this.usuarioService.update(id, updateUsuarioInput, idUpdatedBy);
+  }
+
+  /**
+   * Actualiza los roles de un usuario.
+   * Solo los usuarios con rol ADMINISTRADOR o SUPERADMIN pueden realizar esta operación.
+   *
+   * @param id ID del usuario a actualizar.
+   * @param updateRolesInput Nuevos roles a asignar.
+   * @returns El usuario actualizado con los nuevos roles.
+   * @throws NotFoundException si el usuario no existe.
+   *
+   * @Roles: ADMINISTRADOR, SUPERADMIN
+   */
+  @Mutation(() => UsuarioOutput, { name: 'usuario_updateRoles' })
+  @RolesDec(...administradorUp)
+  async updateRoles(
+    @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
+    @Args('updateRolesInput') updateRolesInput: UpdateRolesInput,
+  ): Promise<UsuarioOutput> {
+    return this.usuarioService.updateRoles(id, updateRolesInput.roles);
   }
 
   /**

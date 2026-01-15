@@ -21,9 +21,8 @@ import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CursoResolver
-  implements IResolverBase<Curso, UpdateCursoInput, CreateCursoInput>
-{
-  constructor(private readonly cursoService: CursoService) {}
+  implements IResolverBase<Curso, UpdateCursoInput, CreateCursoInput> {
+  constructor(private readonly cursoService: CursoService) { }
 
   /**
    * Crea un nuevo curso.
@@ -86,7 +85,6 @@ export class CursoResolver
    */
   @Query(() => CursoOutput, { name: 'Curso' })
   @RolesDec(...administradorUp)
-  @IsPublic()
   async findById(
     @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<CursoOutput> {

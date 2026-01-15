@@ -232,6 +232,33 @@ export class UsuarioService extends BaseService<
     return usuario;
   }
 
+  // #region Actualización de roles
+  /**
+   * Actualiza los roles de un usuario.
+   * @param id ID del usuario a actualizar.
+   * @param roles Nuevos roles a asignar.
+   * @returns El usuario actualizado.
+   * @throws NotFoundException si el usuario no existe.
+   */
+  async updateRoles(
+    id: Types.ObjectId,
+    roles: RolEnum[],
+  ): Promise<UsuarioOutput> {
+    const updatedUser = await this.usuarioModel
+      .findByIdAndUpdate(
+        id,
+        { roles },
+        { new: true, runValidators: true },
+      )
+      .exec();
+
+    if (!updatedUser) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+
+    return updatedUser;
+  }
+
   // #region Manejo de eliminaciones
   /**
    * Elimina (desactiva) un usuario por su ID (soft delete).
