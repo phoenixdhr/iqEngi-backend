@@ -127,6 +127,12 @@ export class CursoService extends BaseService<
     >;
   }
 
+  /**
+   * Obtiene todos los cursos activos con las categorías populadas.
+   *
+   * @param pagination - Opciones de paginación.
+   * @returns Lista de cursos con categorías populadas.
+   */
   async findAll(pagination?: PaginationArgs): Promise<Curso[]> {
     const { limit, offset } = pagination;
 
@@ -136,9 +142,13 @@ export class CursoService extends BaseService<
       .find(query)
       .skip(offset)
       .limit(limit)
-      .lean()
+      .populate({
+        path: 'categorias',
+        match: { deleted: false },
+      })
       .exec();
-    return cursos;
+
+    return cursos as unknown as Curso[];
   }
 
   /**
@@ -161,7 +171,7 @@ export class CursoService extends BaseService<
     });
 
     if (!curso) {
-      throw new NotFoundException(`Curso con ID "${cursoId}" no encontrado`);
+      throw new NotFoundException(`Curso con ID "${cursoId}" no encontrado o fue eliminado`);
     }
 
     // Usar $addToSet para evitar duplicados
@@ -197,7 +207,7 @@ export class CursoService extends BaseService<
     });
 
     if (!curso) {
-      throw new NotFoundException(`Curso con ID "${cursoId}" no encontrado`);
+      throw new NotFoundException(`Curso con ID "${cursoId}" no encontrado o fue eliminado`);
     }
 
     // Usar $pull para eliminar las categorías
