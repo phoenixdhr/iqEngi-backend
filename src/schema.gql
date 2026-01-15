@@ -513,7 +513,6 @@ type Mutation {
   Categorias_softDelete(idRemove: ID!): Categoria!
   Categorias_hardDelete(id: ID!): Categoria!
   Categorias_hardDeleteAllSoftDeleted: DeletedCountOutput!
-  Categorias_restore(idRestore: ID!): Categoria!
   Instructor_create(createInstructorInput: CreateInstructorInput!): Instructor!
   Instructor_update(id: ID!, updateInstructorInput: UpdateInstructorInput!): Instructor!
   Instructor_softDelete(idRemove: ID!): Instructor!
