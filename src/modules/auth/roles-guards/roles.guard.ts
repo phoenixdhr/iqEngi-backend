@@ -13,7 +13,7 @@ import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) { }
 
   /**
    * Determina si el usuario tiene acceso basado en los roles requeridos.
@@ -44,6 +44,8 @@ export class RolesGuard implements CanActivate {
         'No se encontró el usuario autenticado en la solicitud.',
       );
     }
+
+
 
     // Verifica si el usuario posee alguno de los roles requeridos.
     const hasRole = requiredRoles.some((role) => user.roles?.includes(role));
