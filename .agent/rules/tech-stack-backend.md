@@ -14,6 +14,7 @@ Esta regla define la arquitectura, seguridad y estándares de código para el ba
 - **DB:** MongoDB v6 + Mongoose v8.
 - **Auth:** Passport.js (JWT Strategy + Google OAuth).
 - **Email:** Resend + Nodemailer (Integración híbrida).
+- Todos el codigo deben tener comentarios explicativos en español
 
 ## 2. Arquitectura (Strict Modularity)
 - **Estructura:** Cada feature es un Módulo (`src/modules/[Feature]/`).

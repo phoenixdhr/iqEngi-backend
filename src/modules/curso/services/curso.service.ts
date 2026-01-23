@@ -35,6 +35,10 @@ export class CursoService extends BaseService<
         path: 'categorias',
         match: { deleted: false },
       })
+      .populate({
+        path: 'instructor',
+        match: { deleted: false },
+      })
       .exec();
 
     if (!curso) {
@@ -144,6 +148,10 @@ export class CursoService extends BaseService<
       .limit(limit)
       .populate({
         path: 'categorias',
+        match: { deleted: false },
+      })
+      .populate({
+        path: 'instructor',
         match: { deleted: false },
       })
       .exec();
