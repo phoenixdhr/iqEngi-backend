@@ -27,6 +27,7 @@ import { CalificacionModule } from './modules/calificacion/calificacion.module';
 import { CursoCompradoModule } from './modules/curso-comprado/curso-comprado.module';
 import { MailModule } from './modules/mail/mail.module';
 import { ContactoModule } from './modules/contacto/contacto.module';
+import { NewsletterModule } from './modules/newsletter/newsletter.module';
 import mongoose from 'mongoose';
 // import * as cookieParser from 'cookie-parser';
 
@@ -65,6 +66,7 @@ import mongoose from 'mongoose';
     OrdenModule,
     UsuarioModule,
     MailModule,
+    NewsletterModule,
     // SeedModule,
     CursoModule,
     ContactoModule,

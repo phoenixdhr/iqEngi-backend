@@ -337,6 +337,31 @@ type Calificacion {
   deleted: Boolean!
 }
 
+type Newsletter {
+  _id: ID!
+  email: String!
+  name: String
+  isActive: Boolean!
+  source: NewsletterSource!
+  userId: ID
+  unsubscribedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Fuente de donde provino la suscripción"""
+enum NewsletterSource {
+  WEB_FOOTER
+  REGISTER_FORM
+  MANUAL
+}
+
+type SubscriptionResponseOutput {
+  success: Boolean!
+  message: String!
+  email: String
+}
+
 type Query {
   usuarios(offset: Int = 0, limit: Int = 10, search: String): [UsuarioOutput!]!
   usuarios_findAllByFirstname(search: String, offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
@@ -409,6 +434,12 @@ type Query {
   Instructor_findAllByNombre(search: String, offset: Int = 0, limit: Int = 10): [Instructor!]!
   Instructor(id: ID!): Instructor!
   Instructor_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Instructor!]!
+
+  """Lista de suscriptores activos (admin)"""
+  Newsletter_allActive: [Newsletter!]!
+
+  """Total de suscriptores activos (admin)"""
+  Newsletter_countActive: Int!
 }
 
 input RolesInput {
@@ -519,6 +550,12 @@ type Mutation {
   Instructor_hardDelete(id: ID!): Instructor!
   Instructor_hardDeleteAllSoftDeleted: DeletedCountOutput!
   Instructor_restore(idRestore: ID!): Instructor!
+
+  """Suscribirse al newsletter (público)"""
+  Newsletter_subscribe(input: CreateSubscriberInput!): SubscriptionResponseOutput!
+
+  """Darse de baja del newsletter (público)"""
+  Newsletter_unsubscribe(email: String!): SubscriptionResponseOutput!
 }
 
 input CreateUsuarioInput {
@@ -805,4 +842,10 @@ input UpdateInstructorInput {
   profesion: String
   especializacion: [String!]
   pais: String
+}
+
+input CreateSubscriberInput {
+  email: String!
+  name: String
+  source: NewsletterSource
 }
