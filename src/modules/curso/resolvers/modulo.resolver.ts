@@ -20,9 +20,8 @@ import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/delet
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class ModuloResolver
-  implements IResolverBase<Modulo, CreateModuloInput, UpdateModuloInput>
-{
-  constructor(private readonly moduloService: ModuloService) {}
+  implements IResolverBase<Modulo, CreateModuloInput, UpdateModuloInput> {
+  constructor(private readonly moduloService: ModuloService) { }
 
   @Mutation(() => Modulo, { name: 'Modulo_create' })
   @RolesDec(...administradorUp)

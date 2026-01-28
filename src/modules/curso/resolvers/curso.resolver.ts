@@ -17,12 +17,19 @@ import { Types } from 'mongoose';
 import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 import { CursoOutput } from '../dtos/curso-dtos/curso.output';
 import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { CursoComprado } from 'src/modules/curso-comprado/entities/curso-comprado.entity';
 
 @Resolver()
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CursoResolver
   implements IResolverBase<Curso, UpdateCursoInput, CreateCursoInput> {
-  constructor(private readonly cursoService: CursoService) { }
+  constructor(
+    private readonly cursoService: CursoService,
+    @InjectModel(CursoComprado.name)
+    private readonly cursoCompradoModel: Model<CursoComprado>,
+  ) { }
 
   /**
    * Crea un nuevo curso.
@@ -55,7 +62,11 @@ export class CursoResolver
   // @RolesDec(...administradorUp)
   @IsPublic()
   async findAll(@Args() pagination?: PaginationArgs): Promise<CursoOutput[]> {
-    return this.cursoService.findAll(pagination);
+    const cursos = await this.cursoService.findAll(pagination);
+    return cursos.map((curso) => {
+      curso.modulosIds = [];
+      return curso;
+    });
   }
 
   /**
@@ -72,7 +83,11 @@ export class CursoResolver
     @Args() searchArgs: SearchTextArgs,
     @Args() pagination?: PaginationArgs,
   ): Promise<CursoOutput[]> {
-    return this.cursoService.findAllByTitle(searchArgs, pagination);
+    const cursos = await this.cursoService.findAllByTitle(searchArgs, pagination);
+    return cursos.map((curso) => {
+      curso.modulosIds = [];
+      return curso;
+    });
   }
 
   /**
@@ -84,11 +99,36 @@ export class CursoResolver
    * @Roles: ADMINISTRADOR, SUPERADMIN
    */
   @Query(() => CursoOutput, { name: 'Curso' })
-  @RolesDec(...administradorUp)
+  @IsPublic()
   async findById(
     @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
+    @CurrentUser() user?: UserRequest,
   ): Promise<CursoOutput> {
-    return this.cursoService.findById(id);
+    const curso = await this.cursoService.findById(id);
+
+    // Si es administrador o superadmin, tiene acceso total
+    if (user && user.roles.some((role) => administradorUp.includes(role))) {
+      return curso;
+    }
+
+    let hasAccess = false;
+
+    if (user) {
+      const isComprado = await this.cursoCompradoModel.exists({
+        usuarioId: new Types.ObjectId(user._id),
+        cursoId: id,
+        deleted: false,
+      });
+
+      if (isComprado) hasAccess = true;
+    }
+
+    if (!hasAccess) {
+      curso.modulosIds = [];
+      // Aquí se pueden ocultar otros campos si es necesario
+    }
+
+    return curso;
   }
 
   /**

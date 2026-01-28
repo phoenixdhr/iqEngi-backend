@@ -52,4 +52,4 @@ import {
 
   exports: [CursoService],
 })
-export class CursoModule {}
+export class CursoModule { }
