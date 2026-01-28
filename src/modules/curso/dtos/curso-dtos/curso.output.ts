@@ -48,6 +48,10 @@ export class CursoOutput extends AuditFields implements ICurso {
   @Prop({ type: { url: String, alt: String } })
   imagenURL: ImageObjectType;
 
+  @Field({ nullable: true })
+  @Prop()
+  urlVideo?: string;
+
   @Field(() => Float, { nullable: true })
   @Prop()
   precio?: number;

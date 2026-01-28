@@ -58,6 +58,11 @@ export class CreateCursoInput implements ICursoInput {
   @Type(() => ImageInput)
   imagenURL?: ImageInput;
 
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  urlVideo?: string;
+
   @Field(() => Float, { nullable: true })
   @IsNumber()
   @Min(0)

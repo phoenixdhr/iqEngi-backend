@@ -109,6 +109,7 @@ type Curso {
   instructor: Instructor
   duracionHoras: Float
   imagenURL: ImageObjectType
+  urlVideo: String
   precio: Float
   currency: String
   descuento: Float
@@ -166,6 +167,7 @@ type CursoOutput {
   instructor: Instructor
   duracionHoras: Float
   imagenURL: ImageObjectType
+  urlVideo: String
   precio: Float
   currency: String
   descuento: Float
@@ -673,6 +675,7 @@ input CreateCursoInput {
   instructor: ID
   duracionHoras: Float
   imagenURL: ImageInput
+  urlVideo: String
   precio: Float
   currency: String
   descuento: Float
@@ -698,6 +701,7 @@ input UpdateCursoInput {
   instructor: ID
   duracionHoras: Float
   imagenURL: ImageInput
+  urlVideo: String
   precio: Float
   currency: String
   descuento: Float
