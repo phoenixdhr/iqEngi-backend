@@ -12,7 +12,7 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     @Inject(configEnv.KEY) readonly configService: ConfigType<typeof configEnv>,
-  ) {}
+  ) { }
 
   //#region JWT Functions ya no es necesario, se puede eleminar - console.log
   /**
@@ -55,8 +55,8 @@ export class AuthService {
     // Configurar el token JWT en la cookie
     res.cookie('jwt_token', jwtToken, {
       httpOnly: true,
-      secure: isProduction, // this.configService.environment === 'production',
-      sameSite: isProduction ? 'none' : 'lax', // Cambiado a 'strict' para mayor seguridad  antes era :        this.configService.environment === 'production' ? 'none' : 'lax',
+      secure: this.configService.cookie.secure,
+      sameSite: this.configService.cookie.sameSite as 'none' | 'lax' | 'strict',
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -64,9 +64,8 @@ export class AuthService {
     if (googleToken) {
       res.cookie('access_token', googleToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none', // Cambiado a 'strict' para mayor seguridad
-        // sameSite: 'none', // Cambiado a 'strict' para mayor seguridad
+        secure: this.configService.cookie.secure,
+        sameSite: this.configService.cookie.sameSite as 'none' | 'lax' | 'strict',
         maxAge: 24 * 60 * 60 * 1000,
       });
     }
@@ -74,9 +73,8 @@ export class AuthService {
     if (googleRefreshToken) {
       res.cookie('refresh_token', googleRefreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none', // Cambiado a 'strict' para mayor seguridad
-        // sameSite: 'none', // Cambiado a 'strict' para mayor seguridad
+        secure: this.configService.cookie.secure,
+        sameSite: this.configService.cookie.sameSite as 'none' | 'lax' | 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
     }

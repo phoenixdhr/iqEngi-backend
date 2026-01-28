@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
 
 export default registerAs('configEnv', () => {
-  const environment = process.env.ENVIRONMENT;
+  const environment = process.env.ENVIRONMENT || process.env.NODE_ENV;
   const isProduction = environment === 'production';
 
   // Configuracion de mongo
@@ -16,6 +16,13 @@ export default registerAs('configEnv', () => {
 
   // Configuracion de jwt
   const jwtSecret = process.env.JWT_SECRET;
+
+  // Cookie Configuration
+  // Default to 'lax' if not production, to avoid cross-site issues in dev/testing unless explicitly 'none'.
+  // In production, default to 'none' if you need cross-site access (e.g. backend on one domain, frontend on another).
+  // If undefined, isProduction decides.
+  const cookieSameSite = process.env.COOKIE_SAME_SITE || (isProduction ? 'none' : 'lax');
+  const cookieSecure = process.env.COOKIE_SECURE === 'true' || isProduction;
 
   // Configuracion de google oauth
   const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -49,6 +56,10 @@ export default registerAs('configEnv', () => {
       uri,
     },
     jwtSecret,
+    cookie: {
+      sameSite: cookieSameSite,
+      secure: cookieSecure,
+    },
     googleOauth: {
       googleClientId,
       googleClientSecret,
