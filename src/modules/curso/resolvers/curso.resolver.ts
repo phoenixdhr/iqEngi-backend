@@ -20,8 +20,10 @@ import { IsPublic } from 'src/modules/auth/decorators/public.decorator';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CursoComprado } from 'src/modules/curso-comprado/entities/curso-comprado.entity';
+import { ResolveField, Parent, Float } from '@nestjs/graphql';
+import { ExchangeRateService } from 'src/modules/exchange-rate/services/exchange-rate.service';
 
-@Resolver()
+@Resolver(() => CursoOutput)
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CursoResolver
   implements IResolverBase<Curso, UpdateCursoInput, CreateCursoInput> {
@@ -29,6 +31,7 @@ export class CursoResolver
     private readonly cursoService: CursoService,
     @InjectModel(CursoComprado.name)
     private readonly cursoCompradoModel: Model<CursoComprado>,
+    private readonly exchangeRateService: ExchangeRateService,
   ) { }
 
   /**
@@ -286,6 +289,27 @@ export class CursoResolver
     const userId = new Types.ObjectId(user._id);
     const categoriaObjectIds = categoriaIds.map((id) => new Types.ObjectId(id));
     return this.cursoService.removeCategorias(cursoId, categoriaObjectIds, userId);
+  }
+
+  @ResolveField(() => Float, { nullable: true })
+  async precio(
+    @Parent() curso: CursoOutput,
+    @Args('currency', { type: () => String, nullable: true }) currency?: string,
+  ): Promise<number | null> {
+    if (!curso.precio) return null;
+    if (!currency || currency === 'USD') return curso.precio;
+
+    const rate = await this.exchangeRateService.getRate(currency);
+    return parseFloat((curso.precio * rate).toFixed(2));
+  }
+
+  @ResolveField(() => String, { nullable: true })
+  async currency(
+    @Parent() curso: CursoOutput,
+    @Args('currency', { type: () => String, nullable: true }) currency?: string,
+  ): Promise<string> {
+    if (!currency) return curso.currency || 'USD';
+    return currency;
   }
 }
 

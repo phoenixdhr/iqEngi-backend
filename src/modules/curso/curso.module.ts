@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { CursoController } from './controllers/curso.controller';
 import { CursoService } from './services/curso.service';
+import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
 
 import { MongooseModule } from '@nestjs/mongoose';
 import { Curso, CursoSchema } from './entities/curso.entity';
@@ -37,6 +38,7 @@ import {
     ),
 
     // forwardRef(() => CursoCompradoModule),
+    ExchangeRateModule,
   ],
   providers: [
     CursoService,

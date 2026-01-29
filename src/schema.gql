@@ -168,8 +168,8 @@ type CursoOutput {
   duracionHoras: Float
   imagenURL: ImageObjectType
   urlVideo: String
-  precio: Float
-  currency: String
+  precio(currency: String): Float
+  currency(currency: String): String
   descuento: Float
   calificacionPromedio: Float
   numeroCalificaciones: Int!

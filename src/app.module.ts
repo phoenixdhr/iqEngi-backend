@@ -29,6 +29,8 @@ import { MailModule } from './modules/mail/mail.module';
 import { ContactoModule } from './modules/contacto/contacto.module';
 import { NewsletterModule } from './modules/newsletter/newsletter.module';
 import mongoose from 'mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ExchangeRateModule } from './modules/exchange-rate/exchange-rate.module';
 // import * as cookieParser from 'cookie-parser';
 
 @Module({
@@ -70,6 +72,8 @@ import mongoose from 'mongoose';
     // SeedModule,
     CursoModule,
     ContactoModule,
+    ScheduleModule.forRoot(),
+    ExchangeRateModule,
   ],
   controllers: [],
   providers: [],
