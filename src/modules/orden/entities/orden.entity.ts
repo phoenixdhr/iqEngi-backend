@@ -35,6 +35,11 @@ export class Orden extends AuditFields implements IOrden {
   @Prop({ enum: EstadoOrden, default: EstadoOrden.Pendiente })
   estado_orden: EstadoOrden;
 
+  // Moneda en la que se realizó la transacción (código ISO 4217, ej: 'USD', 'PEN', 'BRL')
+  @Field({ nullable: true })
+  @Prop({ default: 'USD' })
+  currency: string;
+
   @Field()
   @Prop({ default: false })
   deleted: boolean;

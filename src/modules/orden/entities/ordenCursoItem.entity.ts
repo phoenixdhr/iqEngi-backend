@@ -21,4 +21,9 @@ export class OrdenCursoItem implements ICursosItemOrden {
   @Field(() => Float, { nullable: true })
   @Prop({ default: 0 })
   descuento?: number;
+
+  // Moneda en la que se registró el precio (código ISO 4217, ej: 'USD', 'PEN', 'MXN')
+  @Field({ nullable: true })
+  @Prop({ default: 'USD' })
+  currency?: string;
 }

@@ -243,6 +243,7 @@ type OrdenCursoItem {
   precio: Float!
   courseTitle: String!
   descuento: Float
+  currency: String
 }
 
 type Orden {
@@ -251,6 +252,7 @@ type Orden {
   listaCursos: [OrdenCursoItem!]!
   montoTotal: Float!
   estado_orden: EstadoOrden!
+  currency: String
   deleted: Boolean!
 }
 
