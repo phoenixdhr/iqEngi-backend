@@ -49,7 +49,7 @@ export class CreateOrdenInput extends OmitType(CreateOrdenDto, [
   'estado_orden',
   'montoTotal',
   'fechaActualizacion',
-]) {}
+]) { }
 
 @InputType()
 export class CreateOrden_ListCursosInput {

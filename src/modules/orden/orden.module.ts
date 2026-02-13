@@ -26,4 +26,4 @@ import { OrdenArrayCursoService } from './services/ordenArrayCursoItem.service';
   ],
   exports: [OrdenService],
 })
-export class OrdenModule {}
+export class OrdenModule { }

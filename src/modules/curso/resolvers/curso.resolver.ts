@@ -291,6 +291,16 @@ export class CursoResolver
     return this.cursoService.removeCategorias(cursoId, categoriaObjectIds, userId);
   }
 
+/**
+   * Campo calculado: Precio del curso.
+   * * Intercepta la resolución del campo `precio` en el tipo `CursoOutput` para aplicar una conversión de divisas en tiempo real si es necesario.
+   * * Comportamiento:
+   * - Si no se solicita `currency` (o es 'USD'), devuelve el precio base de la BD.
+   * - Si se solicita otra divisa, consulta el `ExchangeRateService` y devuelve el valor convertido.
+   * * @param curso - El objeto padre `CursoOutput` recuperado de la base de datos (contiene el precio base en USD).
+   * @param currency - (Opcional) Código ISO de la moneda deseada (ej. 'EUR', 'MXN').
+   * @returns El precio final como número flotante (Float) redondeado a 2 decimales, o `null` si el curso no tiene precio.
+   */
   @ResolveField(() => Float, { nullable: true })
   async precio(
     @Parent() curso: CursoOutput,
@@ -303,6 +313,14 @@ export class CursoResolver
     return parseFloat((curso.precio * rate).toFixed(2));
   }
 
+/**
+   * Campo auxiliar: Código de la moneda actual (USD, PEN, etc).
+   * * Sirve para que el cliente sepa qué símbolo de moneda mostrar junto al campo `precio`.
+   * Garantiza consistencia: si el usuario pidió convertir el precio a 'EUR', este campo confirmará 'EUR'.
+   * * @param curso - El objeto `Curso` padre (para obtener la moneda por defecto si no se especifica ninguna).
+   * @param currency - (Opcional) La misma divisa que se pasó al campo `precio`.
+   * @returns El código de tres letras de la divisa (ej. 'USD', 'PEN').
+   */
   @ResolveField(() => String, { nullable: true })
   async currency(
     @Parent() curso: CursoOutput,
@@ -312,4 +330,5 @@ export class CursoResolver
     return currency;
   }
 }
+
 

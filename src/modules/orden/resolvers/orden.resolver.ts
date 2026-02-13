@@ -20,9 +20,8 @@ import { DeletedCountOutput } from 'src/modules/usuario/dtos/usuarios-dtos/delet
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class OrdenResolver
   implements
-    IResolverBase<Orden, CreateOrden_ListCursosInput, UpdateOrdenInput>
-{
-  constructor(private readonly ordenService: OrdenService) {}
+  IResolverBase<Orden, CreateOrden_ListCursosInput, UpdateOrdenInput> {
+  constructor(private readonly ordenService: OrdenService) { }
 
   /**
    * Crea una nueva orden.

@@ -21,13 +21,12 @@ import { IResolverBase } from 'src/common/interfaces/resolver-base.interface';
 @UseGuards(JwtGqlAuthGuard, RolesGuard)
 export class CursoCompradoResolver
   implements
-    IResolverBase<
-      CursoComprado,
-      CreateCursoComprado_userInput,
-      UpdateCursoCompradoInput
-    >
-{
-  constructor(private readonly cursoCompradoService: CursoCompradoService) {}
+  IResolverBase<
+    CursoComprado,
+    CreateCursoComprado_userInput,
+    UpdateCursoCompradoInput
+  > {
+  constructor(private readonly cursoCompradoService: CursoCompradoService) { }
 
   //#region Métodos Generales IBaseResolver
 
