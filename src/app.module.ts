@@ -31,6 +31,7 @@ import { NewsletterModule } from './modules/newsletter/newsletter.module';
 import mongoose from 'mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ExchangeRateModule } from './modules/exchange-rate/exchange-rate.module';
+import { PaymentModule } from './modules/payments/payment.module';
 // import * as cookieParser from 'cookie-parser';
 
 @Module({
@@ -74,6 +75,7 @@ import { ExchangeRateModule } from './modules/exchange-rate/exchange-rate.module
     ContactoModule,
     ScheduleModule.forRoot(),
     ExchangeRateModule,
+    PaymentModule,
   ],
   controllers: [],
   providers: [],

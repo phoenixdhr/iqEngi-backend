@@ -23,6 +23,9 @@ export interface IOrden extends IdInterface {
   estado_orden?: EstadoOrden;
   // Moneda en la que se realizó la transacción (código ISO 4217)
   currency?: string;
+  paymentMethod?: string;
+  externalPaymentId?: string;
+  paymentUrl?: string;
 }
 
 export type IOrdenInput = Omit<IOrden, '_id' | 'fechaCreacion'>;

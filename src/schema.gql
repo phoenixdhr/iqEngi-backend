@@ -253,6 +253,9 @@ type Orden {
   montoTotal: Float!
   estado_orden: EstadoOrden!
   currency: String
+  paymentMethod: String
+  externalPaymentId: String
+  paymentUrl: String
   deleted: Boolean!
 }
 
@@ -366,6 +369,39 @@ type SubscriptionResponseOutput {
   email: String
 }
 
+type Payment {
+  _id: ID!
+  ordenId: ID!
+  usuarioId: ID!
+  provider: MetodoPago!
+  externalId: String
+  status: EstadoPago!
+  amount: Float!
+  currency: String!
+  paymentUrl: String
+  idempotencyKey: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  deleted: Boolean!
+}
+
+"""Proveedores de pago disponibles"""
+enum MetodoPago {
+  DLOCAL
+  MERCADOPAGO
+  BITPAY
+}
+
+"""Estados de un pago"""
+enum EstadoPago {
+  Pendiente
+  EnProceso
+  Aprobado
+  Rechazado
+  Reembolsado
+  Cancelado
+}
+
 type Query {
   usuarios(offset: Int = 0, limit: Int = 10, search: String): [UsuarioOutput!]!
   usuarios_findAllByFirstname(search: String, offset: Int = 0, limit: Int = 10): [UsuarioOutput!]!
@@ -387,6 +423,7 @@ type Query {
   Ordenes_findAllByUsuarioId(idUsuario: ID!, offset: Int = 0, limit: Int = 10): [Orden!]!
   Ordenes_findAllByCursoId(idCurso: ID!, offset: Int = 0, limit: Int = 10): [Orden!]!
   Orden(id: ID!): Orden!
+  Ordenes_misOrdenes(offset: Int = 0, limit: Int = 10): [Orden!]!
   Ordenes_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Orden!]!
   RespuestaCuestionarios(offset: Int = 0, limit: Int = 10): [RespuestaCuestionario!]!
   RespuestaCuestionario(respuestaCuestionarioId: ID!): RespuestaCuestionario!
@@ -444,6 +481,8 @@ type Query {
 
   """Total de suscriptores activos (admin)"""
   Newsletter_countActive: Int!
+  Payment_obtenerPorId(paymentId: ID!): Payment!
+  Payment_miHistorial(offset: Int = 0, limit: Int = 10): [Payment!]!
 }
 
 input RolesInput {
@@ -560,6 +599,7 @@ type Mutation {
 
   """Darse de baja del newsletter (público)"""
   Newsletter_unsubscribe(email: String!): SubscriptionResponseOutput!
+  Payment_iniciarPago(input: IniciarPagoInput!): Payment!
 }
 
 input CreateUsuarioInput {
@@ -854,4 +894,10 @@ input CreateSubscriberInput {
   email: String!
   name: String
   source: NewsletterSource
+}
+
+input IniciarPagoInput {
+  cursosIds: [ID!]!
+  metodoPago: MetodoPago!
+  currency: String
 }

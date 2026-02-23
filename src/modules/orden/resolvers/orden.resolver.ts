@@ -8,7 +8,7 @@ import { UpdateOrdenInput } from '../dtos/update-orden.input';
 import { CreateOrden_ListCursosInput } from '../dtos/create-orden.input';
 import { OrdenService } from '../services/orden.service';
 import { RolesDec } from 'src/modules/auth/decorators/roles.decorator';
-import { administradorUp, RolEnum } from 'src/common/enums/rol.enum';
+import { administradorUp, allRoles, RolEnum } from 'src/common/enums/rol.enum';
 import { CurrentUser } from 'src/modules/auth/decorators/current-user.decorator';
 import { UserRequest } from 'src/modules/auth/entities/user-request.entity';
 import { Types } from 'mongoose';
@@ -118,6 +118,19 @@ export class OrdenResolver
     @Args('id', { type: () => ID }, IdPipe) id: Types.ObjectId,
   ): Promise<Orden> {
     return this.ordenService.findById(id);
+  }
+
+  /**
+   * Obtiene las órdenes del usuario autenticado.
+   */
+  @Query(() => [Orden], { name: 'Ordenes_misOrdenes' })
+  @RolesDec(...allRoles)
+  async misOrdenes(
+    @CurrentUser() user: UserRequest,
+    @Args() pagination?: PaginationArgs,
+  ): Promise<Orden[]> {
+    const userId = new Types.ObjectId(user._id);
+    return this.ordenService.findByUsuarioId(userId, pagination);
   }
 
   /**

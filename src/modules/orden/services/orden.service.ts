@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { Orden } from '../entities/orden.entity';
 import { InjectModel } from '@nestjs/mongoose';
@@ -9,6 +9,7 @@ import { PaginationArgs } from 'src/common/dtos';
 import { Types } from 'mongoose';
 import { Curso } from 'src/modules/curso/entities/curso.entity';
 import { OrdenCursoItem } from '../entities/ordenCursoItem.entity';
+import { CursoComprado } from 'src/modules/curso-comprado/entities/curso-comprado.entity';
 
 @Injectable()
 export class OrdenService extends BaseService<
@@ -19,6 +20,7 @@ export class OrdenService extends BaseService<
   constructor(
     @InjectModel(Orden.name) private readonly ordenModel: Model<Orden>, // Modelo Mongoose para gestionar la colección de órdenes.
     @InjectModel(Curso.name) private readonly cursoModel: Model<Curso>, // Modelo Mongoose para gestionar la colección de cursos.
+    @InjectModel(CursoComprado.name) private readonly cursoCompradoModel: Model<CursoComprado>, // Modelo Mongoose de cursos comprados.
     // private readonly cursoService: CursoService, // (Comentado) Podría utilizarse si se prefiere un servicio para manejar lógica adicional en lugar de usar el modelo directamente.
   ) {
     super(ordenModel); // Inicialización del servicio base con el modelo de órdenes.
@@ -40,6 +42,22 @@ export class OrdenService extends BaseService<
   ): Promise<Orden> {
     // Convertir los IDs de cursos a ObjectId para consultas en MongoDB.
     const cursoObjectIds = listCursos.map((id) => new Types.ObjectId(id));
+
+    // ESTA SECCION SE PUEDE ELÑIMINAR SIMEPRE Y CUANDO SE IMPLEMENTE UN CARRITO DE COMPRAS QUE RECHACE AGREGAR A LA ORDEN CURSOS YA COMPRADOS
+{
+    // Validar si algún curso de la lista ya fue comprado y su acceso sigue activo temporalmente
+    const ahora = new Date();
+    const cursosYaComprados = await this.cursoCompradoModel.find({
+      usuarioId: userId,
+      cursoId: { $in: cursoObjectIds },
+      fechaExpiracion: { $gte: ahora }, // Solamente cuenta si el acceso sigue vivo, gte = Greater Than or Equal (Mayor o igual)
+    });
+
+    if (cursosYaComprados.length > 0) {
+      throw new BadRequestException(
+        'Ya tienes uno o más de estos cursos con acceso activo. Asegúrate de eliminarlo del carrito.',
+      );
+    }}
 
     // Recuperar cursos válidos (que no estén eliminados).
     const cursosArray: Curso[] = await this.cursoModel

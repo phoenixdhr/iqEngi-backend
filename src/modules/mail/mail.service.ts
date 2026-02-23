@@ -11,6 +11,7 @@ import * as jwt from 'jsonwebtoken';
 import { ConfigType } from '@nestjs/config';
 import { SendMailOptions } from 'nodemailer';
 import { Usuario } from '../usuario/entities/usuario.entity';
+import { Orden } from '../orden/entities/orden.entity';
 import configEnv from 'src/common/enviroments/configEnv';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { UserRequest } from '../auth/entities/user-request.entity';
@@ -230,5 +231,45 @@ export class MailService {
       <hr />
       <p>Si no realizaste esta acción, por favor contacta a nuestro soporte de inmediato.</p>
     `;
+  }
+
+  /**
+   * Envía un correo de confirmación de pago al usuario.
+   * @param usuarioId - ID del usuario.
+   * @param orden - La orden completada.
+   */
+  async sendPaymentConfirmationEmail(
+    usuarioId: import('mongoose').Types.ObjectId,
+    orden: Orden,
+  ): Promise<void> {
+    const user = await this.usuarioService.findById(usuarioId);
+
+    if (!user) return;
+
+    const cursosHtml = orden.listaCursos
+      .map((c) => `<li>${c.courseTitle}</li>`)
+      .join('');
+
+    const mailOptions: SendMailOptions = {
+      from: `IQEngi <${this.configService.email.eUser}>`,
+      to: user.email,
+      subject: 'Confirmación de Compra - IQEngi',
+      html: `
+        <h1>¡Gracias por tu compra, ${user.firstName}!</h1>
+        <p>Tu pago ha sido procesado exitosamente.</p>
+        <h3>Cursos adquiridos:</h3>
+        <ul>${cursosHtml}</ul>
+        <p><strong>Total:</strong> ${orden.montoTotal} ${orden.currency || 'USD'}</p>
+        <p>Ya puedes acceder a tus cursos desde tu panel de estudiante.</p>
+        <hr />
+        <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+      `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error al enviar el correo de confirmación de pago:', error);
+    }
   }
 }

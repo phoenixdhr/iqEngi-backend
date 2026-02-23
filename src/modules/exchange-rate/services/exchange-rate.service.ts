@@ -14,8 +14,8 @@ import { ExchangeRate } from '../entities/exchange-rate.entity';
  * 3. Proveer métodos eficientes de conversión para otros servicios o resolvers.
  */
 @Injectable()
-export class ExchangeRateService implements OnModuleInit {
-    private readonly logger = new Logger(ExchangeRateService.name);
+export class ExchangeRateService implements OnModuleInit { // Implementa el ciclo de vida del módulo, OnModuleInit es un hook que se ejecuta cuando el módulo se carga
+    private readonly logger = new Logger(ExchangeRateService.name); // Logger para registro de eventos
     // API pública gratuita. Base: USD (1 USD = X Currency)
     private readonly API_URL = 'https://open.er-api.com/v6/latest/USD';
 

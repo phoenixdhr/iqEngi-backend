@@ -74,6 +74,22 @@ export default registerAs('configEnv', () => {
       dominioAPI,
       dominioFrontend,
     },
+    payments: {
+      mercadopago: {
+        accessToken: process.env.MP_ACCESS_TOKEN || '',
+        webhookSecret: process.env.MP_WEBHOOK_SECRET || '',
+      },
+      dlocal: {
+        apiUrl: process.env.DLOCAL_API_URL || 'https://sandbox.dlocal.com',
+        xLogin: process.env.DLOCAL_X_LOGIN || '',
+        xTransKey: process.env.DLOCAL_X_TRANS_KEY || '',
+        secretKey: process.env.DLOCAL_SECRET_KEY || '',
+      },
+      bitpay: {
+        token: process.env.BITPAY_TOKEN || '',
+        environment: (process.env.BITPAY_ENVIRONMENT || 'test') as 'test' | 'prod',
+      },
+    },
   };
 });
 

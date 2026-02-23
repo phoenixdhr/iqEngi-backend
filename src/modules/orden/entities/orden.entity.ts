@@ -40,6 +40,18 @@ export class Orden extends AuditFields implements IOrden {
   @Prop({ default: 'USD' })
   currency: string;
 
+  @Field({ nullable: true })
+  @Prop()
+  paymentMethod?: string;
+
+  @Field({ nullable: true })
+  @Prop()
+  externalPaymentId?: string;
+
+  @Field({ nullable: true })
+  @Prop()
+  paymentUrl?: string;
+
   @Field()
   @Prop({ default: false })
   deleted: boolean;

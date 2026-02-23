@@ -40,8 +40,12 @@ export class CursoCompradoService extends BaseService<
       throw new NotFoundException('El curso no existe');
     }
 
+    const currentDate = new Date();
+    const fechaExpiracion = new Date(currentDate.setMonth(currentDate.getMonth() + 6));
+
     const data = {
       ...createCursoCompradoInput,
+      fechaExpiracion,
       cursoId: new Types.ObjectId(createCursoCompradoInput.cursoId),
       usuarioId: new Types.ObjectId(createCursoCompradoInput.usuarioId),
       courseTitle: curso.courseTitle,
