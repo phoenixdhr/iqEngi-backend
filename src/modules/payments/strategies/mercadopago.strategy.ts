@@ -52,7 +52,7 @@ export class MercadoPagoStrategy implements PaymentStrategy {
           failure: params.cancelUrl,
           pending: params.pendingUrl,
         },
-        auto_return: 'approved', // auto_return sirve para configurar el retorno automático al sitio del vendedor.
+        // auto_return: 'approved', // Removido temporalmente para evitar el error 'invalid_auto_return' si las URLs no convencen al validador de MP
         // IMPORTANTE: En external_reference enviamos NUESTRO ID DE ORDEN.
         // Mercado Pago lo almacenará y nos lo devolverá intacto en el webhook para que identifiquemos esta orden.
         external_reference: params.ordenId.toString(),
