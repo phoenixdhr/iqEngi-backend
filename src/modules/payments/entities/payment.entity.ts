@@ -53,6 +53,10 @@ export class Payment extends AuditFields implements IPayment {
   idempotencyKey?: string;
 
   @Field(() => GraphQLISODateTime, { nullable: true })
+  @Prop({ index: true })
+  expiresAt?: Date;
+
+  @Field(() => GraphQLISODateTime, { nullable: true })
   createdAt?: Date;
 
   @Field(() => GraphQLISODateTime, { nullable: true })

@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: iqengi-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - iqengi_mongo_data:/data/db
+    networks:
+      - iqengi-network
+
+networks:
+  iqengi-network:
+    driver: bridge
+
+volumes:
+  iqengi_mongo_data:

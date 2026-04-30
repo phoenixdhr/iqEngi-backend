@@ -6,6 +6,7 @@ import { Payment, PaymentSchema } from './entities/payment.entity';
 import { PaymentService } from './services/payment.service';
 import { PaymentController } from './controllers/payment.controller';
 import { PaymentResolver } from './resolvers/payment.resolver';
+import { PaymentExpirationCron } from './crons/payment-expiration.cron';
 
 import { MercadoPagoStrategy } from './strategies/mercadopago.strategy';
 import { DLocalStrategy } from './strategies/dlocal.strategy';
@@ -30,7 +31,9 @@ import { MailModule } from '../mail/mail.module';
     MercadoPagoStrategy,
     DLocalStrategy,
     BitPayStrategy,
+    PaymentExpirationCron,
   ],
   exports: [PaymentService],
 })
 export class PaymentModule {}
+

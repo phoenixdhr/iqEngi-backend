@@ -292,6 +292,7 @@ export class CursoResolver
   }
 
 /**
+   * MODIFICA EL CAMPO "precio" del documento "CursoOutput"
    * Campo calculado: Precio del curso.
    * * Intercepta la resolución del campo `precio` en el tipo `CursoOutput` para aplicar una conversión de divisas en tiempo real si es necesario.
    * * Comportamiento:
@@ -314,7 +315,8 @@ export class CursoResolver
   }
 
 /**
-   * Campo auxiliar: Código de la moneda actual (USD, PEN, etc).
+   * MODIFICA EL CAMPO "currency" del documento "CursoOutput"
+   *  Campo auxiliar: Código de la moneda actual (USD, PEN, etc).
    * * Sirve para que el cliente sepa qué símbolo de moneda mostrar junto al campo `precio`.
    * Garantiza consistencia: si el usuario pidió convertir el precio a 'EUR', este campo confirmará 'EUR'.
    * * @param curso - El objeto `Curso` padre (para obtener la moneda por defecto si no se especifica ninguna).

@@ -14,6 +14,7 @@ dco up -d mongo
 npm run start
 ```
 
+
 ### Iniciar el backend Reseteanado la base de datos y clonar desde Railway
 
 ```bash
@@ -23,6 +24,15 @@ npm run start
 # Iniciar el backend
 npm run start
 ```
+
+### Para uso de ngrok en el backend
+Para probar en local se necesita un TUNEL para que pueda recibir los webhooks de las pasarelas
+Adicionalmente se debe modificar los dominios en el archivo .env, especificamente el que dice  `DOMINIO_URL_API`.
+```bash
+ngrok http 3000
+```
+
+
 
 ---
 

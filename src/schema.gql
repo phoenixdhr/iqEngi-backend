@@ -380,6 +380,7 @@ type Payment {
   currency: String!
   paymentUrl: String
   idempotencyKey: String
+  expiresAt: DateTime
   createdAt: DateTime
   updatedAt: DateTime
   deleted: Boolean!
@@ -400,6 +401,12 @@ enum EstadoPago {
   Rechazado
   Reembolsado
   Cancelado
+}
+
+type SincronizarEstadoOutput {
+  status: EstadoPago!
+  ordenId: ID!
+  paymentId: ID!
 }
 
 type Query {
@@ -461,6 +468,7 @@ type Query {
   CursoComprado_findSoftDeleted(offset: Int = 0, limit: Int = 10): [CursoComprado!]!
   CursoCompradoes_PorCurso(cursoId: ID!): [CursoComprado!]!
   CursoCompradoes_PorUsuario(usuarioId: ID!): [CursoComprado!]!
+  CursoComprado_misCursosIds: [String!]!
   Calificaciones(offset: Int = 0, limit: Int = 10): [Calificacion!]!
   Calificacion(id: ID!): Calificacion!
   Calificacion_findSoftDeleted(offset: Int = 0, limit: Int = 10): [Calificacion!]!
@@ -600,6 +608,7 @@ type Mutation {
   """Darse de baja del newsletter (público)"""
   Newsletter_unsubscribe(email: String!): SubscriptionResponseOutput!
   Payment_iniciarPago(input: IniciarPagoInput!): Payment!
+  Payment_verificarEstadoPorOrden(ordenId: ID!): SincronizarEstadoOutput!
 }
 
 input CreateUsuarioInput {
