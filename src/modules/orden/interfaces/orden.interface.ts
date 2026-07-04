@@ -1,3 +1,18 @@
+/*
+ * ==============================================================================
+ * NOTA DE CAMBIOS RECIENTES (Refactorización Arquitectura de Pagos)
+ * ==============================================================================
+ * Este archivo fue modificado para soportar la separación de responsabilidades 
+ * entre 'Orden' y 'Payment'.
+ * 
+ * Principales cambios:
+ * 1. Se independizó el concepto de Orden (intención de compra) del Payment (intento de pago).
+ * 2. Se implementó una lógica de expiración estricta sincronizada con las pasarelas (expiresAt).
+ * 3. Se garantizó la idempotencia completa en los webhooks para evitar procesamiento duplicado.
+ * 4. Se migró el campo 'metodoPago' a 'paymentProvider' / 'ProveedorPago'.
+ * ==============================================================================
+ */
+
 // orden/interfaces/orden.interface.ts
 
 import { Types } from 'mongoose';
@@ -23,9 +38,13 @@ export interface IOrden extends IdInterface {
   estado_orden?: EstadoOrden;
   // Moneda en la que se realizó la transacción (código ISO 4217)
   currency?: string;
-  paymentMethod?: string;
+  paymentProvider?: string;
   externalPaymentId?: string;
   paymentUrl?: string;
+  paymentProvider?: string;
+  // NOTA: Por el momento este campo no se está utilizando ni guardando en ningún lado.
+  checkoutSessionId?: string;
+  expiresAt?: Date;
 }
 
 export type IOrdenInput = Omit<IOrden, '_id' | 'fechaCreacion'>;

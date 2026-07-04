@@ -1,3 +1,22 @@
+/* MODIFICACIONES DESDE EL 贚TIMO COMMIT:
+ * - Actualizaci髇 de paymentMethod a paymentProvider.
+ * - Se mantuvo payment_method_flow por requerimiento de la API de DLocal.
+ */
+/*
+ * ==============================================================================
+ * NOTA DE CAMBIOS RECIENTES (Refactorizaci贸n Arquitectura de Pagos)
+ * ==============================================================================
+ * Este archivo fue modificado para soportar la separaci贸n de responsabilidades 
+ * entre 'Orden' y 'Payment'.
+ * 
+ * Principales cambios:
+ * 1. Se independiz贸 el concepto de Orden (intenci贸n de compra) del Payment (intento de pago).
+ * 2. Se implement贸 una l贸gica de expiraci贸n estricta sincronizada con las pasarelas (expiresAt).
+ * 3. Se garantiz贸 la idempotencia completa en los webhooks para evitar procesamiento duplicado.
+ * 4. Se migr贸 el campo 'metodoPago' a 'paymentProvider' / 'ProveedorPago'.
+ * ==============================================================================
+ */
+
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
@@ -134,3 +153,4 @@ export class DLocalStrategy implements PaymentStrategy {
     return currencyCountryMap[currency] || 'US';
   }
 }
+

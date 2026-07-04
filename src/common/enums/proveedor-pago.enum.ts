@@ -1,12 +1,12 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-export enum MetodoPago {
+export enum ProveedorPago {
   DLOCAL = 'dlocal',
   MERCADOPAGO = 'mercadopago',
   BITPAY = 'bitpay',
 }
 
-registerEnumType(MetodoPago, {
-  name: 'MetodoPago',
+registerEnumType(ProveedorPago, {
+  name: 'ProveedorPago',
   description: 'Proveedores de pago disponibles',
 });

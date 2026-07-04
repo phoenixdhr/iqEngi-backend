@@ -1,3 +1,21 @@
+/* MODIFICACIONES DESDE EL 贚TIMO COMMIT:
+ * - Ajustes en las interfaces para soportar la validaci髇 y tipado del ProviderPaymentId.
+ */
+/*
+ * ==============================================================================
+ * NOTA DE CAMBIOS RECIENTES (Refactorizaci贸n Arquitectura de Pagos)
+ * ==============================================================================
+ * Este archivo fue modificado para soportar la separaci贸n de responsabilidades 
+ * entre 'Orden' y 'Payment'.
+ * 
+ * Principales cambios:
+ * 1. Se independiz贸 el concepto de Orden (intenci贸n de compra) del Payment (intento de pago).
+ * 2. Se implement贸 una l贸gica de expiraci贸n estricta sincronizada con las pasarelas (expiresAt).
+ * 3. Se garantiz贸 la idempotencia completa en los webhooks para evitar procesamiento duplicado.
+ * 4. Se migr贸 el campo 'metodoPago' a 'paymentProvider' / 'ProveedorPago'.
+ * ==============================================================================
+ */
+
 import { Types } from 'mongoose';
 
 // Define los par谩metros necesarios para iniciar un proceso de pago.
@@ -11,7 +29,12 @@ export interface CreatePaymentParams {
   successUrl: string; // URL de 茅xito
   cancelUrl: string; // URL de cancelaci贸n
   pendingUrl: string; // URL de pendiente
+  // URL p煤blica del webhook del backend. La pasarela la usa para notificar
+  // cambios de estado del pago. Si la pasarela no la recibe, el webhook
+  // queda dependiendo de la configuraci贸n del dashboard del proveedor.
+  notificationUrl?: string;
   idempotencyKey: string; // Clave de idempotencia
+  expiresAt: Date; // Fecha exacta de expiraci贸n
 }
 
 // Representa el resultado de una creaci贸n de pago exitosa.
@@ -49,3 +72,4 @@ export interface PaymentStrategy {
   ): Promise<WebhookValidationResult>;
   getPaymentStatus(externalId: string): Promise<string>;
 }
+

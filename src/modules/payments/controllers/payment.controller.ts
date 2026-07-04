@@ -1,3 +1,22 @@
+/* MODIFICACIONES DESDE EL �LTIMO COMMIT:
+ * - Se actualiz� la terminolog�a de PaymentMethod a PaymentProvider.
+ * - Ajustes en el manejo de webhooks para los proveedores de pago.
+ */
+/*
+ * ==============================================================================
+ * NOTA DE CAMBIOS RECIENTES (Refactorización Arquitectura de Pagos)
+ * ==============================================================================
+ * Este archivo fue modificado para soportar la separación de responsabilidades 
+ * entre 'Orden' y 'Payment'.
+ * 
+ * Principales cambios:
+ * 1. Se independizó el concepto de Orden (intención de compra) del Payment (intento de pago).
+ * 2. Se implementó una lógica de expiración estricta sincronizada con las pasarelas (expiresAt).
+ * 3. Se garantizó la idempotencia completa en los webhooks para evitar procesamiento duplicado.
+ * 4. Se migró el campo 'metodoPago' a 'paymentProvider' / 'ProveedorPago'.
+ * ==============================================================================
+ */
+
 import {
   Controller,
   Post,
@@ -13,7 +32,7 @@ import { Request, Response } from 'express';
 import { ConfigType } from '@nestjs/config';
 
 import configEnv from 'src/common/enviroments/configEnv';
-import { MetodoPago } from 'src/common/enums/metodo-pago.enum';
+import { ProveedorPago } from 'src/common/enums/proveedor-pago.enum';
 import { PaymentService } from '../services/payment.service';
 
 @Controller('payments')
@@ -36,7 +55,7 @@ export class PaymentController {
   ): Promise<void> {
     try {
       await this.paymentService.procesarWebhook(
-        MetodoPago.MERCADOPAGO,
+        ProveedorPago.MERCADOPAGO,
         req.body,
         req.headers as Record<string, string>,
       );
@@ -55,7 +74,7 @@ export class PaymentController {
   ): Promise<void> {
     try {
       await this.paymentService.procesarWebhook(
-        MetodoPago.DLOCAL,
+        ProveedorPago.DLOCAL,
         req.body,
         req.headers as Record<string, string>,
       );
@@ -73,7 +92,7 @@ export class PaymentController {
   ): Promise<void> {
     try {
       await this.paymentService.procesarWebhook(
-        MetodoPago.BITPAY,
+        ProveedorPago.BITPAY,
         req.body,
         req.headers as Record<string, string>,
       );
@@ -116,3 +135,4 @@ export class PaymentController {
 
   // #endregion
 }
+

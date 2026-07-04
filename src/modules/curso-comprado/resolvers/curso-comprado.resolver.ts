@@ -38,6 +38,7 @@ export class CursoCompradoResolver
    * @returns La compra de curso creada.
    */
   @Mutation(() => CursoComprado, { name: 'CursoComprado_create' })
+  @RolesDec(RolEnum.SUPERADMIN)
   async create(
     @Args('createCursoCompradoInput')
     createCursoCompradoUserInput: CreateCursoComprado_userInput,
@@ -211,6 +212,7 @@ export class CursoCompradoResolver
    * @Roles: No requiere roles específicos.
    */
   @Query(() => [CursoComprado], { name: 'CursoCompradoes_PorCurso' })
+  @RolesDec(...administradorUp)
   async findByCurso(
     @Args('cursoId', { type: () => ID }, IdPipe) cursoId: Types.ObjectId,
   ): Promise<CursoComprado[]> {
@@ -226,9 +228,28 @@ export class CursoCompradoResolver
    * @Roles: No requiere roles específicos.
    */
   @Query(() => [CursoComprado], { name: 'CursoCompradoes_PorUsuario' })
+  @RolesDec(...administradorUp)
   async findByUsuario(
     @Args('usuarioId', { type: () => ID }, IdPipe) usuarioId: Types.ObjectId,
   ): Promise<CursoComprado[]> {
     return this.cursoCompradoService.findByUsuarioId(usuarioId);
+  }
+
+  /**
+   * Retorna únicamente los IDs (como strings) de los cursos que el usuario
+   * autenticado tiene con acceso activo (fechaExpiracion >= ahora).
+   * 
+   * Query liviana sin populate, diseñada para que el frontend pueda
+   * marcar visualmente los cursos ya comprados (ej: botón "✓ Comprado" 
+   * en CourseCard o validación preventiva en el Checkout).
+   * 
+   * @returns Array de cursoId como strings que el usuario logueado tiene acceso activo. Ej: ["663a...", "664b..."]
+   */
+  @Query(() => [String], { name: 'CursoComprado_misCursosIds' })
+  async misCursosIds(
+    @CurrentUser() user: UserRequest,
+  ): Promise<string[]> {
+    const userId = new Types.ObjectId(user._id);
+    return this.cursoCompradoService.getIdsCursosActivosUsuario(userId);
   }
 }

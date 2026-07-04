@@ -9,7 +9,7 @@ import {
   ArrayMinSize,
 } from 'class-validator';
 import { Types } from 'mongoose';
-import { MetodoPago } from 'src/common/enums/metodo-pago.enum';
+import { ProveedorPago } from 'src/common/enums/proveedor-pago.enum';
 
 @InputType()
 export class IniciarPagoInput {
@@ -19,10 +19,10 @@ export class IniciarPagoInput {
   @IsMongoId({ each: true })
   cursosIds: Types.ObjectId[];
 
-  @Field(() => MetodoPago)
+  @Field(() => ProveedorPago)
   @IsNotEmpty()
-  @IsEnum(MetodoPago)
-  metodoPago: MetodoPago;
+  @IsEnum(ProveedorPago)
+  paymentProvider: ProveedorPago;
 
   @Field({ nullable: true })
   @IsOptional()

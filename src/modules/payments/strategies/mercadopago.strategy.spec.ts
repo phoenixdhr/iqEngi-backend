@@ -11,6 +11,7 @@ jest.mock('mercadopago', () => {
       create: jest.fn().mockResolvedValue({
         id: 'pref-123',
         init_point: 'https://mercadopago.com/checkout/pref-123',
+        sandbox_init_point: 'https://sandbox.mercadopago.com/checkout/pref-123',
       }),
     })),
     Payment: jest.fn().mockImplementation(() => ({
@@ -30,9 +31,10 @@ describe('MercadoPagoStrategy', () => {
     payments: {
       mercadopago: {
         accessToken: 'TEST-token-123',
-        webhookSecret: 'test-webhook-secret',
+        webhookSecret: '',
       },
     },
+    isProduction: false,
   };
 
   beforeEach(async () => {
@@ -62,11 +64,12 @@ describe('MercadoPagoStrategy', () => {
         cancelUrl: 'http://localhost:3000/payments/return/cancel',
         pendingUrl: 'http://localhost:3000/payments/return/pending',
         idempotencyKey: 'test-key-123',
+        expiresAt: new Date(),
       });
 
-      expect(result.externalId).toBe('pref-123');
+      expect(result.providerPaymentId).toBe('pref-123');
       expect(result.paymentUrl).toBe(
-        'https://mercadopago.com/checkout/pref-123',
+        'https://sandbox.mercadopago.com/checkout/pref-123',
       );
     });
   });
@@ -88,7 +91,7 @@ describe('MercadoPagoStrategy', () => {
 
       expect(result.isValid).toBe(true);
       expect(result.status).toBe('approved');
-      expect(result.externalId).toBe('507f1f77bcf86cd799439011');
+      expect(result.originalOrdenId).toBe('507f1f77bcf86cd799439011');
     });
   });
 });

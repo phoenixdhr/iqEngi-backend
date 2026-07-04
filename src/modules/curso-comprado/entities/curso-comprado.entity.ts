@@ -25,6 +25,11 @@ export class CursoComprado extends AuditFields implements ICursoComprado {
   @Prop({ type: Types.ObjectId, ref: Coleccion.Curso, required: true })
   cursoId: Types.ObjectId;
 
+  // NUEVO: Trazabilidad del pago que originó este acceso
+  @Field(() => ID, { nullable: true })
+  @Prop({ type: Types.ObjectId, ref: 'Payment' })
+  paymentId?: Types.ObjectId;
+
   @Field()
   @Prop()
   courseTitle: string;

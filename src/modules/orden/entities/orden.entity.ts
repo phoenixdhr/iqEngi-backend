@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
+import { ObjectType, Field, ID, Float, GraphQLISODateTime } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 
 import { Usuario } from '../../usuario/entities/usuario.entity';
@@ -42,15 +42,28 @@ export class Orden extends AuditFields implements IOrden {
 
   @Field({ nullable: true })
   @Prop()
-  paymentMethod?: string;
-
-  @Field({ nullable: true })
-  @Prop()
   externalPaymentId?: string;
 
   @Field({ nullable: true })
   @Prop()
   paymentUrl?: string;
+
+  // GraphQLISODateTime es un tipo escalar de GraphQL que asegura que las fechas se serialicen y parseen
+  // correctamente en formato estándar ISO-8601 (ej. "2023-10-25T14:30:00Z").
+  @Field(() => GraphQLISODateTime, { nullable: true })
+  @Prop({ index: true })
+  expiresAt?: Date;
+
+  // Indica qué pasarela está procesando el pago (ej. 'MERCADO_PAGO', 'STRIPE', 'PAYPAL')
+  @Field({ nullable: true })
+  @Prop()
+  paymentProvider?: string;
+
+  // NOTA: Por el momento este campo no se está utilizando ni guardando en ningún lado.
+  // ID genérico para inicializar el checkout en cualquier pasarela (reemplaza a mpPreferenceId).
+  @Field({ nullable: true })
+  @Prop()
+  checkoutSessionId?: string;
 
   @Field()
   @Prop({ default: false })

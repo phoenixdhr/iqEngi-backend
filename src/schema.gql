@@ -222,6 +222,7 @@ type CursoComprado {
   _id: ID!
   usuarioId: Usuario!
   cursoId: Curso!
+  paymentId: ID
   courseTitle: String!
   fechaCompra: DateTime!
   fechaExpiracion: DateTime
@@ -253,18 +254,20 @@ type Orden {
   montoTotal: Float!
   estado_orden: EstadoOrden!
   currency: String
-  paymentMethod: String
   externalPaymentId: String
   paymentUrl: String
+  expiresAt: DateTime
+  paymentProvider: String
+  checkoutSessionId: String
   deleted: Boolean!
 }
 
-"""Estados de una orden"""
+"""Estados del ciclo de vida de una orden"""
 enum EstadoOrden {
   Pendiente
-  Procesando
-  Completada
+  Pagada
   Cancelada
+  Expirada
   Reembolsada
 }
 
@@ -378,9 +381,6 @@ type Payment {
   status: EstadoPago!
   amount: Float!
   currency: String!
-  paymentUrl: String
-  idempotencyKey: String
-  expiresAt: DateTime
   createdAt: DateTime
   updatedAt: DateTime
   deleted: Boolean!
@@ -393,20 +393,24 @@ enum MetodoPago {
   BITPAY
 }
 
-"""Estados de un pago"""
+"""Estados de un pago (solo intentos reales notificados por webhook)"""
 enum EstadoPago {
-  Pendiente
-  EnProceso
   Aprobado
   Rechazado
   Reembolsado
   Cancelado
+  EnRevision
 }
 
 type SincronizarEstadoOutput {
   status: EstadoPago!
   ordenId: ID!
   paymentId: ID!
+}
+
+type CheckoutResponse {
+  ordenId: ID!
+  paymentUrl: String
 }
 
 type Query {
@@ -607,7 +611,7 @@ type Mutation {
 
   """Darse de baja del newsletter (público)"""
   Newsletter_unsubscribe(email: String!): SubscriptionResponseOutput!
-  Payment_iniciarPago(input: IniciarPagoInput!): Payment!
+  Payment_iniciarPago(input: IniciarPagoInput!): CheckoutResponse!
   Payment_verificarEstadoPorOrden(ordenId: ID!): SincronizarEstadoOutput!
 }
 
@@ -907,6 +911,6 @@ input CreateSubscriberInput {
 
 input IniciarPagoInput {
   cursosIds: [ID!]!
-  metodoPago: MetodoPago!
+  paymentProvider: MetodoPago!
   currency: String
 }

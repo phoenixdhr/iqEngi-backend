@@ -1,7 +1,22 @@
+/*
+ * ==============================================================================
+ * NOTA DE CAMBIOS RECIENTES (Refactorización Arquitectura de Pagos)
+ * ==============================================================================
+ * Este archivo fue modificado para soportar la separación de responsabilidades 
+ * entre 'Orden' y 'Payment'.
+ * 
+ * Principales cambios:
+ * 1. Se independizó el concepto de Orden (intención de compra) del Payment (intento de pago).
+ * 2. Se implementó una lógica de expiración estricta sincronizada con las pasarelas (expiresAt).
+ * 3. Se garantizó la idempotencia completa en los webhooks para evitar procesamiento duplicado.
+ * 4. Se migró el campo 'metodoPago' a 'paymentProvider' / 'ProveedorPago'.
+ * ==============================================================================
+ */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from '../services/payment.service';
-import { MetodoPago } from 'src/common/enums/metodo-pago.enum';
+import { ProveedorPago } from 'src/common/enums/proveedor-pago.enum';
 import configEnv from 'src/common/enviroments/configEnv';
 
 describe('PaymentController', () => {
@@ -48,7 +63,7 @@ describe('PaymentController', () => {
       await controller.webhookMercadoPago(mockReq as any, mockRes as any);
 
       expect(mockPaymentService.procesarWebhook).toHaveBeenCalledWith(
-        MetodoPago.MERCADOPAGO,
+        ProveedorPago.MERCADOPAGO,
         mockReq.body,
         mockReq.headers,
       );
