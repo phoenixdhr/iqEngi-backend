@@ -18,5 +18,3 @@ export class ExchangeRate extends Document {
 
 export const ExchangeRateSchema = SchemaFactory.createForClass(ExchangeRate);
 
-// Índices
-ExchangeRateSchema.index({ currencyCode: 1 }, { unique: true });
