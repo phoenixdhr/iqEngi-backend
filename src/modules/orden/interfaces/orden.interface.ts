@@ -41,7 +41,6 @@ export interface IOrden extends IdInterface {
   paymentProvider?: string;
   externalPaymentId?: string;
   paymentUrl?: string;
-  paymentProvider?: string;
   // NOTA: Por el momento este campo no se está utilizando ni guardando en ningún lado.
   checkoutSessionId?: string;
   expiresAt?: Date;

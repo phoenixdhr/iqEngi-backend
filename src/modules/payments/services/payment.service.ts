@@ -1,6 +1,6 @@
-/* MODIFICACIONES DESDE EL �LTIMO COMMIT:
+/* MODIFICACIONES DESDE EL ÚLTIMO COMMIT:
  * - Refactor masivo de variables y tipos de MetodoPago a ProveedorPago.
- * - Refactorizaci�n de idempotencia y validaci�n de webhooks.
+ * - Refactorización de idempotencia y validación de webhooks.
  */
 /*
  * ==============================================================================
@@ -82,7 +82,7 @@ export class PaymentService {
     private readonly ordenService: OrdenService, // Inyecta el servicio de Orden
     private readonly cursoCompradoService: CursoCompradoService, // Inyecta el servicio de CursoComprado
     private readonly mailService: MailService, // Inyecta el servicio de Mail
-    private readonly exchangeRateService: ExchangeRateService, // Conversor de moneda USD → currency destino
+    private readonly exchangeRateService: ExchangeRateService, // Conversor de moneda USD -> currency destino
   ) {
     this.strategyMap = new Map<ProveedorPago, PaymentStrategy>([
       [ProveedorPago.MERCADOPAGO, this.mercadoPagoStrategy],
@@ -99,7 +99,7 @@ export class PaymentService {
    * 2. Cancelar TODAS las órdenes/payments pendientes del usuario, incluso
    *    aquellas con externalId (la pasarela ya las conoce). Si la pasarela
    *    aprueba un pago cancelado localmente, procesarWebhook() lo reabrirá
-   *    automáticamente (_reopenedAfterCancellation) — el dinero nunca se pierde.
+   *    automáticamente (_reopenedAfterCancellation) â€” el dinero nunca se pierde.
    * 3. Crear una orden nueva + Payment + llamada a la pasarela.
    *
    * Protección anti-spam: este método está protegido por
@@ -114,7 +114,7 @@ export class PaymentService {
     const finalCurrency = currency || 'USD';
     const cursoObjectIds = cursosIds.map((id) => new Types.ObjectId(id));
 
-    // ── PASO 1: Rechazar cursos ya comprados con acceso activo ──
+    // â”€â”€ PASO 1: Rechazar cursos ya comprados con acceso activo â”€â”€
     const titulosDuplicados = await this.cursoCompradoService.verificarCursosYaComprados(
       userId,
       cursoObjectIds,
@@ -126,7 +126,7 @@ export class PaymentService {
       );
     }
 
-    // ── PASO 2: Cancelar TODAS las órdenes/payments pendientes ──
+    // â”€â”€ PASO 2: Cancelar TODAS las órdenes/payments pendientes â”€â”€
     // Cancela sin excepción (incluso con externalId). Es seguro porque:
     //   - procesarWebhook() reabre pagos cancelados si la pasarela los aprueba.
     //   - El Rate Limit (Capa 2) previene ráfagas de cancelaciones accidentales.
@@ -137,7 +137,7 @@ export class PaymentService {
       );
     }
 
-    // ── PASO 3: Crear orden nueva + llamada a la pasarela ──
+    // â”€â”€ PASO 3: Crear orden nueva + llamada a la pasarela â”€â”€
     const orden = await this.ordenService._create(cursoObjectIds, userId);
 
     return this.prepararPreferencia(
@@ -264,14 +264,14 @@ export class PaymentService {
    * undefined para que la pasarela use lo que tenga configurado en su
    * dashboard y no falle el preference.create.
    */
-  private buildNotificationUrl(ProveedorPago: ProveedorPago): string | undefined {
+  private buildNotificationUrl(provider: ProveedorPago): string | undefined {
     const baseApi = this.config.dominioAPI;
     if (!baseApi || !/^https?:\/\//.test(baseApi)) return undefined;
     const slug = {
       [ProveedorPago.MERCADOPAGO]: 'mercadopago',
       [ProveedorPago.DLOCAL]: 'dlocal',
       [ProveedorPago.BITPAY]: 'bitpay',
-    }[ProveedorPago];
+    }[provider];
     return `${baseApi}/payments/webhook/${slug}`;
   }
 
@@ -397,7 +397,7 @@ export class PaymentService {
         );
       } catch (error) {
         this.logger.error(
-          `Fallo CRÍTICO al otorgar acceso al curso ${cursoItem.cursoId} para usuario ${payment.usuarioId}. El webhook fallará y se reintentará.`,
+          `Fallo CRÃ�TICO al otorgar acceso al curso ${cursoItem.cursoId} para usuario ${payment.usuarioId}. El webhook fallará y se reintentará.`,
           error.stack,
         );
         throw error; // Lanzar error aborta la actualización de la Orden y del Payment
@@ -517,7 +517,7 @@ export class PaymentService {
     result.status = payment.status;
     result.paymentId = payment._id.toString();
 
-    // Estado terminal → no consultamos al proveedor
+    // Estado terminal -> no consultamos al proveedor
     const estadosTerminales: EstadoPago[] = [
       EstadoPago.Aprobado,
       EstadoPago.Rechazado,
@@ -526,7 +526,7 @@ export class PaymentService {
     ];
     if (estadosTerminales.includes(payment.status)) return result;
 
-    // Sin externalId aún → solo devolver estado local
+    // Sin externalId aún -> solo devolver estado local
     if (!payment.externalId) return result;
 
     const strategy = this.strategyMap.get(payment.provider);
