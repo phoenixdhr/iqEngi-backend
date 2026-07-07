@@ -376,7 +376,7 @@ type Payment {
   _id: ID!
   ordenId: ID!
   usuarioId: ID!
-  provider: MetodoPago!
+  provider: ProveedorPago!
   externalId: String
   status: EstadoPago!
   amount: Float!
@@ -387,7 +387,7 @@ type Payment {
 }
 
 """Proveedores de pago disponibles"""
-enum MetodoPago {
+enum ProveedorPago {
   DLOCAL
   MERCADOPAGO
   BITPAY
@@ -911,6 +911,6 @@ input CreateSubscriberInput {
 
 input IniciarPagoInput {
   cursosIds: [ID!]!
-  paymentProvider: MetodoPago!
+  paymentProvider: ProveedorPago!
   currency: String
 }
